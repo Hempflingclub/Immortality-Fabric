@@ -5,6 +5,7 @@
 [Requires Fabric API ![](https://github.com/Hempflingclub/Immortality-Fabric/blob/master/.github/readme/Fabric_API.png?raw=true)](https://www.curseforge.com/minecraft/mc-mods/fabric-api)
 
 [Requires Cardinal Components ![](https://github.com/Hempflingclub/Immortality-Fabric/blob/master/.github/readme/Cardinal_Components.png?raw=true)](https://www.curseforge.com/minecraft/mc-mods/cardinal-components)
+## This is a Testing Branch for 2.0.0 it is not recommended to use this Version prior to full 2.0.0 Release
 # Immortality  Mod Features
 - Achieve Different Kinds of Immortality
 - Complete the Quest of Immortality
