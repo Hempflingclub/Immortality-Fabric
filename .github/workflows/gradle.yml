@@ -9,9 +9,7 @@ name: Java build and Artifact Upload
 
 on:
   push:
-    branches: [ "master" ]
   pull_request:
-    branches: [ "master" ]
   schedule:
   - cron: "15 6 1 * *"
 permissions:
