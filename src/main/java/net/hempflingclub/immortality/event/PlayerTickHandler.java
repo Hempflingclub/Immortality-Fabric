@@ -13,12 +13,15 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 
 public class PlayerTickHandler implements ServerTickEvents.StartTick {
+    private int internalTicks = 0;
+
     @Override
     public void onStartTick(MinecraftServer server) {
-        int currentTime = ImmortalityStatus.getCurrentTime(server);
-        if (currentTime % 20 == 0) {
+        internalTicks++;
+        if (internalTicks % 20 == 0) {
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
                 //Run Stuff
+                int currentTime = ImmortalityStatus.getCurrentTime(server);
                 if (currentTime % 100 == 0) { // Every 5sec
                     if (ImmortalityData.getLiverExtracted(ImmortalityStatus.getPlayerComponent(player))) {
                         if (ImmortalityStatus.getRegeneratingHearts(player) == 0) {
@@ -123,7 +126,7 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                     }
                     if (player.isOnFire()) {
                         player.getWorld().playSoundFromEntity(null, player, SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.PLAYERS, 1, 1);
-                        player.setOnFire(false);
+                        player.setFireTicks(0);
                     }
                     if (ImmortalityStatus.isSemiImmortal(player)) {
                         player.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.semi_immortality, 20 * 5, 0, false, false));
