@@ -31,7 +31,8 @@
     "cardinal-components": [
       "immortality:world-data",
       "immortality:player-data",
-      "immortality:living-entity-data"
+      "immortality:living-entity-data",
+      "immortality:item-data"
     ]
   },
   "depends": {

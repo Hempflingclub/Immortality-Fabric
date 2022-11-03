@@ -87,6 +87,12 @@ public class ImmortalityItems {
             .fireproof()
             .maxCount(1)
             .maxDamage(1)));
+    public static final Item SoulStone = registerItem("soul_stone", new SoulStone(new FabricItemSettings()
+            .group(ItemGroup.Immortality)
+            .rarity(Rarity.RARE)
+            .fireproof()
+            .maxCount(1)
+            .maxDamage(3)));
     public static final Potion LifeElixirPotion = registerPotion("life_elixir_potion", new Potion("life_elixir_potion", new StatusEffectInstance(ModEffectRegistry.life_elixir, 0)));
 
     private static Item registerItem(String name, Item item) {
