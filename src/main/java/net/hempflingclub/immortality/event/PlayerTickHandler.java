@@ -21,7 +21,7 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                 //Run Stuff
                 if (currentTime % 100 == 0) { // Every 5sec
                     if (ImmortalityData.getLiverExtracted(ImmortalityStatus.getPlayerComponent(player))) {
-                        if (ImmortalityStatus.getRegeneratingHearts(player) == 0) {
+                        if (ImmortalityStatus.getRegeneratingHearts(player) != ImmortalityStatus.regrowingImmortalityLiver) {
                             ImmortalityStatus.addRegrowingLiver(player);
                         }
                     }
@@ -59,6 +59,28 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                         ImmortalityStatus.setSemiImmortalityLostHeartTime(player, currentTime);
                     } else {
                         ImmortalityStatus.resetSemiImmortalityLostHeartTime(player);
+                    }
+                } else if (currentTime % 600 == 0) {
+                    if (ImmortalityStatus.getLifeElixirBonus(player) > ImmortalityStatus.getLifeElixirAppliedHealth(player)) {
+                        for (int i = 0; i < ((ImmortalityStatus.getLifeElixirBonus(player) - ImmortalityStatus.getLifeElixirAppliedHealth(player)) / ImmortalityStatus.lifeElixirHealth); i++) {
+                            ImmortalityStatus.addLifeElixirBonusHealth(player);
+                        }
+                    } else if (ImmortalityStatus.getLiverHearts(player) > ImmortalityStatus.getBonusHearts(player)) {
+                        for (int i = 0; i < ((ImmortalityStatus.getLiverHearts(player) - ImmortalityStatus.getBonusHearts(player)) / ImmortalityStatus.immortalityHearts); i++) {
+                            ImmortalityStatus.addImmortalityHeartsBonus(player);
+                        }
+                    } else if (ImmortalityStatus.getLostHearts(player) > ImmortalityStatus.getNegativeHearts(player)) {
+                        for (int i = 0; i < ((ImmortalityStatus.getLostHearts(player) - ImmortalityStatus.getNegativeHearts(player)) / ImmortalityStatus.immortalityHearts); i++) {
+                            ImmortalityStatus.addNegativeHeartsBonus(player);
+                        }
+                    } else if (ImmortalityStatus.getArmorBonus(player) > ImmortalityStatus.getAppliedBonusArmor(player)) {
+                        for (int i = 0; i < ((ImmortalityStatus.getArmorBonus(player) - ImmortalityStatus.getAppliedBonusArmor(player)) / ImmortalityStatus.immortalityBaseArmor); i++) {
+                            ImmortalityStatus.addImmortalityArmorBonus(player);
+                        }
+                    } else if (ImmortalityStatus.getArmorTBonus(player) > ImmortalityStatus.getAppliedBonusArmorT(player)) {
+                        for (int i = 0; i < ((ImmortalityStatus.getArmorTBonus(player) - ImmortalityStatus.getAppliedBonusArmorT(player)) / ImmortalityStatus.immortalityHardening); i++) {
+                            ImmortalityStatus.addImmortalityArmorTBonus(player);
+                        }
                     }
                 }
                 if (ImmortalityStatus.getImmortality(player)) {

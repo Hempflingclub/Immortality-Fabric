@@ -90,6 +90,7 @@ public class HolyDagger extends Item {
                         ImmortalityData.setLiverExtracted(ImmortalityStatus.getPlayerComponent(playerEntity), true);
                         ImmortalityData.setLiverExtractionTime(ImmortalityStatus.getPlayerComponent(playerEntity), ImmortalityStatus.getCurrentTime(playerEntity));
                         ImmortalityStatus.addRegrowingLiver(playerEntity);
+                        playerEntity.heal(0);
                         playerEntity.giveItemStack(new ItemStack(ImmortalityItems.LiverOfImmortality));
                         //If Trilogy
                         if (!ImmortalityStatus.isTrueImmortal(playerEntity)) {

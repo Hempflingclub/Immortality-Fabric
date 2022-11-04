@@ -49,8 +49,8 @@ public final class ImmortalityCommands {
 
                                 }
                             }
-                            if (ImmortalityStatus.getLifeElixirHealth(playerEntity) != 0) {
-                                context.getSource().sendFeedback(Text.translatable("immortality.commands.lifeElixirHearts", ImmortalityStatus.getLifeElixirHealth(playerEntity)), false);
+                            if (ImmortalityStatus.getLifeElixirAppliedHealth(playerEntity) != 0) {
+                                context.getSource().sendFeedback(Text.translatable("immortality.commands.lifeElixirHearts", ImmortalityStatus.getLifeElixirAppliedHealth(playerEntity)), false);
                             }
                             if (ImmortalityStatus.getBonusHearts(playerEntity) != 0) {
                                 context.getSource().sendFeedback(Text.translatable("immortality.commands.bonusHearts", ImmortalityStatus.getBonusHearts(playerEntity)), false);
@@ -65,11 +65,11 @@ public final class ImmortalityCommands {
                             if (ImmortalityStatus.getRegeneratingHearts(playerEntity) != 0) {
                                 context.getSource().sendFeedback(Text.translatable("immortality.commands.regeneratingHearts", ImmortalityStatus.getRegeneratingHearts(playerEntity)), false);
                             }
-                            if (ImmortalityStatus.getBonusArmor(playerEntity) != 0) {
-                                context.getSource().sendFeedback(Text.translatable("immortality.commands.bonusArmor", ImmortalityStatus.getBonusArmor(playerEntity)), false);
+                            if (ImmortalityStatus.getAppliedBonusArmor(playerEntity) != 0) {
+                                context.getSource().sendFeedback(Text.translatable("immortality.commands.bonusArmor", ImmortalityStatus.getAppliedBonusArmor(playerEntity)), false);
                             }
-                            if (ImmortalityStatus.getBonusArmorT(playerEntity) != 0) {
-                                context.getSource().sendFeedback(Text.translatable("immortality.commands.bonusArmorT", ImmortalityStatus.getBonusArmorT(playerEntity)), false);
+                            if (ImmortalityStatus.getAppliedBonusArmorT(playerEntity) != 0) {
+                                context.getSource().sendFeedback(Text.translatable("immortality.commands.bonusArmorT", ImmortalityStatus.getAppliedBonusArmorT(playerEntity)), false);
                             }
                             if (ImmortalityStatus.getVoidHeart(playerEntity)) {
                                 context.getSource().sendFeedback(Text.translatable("immortality.commands.void_heart"), false);

@@ -230,4 +230,60 @@ public final class ImmortalityData {
         NbtCompound nbt = playerComponent.getPlayerData();
         return nbt.getBoolean("summonTeleport");
     }
+
+    public static void setLifeElixirBonus(@NotNull IImmortalityPlayerComponent playerComponent, int amount) {
+        NbtCompound nbt = playerComponent.getPlayerData();
+        nbt.putInt("LifeElixirBonus", amount);
+        playerComponent.setPlayerData(nbt);
+    }
+
+    public static int getLifeElixirBonus(@NotNull IImmortalityPlayerComponent playerComponent) {
+        NbtCompound nbt = playerComponent.getPlayerData();
+        return nbt.getInt("LifeElixirBonus");
+    }
+
+    public static void setLostHearts(@NotNull IImmortalityPlayerComponent playerComponent, int amount) {
+        NbtCompound nbt = playerComponent.getPlayerData();
+        nbt.putInt("LostHearts", amount);
+        playerComponent.setPlayerData(nbt);
+    }
+
+    public static int getLostHearts(@NotNull IImmortalityPlayerComponent playerComponent) {
+        NbtCompound nbt = playerComponent.getPlayerData();
+        return nbt.getInt("LostHearts");
+    }
+
+    public static void setLiverHearts(@NotNull IImmortalityPlayerComponent playerComponent, int amount) {
+        NbtCompound nbt = playerComponent.getPlayerData();
+        nbt.putInt("LiverHearts", amount);
+        playerComponent.setPlayerData(nbt);
+    }
+
+    public static int getLiverHearts(@NotNull IImmortalityPlayerComponent playerComponent) {
+        NbtCompound nbt = playerComponent.getPlayerData();
+        return nbt.getInt("LiverHearts");
+    }
+
+    public static void setArmorBonus(@NotNull IImmortalityPlayerComponent playerComponent, int amount) {
+        NbtCompound nbt = playerComponent.getPlayerData();
+        nbt.putInt("ArmorBonus", amount);
+        playerComponent.setPlayerData(nbt);
+    }
+
+    public static int getArmorBonus(@NotNull IImmortalityPlayerComponent playerComponent) {
+        NbtCompound nbt = playerComponent.getPlayerData();
+        return nbt.getInt("ArmorBonus");
+    }
+
+    public static void setArmorTBonus(@NotNull IImmortalityPlayerComponent playerComponent, int amount) {
+        NbtCompound nbt = playerComponent.getPlayerData();
+        nbt.putInt("ArmorTBonus", amount);
+        playerComponent.setPlayerData(nbt);
+    }
+
+    public static int getArmorTBonus(@NotNull IImmortalityPlayerComponent playerComponent) {
+        NbtCompound nbt = playerComponent.getPlayerData();
+        return nbt.getInt("ArmorTBonus");
+    }
+
 }
