@@ -18,7 +18,7 @@ import java.util.UUID;
 
 public final class ImmortalityStatus {
     public static final int immortalityHearts = 2;
-    public static final int negativeImmortalityHearts = -2;
+    public static final int negativeImmortalityHearts = -1 * immortalityHearts;
     public static final int regrowingImmortalityLiver = -10;
     public static final int immortalityHardening = 1;
     public static final int immortalityBaseArmor = 1;
@@ -30,6 +30,12 @@ public final class ImmortalityStatus {
      * @param playerEntity you can Typecast to this using (playerEntity) however please check if player by playerEntity.isPlayer() before
      */
     public static void addImmortalityHearts(PlayerEntity playerEntity) {
+        addImmortalityHeartsBonus(playerEntity);
+        setLiverHearts(playerEntity, getLiverHearts(playerEntity) + immortalityHearts);
+        playerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
+    }
+
+    public static void addImmortalityHeartsBonus(PlayerEntity playerEntity) {
         EntityAttributeInstance maxHealth = playerEntity.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
         assert maxHealth != null;
         EntityAttributeModifier healthAddition = new EntityAttributeModifier("immortalityHearts", immortalityHearts, EntityAttributeModifier.Operation.ADDITION);
@@ -38,12 +44,18 @@ public final class ImmortalityStatus {
     }
 
     public static void addNegativeHearts(PlayerEntity playerEntity) {
+        addNegativeHeartsBonus(playerEntity);
+        setLostHearts(playerEntity, getLostHearts(playerEntity) + immortalityHearts);
+        playerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
+        playerEntity.tick();
+    }
+
+    public static void addNegativeHeartsBonus(PlayerEntity playerEntity) {
         EntityAttributeInstance maxHealth = playerEntity.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
         assert maxHealth != null;
         EntityAttributeModifier healthSubtraction = new EntityAttributeModifier("negativeImmortalityHearts", negativeImmortalityHearts, EntityAttributeModifier.Operation.ADDITION);
         maxHealth.addPersistentModifier(healthSubtraction);
         playerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
-        playerEntity.tick();
     }
 
     public static void addRegrowingLiver(PlayerEntity playerEntity) {
@@ -72,6 +84,12 @@ public final class ImmortalityStatus {
     }
 
     public static void addImmortalityArmorT(PlayerEntity playerEntity) {
+        addImmortalityArmorTBonus(playerEntity);
+        setArmorTBonus(playerEntity, getArmorTBonus(playerEntity) + immortalityHardening);
+        playerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
+    }
+
+    public static void addImmortalityArmorTBonus(PlayerEntity playerEntity) {
         EntityAttributeInstance armorT = playerEntity.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS);
         assert armorT != null;
         EntityAttributeModifier addArmorTough = new EntityAttributeModifier("immortalityHardening", immortalityHardening, EntityAttributeModifier.Operation.ADDITION);
@@ -85,6 +103,7 @@ public final class ImmortalityStatus {
         for (EntityAttributeModifier entityModifier : armorT.getModifiers()) {
             if (entityModifier.getName().equals("immortalityHardening")) {
                 armorT.removeModifier(entityModifier);
+                setArmorTBonus(playerEntity, getArmorTBonus(playerEntity) - immortalityHardening);
             }
         }
         playerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
@@ -108,11 +127,14 @@ public final class ImmortalityStatus {
         removeImmortalityArmorT(playerEntity);
         removeImmortalityArmor(playerEntity);
         for (EntityAttributeModifier entityModifier : maxHealth.getModifiers()) {
-            if (
-                    entityModifier.getName().equals("immortalityHearts") ||
-                            entityModifier.getName().equals("regrowingImmortalityLiver") ||
-                            entityModifier.getName().equals("negativeImmortalityHearts")) {
+            if (entityModifier.getName().equals("immortalityHearts")) {
                 maxHealth.removeModifier(entityModifier);
+                setLiverHearts(playerEntity, getLiverHearts(playerEntity) - immortalityHearts);
+            } else if (entityModifier.getName().equals("regrowingImmortalityLiver")) {
+                maxHealth.removeModifier(entityModifier);
+            } else if (entityModifier.getName().equals("negativeImmortalityHearts")) {
+                maxHealth.removeModifier(entityModifier);
+                setLostHearts(playerEntity, getLostHearts(playerEntity) - immortalityHearts);
             }
         }
         playerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
@@ -135,6 +157,7 @@ public final class ImmortalityStatus {
         for (EntityAttributeModifier entityModifier : maxHealth.getModifiers()) {
             if (entityModifier.getName().equals("negativeImmortalityHearts")) {
                 maxHealth.removeModifier(entityModifier);
+                setLostHearts(playerEntity, getLostHearts(playerEntity) - immortalityHearts);
             }
         }
         playerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
@@ -148,12 +171,19 @@ public final class ImmortalityStatus {
         for (EntityAttributeModifier entityModifier : maxHealth.getModifiers()) {
             if (entityModifier.getName().equals("negativeImmortalityHearts")) {
                 maxHealth.removeModifier(entityModifier);
+                setLostHearts(playerEntity, getLostHearts(playerEntity) - immortalityHearts);
             }
         }
         playerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
     }
 
     public static void addImmortalityArmor(PlayerEntity playerEntity) {
+        addImmortalityArmorBonus(playerEntity);
+        setArmorBonus(playerEntity, getArmorBonus(playerEntity) + immortalityBaseArmor);
+        playerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
+    }
+
+    public static void addImmortalityArmorBonus(PlayerEntity playerEntity) {
         EntityAttributeInstance armor = playerEntity.getAttributeInstance(EntityAttributes.GENERIC_ARMOR);
         assert armor != null;
         EntityAttributeModifier addArmor = new EntityAttributeModifier("immortalityBaseArmor", immortalityBaseArmor, EntityAttributeModifier.Operation.ADDITION);
@@ -167,6 +197,7 @@ public final class ImmortalityStatus {
         for (EntityAttributeModifier entityModifier : armor.getModifiers()) {
             if (entityModifier.getName().equals("immortalityBaseArmor")) {
                 armor.removeModifier(entityModifier);
+                setArmorBonus(playerEntity, getArmorBonus(playerEntity) - immortalityBaseArmor);
             }
         }
         playerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
@@ -202,13 +233,13 @@ public final class ImmortalityStatus {
         int regeneratingHearts = 0;
         for (EntityAttributeModifier entityModifier : maxHealth.getModifiers()) {
             if (entityModifier.getName().equals("regrowingImmortalityLiver")) {
-                regeneratingHearts += regeneratingHearts;
+                regeneratingHearts += regrowingImmortalityLiver;
             }
         }
         return regeneratingHearts;
     }
 
-    public static int getBonusArmor(PlayerEntity playerEntity) {
+    public static int getAppliedBonusArmor(PlayerEntity playerEntity) {
         EntityAttributeInstance armor = playerEntity.getAttributeInstance(EntityAttributes.GENERIC_ARMOR);
         assert armor != null;
         int bonusArmor = 0;
@@ -220,7 +251,7 @@ public final class ImmortalityStatus {
         return bonusArmor;
     }
 
-    public static int getBonusArmorT(PlayerEntity playerEntity) {
+    public static int getAppliedBonusArmorT(PlayerEntity playerEntity) {
         EntityAttributeInstance armorT = playerEntity.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS);
         assert armorT != null;
         int bonusArmorT = 0;
@@ -317,10 +348,8 @@ public final class ImmortalityStatus {
 
     public static void addLifeElixirHealth(PlayerEntity playerEntity) {
         if (isTrueImmortal(playerEntity) || (Math.random() >= 0.75 && !(ImmortalityStatus.isSemiImmortal(playerEntity) || ImmortalityStatus.getLiverImmortality(playerEntity) || ImmortalityStatus.getImmortality(playerEntity) || ImmortalityStatus.isTrueImmortal(playerEntity))) || (Math.random() >= 0.5 && (ImmortalityStatus.isSemiImmortal(playerEntity) || ImmortalityStatus.getLiverImmortality(playerEntity) || ImmortalityStatus.getImmortality(playerEntity) || ImmortalityStatus.isTrueImmortal(playerEntity)))) {
-            EntityAttributeInstance maxHealth = playerEntity.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-            assert maxHealth != null;
-            EntityAttributeModifier healthAddition = new EntityAttributeModifier("lifeElixir", lifeElixirHealth, EntityAttributeModifier.Operation.ADDITION);
-            maxHealth.addPersistentModifier(healthAddition);
+            addLifeElixirBonusHealth(playerEntity);
+            setLifeElixirBonus(playerEntity, getLifeElixirBonus(playerEntity) + lifeElixirHealth);
             resetLifeElixirTime(playerEntity);
             playerEntity.syncComponent(IImmortalityPlayerComponent.KEY); // Ensures their NBT gets saved, even if killed the next tick (hopefully)
             ImmortalityAdvancementGiver.giveLifeElixirAchievement(playerEntity);
@@ -335,7 +364,15 @@ public final class ImmortalityStatus {
         }
     }
 
-    public static int getLifeElixirHealth(PlayerEntity playerEntity) {
+    public static void addLifeElixirBonusHealth(PlayerEntity playerEntity) {
+        EntityAttributeInstance maxHealth = playerEntity.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+        assert maxHealth != null;
+        EntityAttributeModifier healthAddition = new EntityAttributeModifier("lifeElixir", lifeElixirHealth, EntityAttributeModifier.Operation.ADDITION);
+        maxHealth.addPersistentModifier(healthAddition);
+        playerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
+    }
+
+    public static int getLifeElixirAppliedHealth(PlayerEntity playerEntity) {
         EntityAttributeInstance elixirH = playerEntity.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
         assert elixirH != null;
         int bonusLifeElixirH = 0;
@@ -446,6 +483,7 @@ public final class ImmortalityStatus {
         for (EntityAttributeModifier entityModifier : maxHealth.getModifiers()) {
             if (entityModifier.getName().equals("negativeImmortalityHearts")) {
                 maxHealth.removeModifier(entityModifier);
+                setLostHearts(playerEntity, getLostHearts(playerEntity) - immortalityHearts);
                 break;
             }
         }
@@ -530,5 +568,60 @@ public final class ImmortalityStatus {
     public static void toggleSummonedTeleport(PlayerEntity playerEntity) {
         IImmortalityPlayerComponent playerComponent = getPlayerComponent(playerEntity);
         ImmortalityData.setSummonedTeleport(playerComponent, !getSummonedTeleport(playerEntity));
+    }
+
+    public static void setLifeElixirBonus(PlayerEntity playerEntity, int amount) {
+        IImmortalityPlayerComponent playerComponent = getPlayerComponent(playerEntity);
+        ImmortalityData.setLifeElixirBonus(playerComponent, amount);
+        playerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
+    }
+
+    public static int getLifeElixirBonus(PlayerEntity playerEntity) {
+        IImmortalityPlayerComponent playerComponent = getPlayerComponent(playerEntity);
+        return ImmortalityData.getLifeElixirBonus(playerComponent);
+    }
+
+    public static void setLostHearts(PlayerEntity playerEntity, int amount) {
+        IImmortalityPlayerComponent playerComponent = getPlayerComponent(playerEntity);
+        ImmortalityData.setLostHearts(playerComponent, amount);
+        playerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
+    }
+
+    public static int getLostHearts(PlayerEntity playerEntity) {
+        IImmortalityPlayerComponent playerComponent = getPlayerComponent(playerEntity);
+        return ImmortalityData.getLostHearts(playerComponent);
+    }
+
+    public static void setLiverHearts(PlayerEntity playerEntity, int amount) {
+        IImmortalityPlayerComponent playerComponent = getPlayerComponent(playerEntity);
+        ImmortalityData.setLiverHearts(playerComponent, amount);
+        playerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
+    }
+
+    public static int getLiverHearts(PlayerEntity playerEntity) {
+        IImmortalityPlayerComponent playerComponent = getPlayerComponent(playerEntity);
+        return ImmortalityData.getLiverHearts(playerComponent);
+    }
+
+    public static void setArmorBonus(PlayerEntity playerEntity, int amount) {
+        IImmortalityPlayerComponent playerComponent = getPlayerComponent(playerEntity);
+        ImmortalityData.setArmorBonus(playerComponent, amount);
+        playerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
+    }
+
+    public static int getArmorBonus(PlayerEntity playerEntity) {
+        IImmortalityPlayerComponent playerComponent = getPlayerComponent(playerEntity);
+        return ImmortalityData.getArmorBonus(playerComponent);
+    }
+
+    public static void setArmorTBonus(PlayerEntity playerEntity, int amount) {
+        IImmortalityPlayerComponent playerComponent = getPlayerComponent(playerEntity);
+        ImmortalityData.setArmorTBonus(playerComponent, amount);
+        playerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
+    }
+
+    public static int getArmorTBonus(PlayerEntity playerEntity) {
+        IImmortalityPlayerComponent playerComponent = getPlayerComponent(playerEntity);
+        return ImmortalityData.getArmorTBonus(playerComponent);
     }
 }

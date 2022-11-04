@@ -19,7 +19,7 @@ public class LifeElixirEffect extends ModStatusEffect {
             ServerPlayerEntity playerEntity = (ServerPlayerEntity) entity;
             if (ImmortalityStatus.shouldLifeElixirApply(playerEntity)) {
                 ImmortalityStatus.addLifeElixirHealth(playerEntity);
-                if (ImmortalityStatus.getLifeElixirHealth(playerEntity) >= 20) {
+                if (ImmortalityStatus.getLifeElixirAppliedHealth(playerEntity) >= 20) {
                     if (ImmortalityStatus.getLiverImmortality(playerEntity) && !ImmortalityStatus.isSemiImmortal(playerEntity)) {
                         ImmortalityStatus.convertFalseIntoSemiImmortality(playerEntity);
                         ImmortalityAdvancementGiver.giveImmortalityAchievements(playerEntity);
