@@ -101,7 +101,7 @@ public final class ImmortalityCommands {
                                 } else {
                                     context.getSource().sendFeedback(Text.translatable("immortality.commands.neededExtractionLivers", ImmortalityStatus.getMissingLiversToEatLiverOfImmortality(playerEntity)), false);
                                 }
-                            } else {
+                            } else if (!ImmortalityStatus.isSemiImmortal(playerEntity)) {
                                 context.getSource().sendFeedback(Text.translatable("immortality.commands.not_immortal"), false);
                             }
                             if (ImmortalityData.getImmortalDeaths(ImmortalityStatus.getPlayerComponent(playerEntity)) > 0) {
