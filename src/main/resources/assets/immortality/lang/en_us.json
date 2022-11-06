@@ -110,6 +110,7 @@
   "immortality.tooltip.item.holy_dagger_6": "This Dagger will break upon use",
   "immortality.tooltip.item.holy_dagger_7": "Sneak Right clicking on Entity",
   "immortality.tooltip.item.holy_dagger_8": "will SoulBound them to you",
+  "immortality.tooltip.item.soul_stone_1": "Soul Energy: %s/5.0",
   "advancements.immortality.root.title": "Immortality",
   "advancements.immortality.root.description": "The Quest of Immortality",
   "advancements.immortality.heart_of_immortality": "Achieving Immortality",

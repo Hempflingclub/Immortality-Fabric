@@ -286,4 +286,14 @@ public final class ImmortalityData {
         return nbt.getInt("ArmorTBonus");
     }
 
+    public static void setSoulEnergyForItem(@NotNull IImmortalityItemComponent itemComponent, double soulEnergy) {
+        NbtCompound nbt = itemComponent.getItemData();
+        nbt.putDouble("soulEnergy", soulEnergy);
+        itemComponent.setItemData(nbt);
+    }
+
+    public static double getSoulEnergyForItem(@NotNull IImmortalityItemComponent itemComponent) {
+        NbtCompound nbt = itemComponent.getItemData();
+        return nbt.getDouble("soulEnergy");
+    }
 }

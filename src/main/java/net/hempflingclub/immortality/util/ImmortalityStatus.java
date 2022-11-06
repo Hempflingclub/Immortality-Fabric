@@ -6,6 +6,7 @@ import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
@@ -623,5 +624,27 @@ public final class ImmortalityStatus {
     public static int getArmorTBonus(PlayerEntity playerEntity) {
         IImmortalityPlayerComponent playerComponent = getPlayerComponent(playerEntity);
         return ImmortalityData.getArmorTBonus(playerComponent);
+    }
+
+    public static IImmortalityItemComponent getItemComponent(ItemStack itemStack) {
+        return IImmortalityItemComponent.KEY.get(itemStack);
+    }
+
+    public static void setItemSoulEnergy(ItemStack itemStack, double soulEnergy) {
+        IImmortalityItemComponent itemComponent = getItemComponent(itemStack);
+        ImmortalityData.setSoulEnergyForItem(itemComponent, roundToDecimal(Math.min(soulEnergy, 5.0), 2)); // Currently has lost Data When moving ItemStack, or Reloading World
+    }
+
+    public static double getItemSoulEnergy(ItemStack itemStack) {
+        IImmortalityItemComponent itemComponent = getItemComponent(itemStack);
+        return roundToDecimal(ImmortalityData.getSoulEnergyForItem(itemComponent), 2);
+    }
+
+    public static void addItemSoulEnergy(ItemStack itemStack, double increment) {
+        setItemSoulEnergy(itemStack, getItemSoulEnergy(itemStack) + increment);
+    }
+
+    public static double roundToDecimal(double input, int n) {
+        return Math.round(input * Math.pow(10, n)) / Math.pow(10, n);
     }
 }
