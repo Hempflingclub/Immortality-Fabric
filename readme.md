@@ -115,3 +115,8 @@ Thanks to driplock's suggestions on CurseForge I've come up with these following
     - [ ] Any Type of Immortal can kill their own SoulBound without needing Bane Of Life, so beware
     - [ ] For Every Immortal Type SoulBound's will use 1 Soul Power to save themselves from a Bane Of Life Death and then be force summoned to you, unless you're Offline
   - [ ] Rework Existing True Immortality to be a Strong Immortal, and also give clear feedback regarding radiating Immortality healing Items (already in 1.0.0+) and add a toggle Command for it (maybe someone doesn't like their blinking pickaxe when mining)
+  - [ ] Changeable Immortality modes
+    - [x] Current (Staying at Death place) (except Void Death's, which will teleport to Bed)
+    - [ ] Current but without Void to Bed teleport
+    - [ ] Return to SoulBound, if it is released
+    - [ ] Return to SoulAnchor? maybe new Item
