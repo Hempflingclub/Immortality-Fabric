@@ -8,6 +8,7 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -623,5 +624,28 @@ public final class ImmortalityStatus {
     public static int getArmorTBonus(PlayerEntity playerEntity) {
         IImmortalityPlayerComponent playerComponent = getPlayerComponent(playerEntity);
         return ImmortalityData.getArmorTBonus(playerComponent);
+    }
+    public static void reapplyUserBuffs(ServerPlayerEntity player){
+        if (ImmortalityStatus.getLifeElixirBonus(player) > ImmortalityStatus.getLifeElixirAppliedHealth(player)) {
+            for (int i = 0; i < ((ImmortalityStatus.getLifeElixirBonus(player) - ImmortalityStatus.getLifeElixirAppliedHealth(player)) / ImmortalityStatus.lifeElixirHealth); i++) {
+                ImmortalityStatus.addLifeElixirBonusHealth(player);
+            }
+        } else if (ImmortalityStatus.getLiverHearts(player) > ImmortalityStatus.getBonusHearts(player)) {
+            for (int i = 0; i < ((ImmortalityStatus.getLiverHearts(player) - ImmortalityStatus.getBonusHearts(player)) / ImmortalityStatus.immortalityHearts); i++) {
+                ImmortalityStatus.addImmortalityHeartsBonus(player);
+            }
+        } else if (ImmortalityStatus.getLostHearts(player) > ImmortalityStatus.getNegativeHearts(player)) {
+            for (int i = 0; i < ((ImmortalityStatus.getLostHearts(player) - ImmortalityStatus.getNegativeHearts(player)) / ImmortalityStatus.immortalityHearts); i++) {
+                ImmortalityStatus.addNegativeHeartsBonus(player);
+            }
+        } else if (ImmortalityStatus.getArmorBonus(player) > ImmortalityStatus.getAppliedBonusArmor(player)) {
+            for (int i = 0; i < ((ImmortalityStatus.getArmorBonus(player) - ImmortalityStatus.getAppliedBonusArmor(player)) / ImmortalityStatus.immortalityBaseArmor); i++) {
+                ImmortalityStatus.addImmortalityArmorBonus(player);
+            }
+        } else if (ImmortalityStatus.getArmorTBonus(player) > ImmortalityStatus.getAppliedBonusArmorT(player)) {
+            for (int i = 0; i < ((ImmortalityStatus.getArmorTBonus(player) - ImmortalityStatus.getAppliedBonusArmorT(player)) / ImmortalityStatus.immortalityHardening); i++) {
+                ImmortalityStatus.addImmortalityArmorTBonus(player);
+            }
+        }
     }
 }

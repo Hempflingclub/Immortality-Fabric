@@ -11,6 +11,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
@@ -26,6 +27,7 @@ public final class ImmortalityCommands {
                         PlayerEntity playerEntity = (context.getSource().getPlayer());
                         context.getSource().getServer().execute(() -> {
                             assert playerEntity != null;
+                            ImmortalityStatus.reapplyUserBuffs((ServerPlayerEntity) playerEntity);
                             playerEntity.sendMessage(Text.translatable("immortality.commands.use_auto_completed_commands"), false);
                         });
                     } else {
@@ -38,6 +40,7 @@ public final class ImmortalityCommands {
                         PlayerEntity playerEntity = context.getSource().getPlayer();
                         context.getSource().getServer().execute(() -> {
                             assert playerEntity != null;
+                            ImmortalityStatus.reapplyUserBuffs((ServerPlayerEntity) playerEntity);
                             if (ImmortalityStatus.hasTargetGiftedImmortal(playerEntity)) {
                                 if (ImmortalityStatus.getTargetGiftedImmortalLivingEntity(playerEntity) != null) {
                                     LivingEntity soulBondEntity = ImmortalityStatus.getTargetGiftedImmortalLivingEntity(playerEntity);
@@ -117,8 +120,9 @@ public final class ImmortalityCommands {
                             if (context.getSource().isExecutedByPlayer()) {
                                 PlayerEntity playerEntity = context.getSource().getPlayer();
                                 context.getSource().getServer().execute(() -> {
+                                    assert playerEntity != null;
+                                    ImmortalityStatus.reapplyUserBuffs((ServerPlayerEntity) playerEntity);
                                     if (ImmortalityStatus.hasTargetGiftedImmortal(playerEntity)) {
-                                        assert playerEntity != null;
                                         playerEntity.sendMessage(Text.translatable("immortality.commands.summoned"), true);
                                         LivingEntity summonedEntity = ImmortalityStatus.getTargetGiftedImmortalLivingEntity(playerEntity);
                                         assert summonedEntity != null;
@@ -136,8 +140,9 @@ public final class ImmortalityCommands {
                             if (context.getSource().isExecutedByPlayer()) {
                                 PlayerEntity playerEntity = context.getSource().getPlayer();
                                 context.getSource().getServer().execute(() -> {
+                                    assert playerEntity != null;
+                                    ImmortalityStatus.reapplyUserBuffs((ServerPlayerEntity) playerEntity);
                                     if (ImmortalityStatus.hasTargetGiftedImmortal(playerEntity) && ImmortalityStatus.getTargetGiftedImmortalLivingEntity(playerEntity) instanceof WolfEntity) {
-                                        assert playerEntity != null;
                                         ImmortalityStatus.toggleSummonedTeleport(playerEntity);
                                         playerEntity.sendMessage(Text.translatable((ImmortalityStatus.getSummonedTeleport(playerEntity) ? "immortality.status.enabled_combat_wolf" : "immortality.status_disabled_combat_wolf")));
                                     } else {
