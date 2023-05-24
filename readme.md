@@ -88,6 +88,7 @@
 ---
 ## Version 2.0.0 (WIP)
 Thanks to driplock's suggestions on CurseForge I've come up with these following changes I plan on implementing for 2.0.0 after fixing existing Bugs (if everything goes as planned, otherwise it will be adjusted accordingly)
+  - [ ] Void Coal
   - ### New Item Soul Stone
     - [ ] If held in Offhand when killing will absorb Soul Power
     - [ ] It shows it's Soul Power in Tooltip
