@@ -118,179 +118,152 @@ public final class ImmortalityInvokeImmortality {
         // This is Server, Player is Immortal and would've Died
         if (playerEntity.getY() <= playerEntity.world.getBottomY() && dmgSource == DamageSource.OUT_OF_WORLD) {
             teleportPlayerToSpawnPoint(playerEntity);
-        } else if (dmgSource != DamageSource.OUT_OF_WORLD) {
-            playerEntity.getWorld().playSoundFromEntity(null, playerEntity, SoundEvents.BLOCK_AMETHYST_CLUSTER_FALL, SoundCategory.PLAYERS, 5, 1);
-            (playerEntity.getWorld()).spawnParticles(ParticleTypes.TOTEM_OF_UNDYING, playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), 64, 0, 5, 0, 1);
-            //Extinguish and refill Air
-            playerEntity.setAir(playerEntity.getMaxAir());
-            playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 20, 0, false, false));
-            playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 100, 1, false, false));
-            playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 15 * 20, 2, true, true));
-            //Increase Immortals Death Counter, if DamageType is not Void Damage
-            if (!((ImmortalityStatus.getImmortality(playerEntity) || ImmortalityStatus.isTrueImmortal(playerEntity)) && ImmortalityStatus.isSemiImmortal(playerEntity)) && (dmgSource != soulBoundDamageSource && (ImmortalityStatus.getImmortality(playerEntity) || ImmortalityStatus.isTrueImmortal(playerEntity)))) {
-                ImmortalityStatus.incrementImmortalityDeath(playerEntity);
-                //Immortals shouldn't be strengthened by SoulBound Deaths
-                if (ImmortalityStatus.getImmortality(playerEntity) || ImmortalityStatus.isTrueImmortal(playerEntity)) {
-                    ImmortalityStatus.addImmortalityArmorT(playerEntity);
-                }
+        }
+        if (dmgSource == DamageSource.OUT_OF_WORLD) {
+            return 0;// Not counting OUT_OF_WORLD as a Death in any way
+        }
+        playerEntity.getWorld().playSoundFromEntity(null, playerEntity, SoundEvents.BLOCK_AMETHYST_CLUSTER_FALL, SoundCategory.PLAYERS, 5, 1);
+        (playerEntity.getWorld()).spawnParticles(ParticleTypes.TOTEM_OF_UNDYING, playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), 64, 0, 5, 0, 1);
+        //Extinguish and refill Air
+        playerEntity.setAir(playerEntity.getMaxAir());
+        playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 20, 0, false, false));
+        playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 100, 1, false, false));
+        playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 15 * 20, 2, true, true));
+        //Increase Immortals Death Counter, if DamageType is not Void Damage
+        boolean isKillableRealImmortal = (ImmortalityStatus.getImmortality(playerEntity) || ImmortalityStatus.isTrueImmortal(playerEntity)) && ImmortalityStatus.isSemiImmortal(playerEntity);
+        boolean realImmortalNormalDeath = dmgSource != soulBoundDamageSource && (ImmortalityStatus.getImmortality(playerEntity) || ImmortalityStatus.isTrueImmortal(playerEntity));
+        if (!isKillableRealImmortal && realImmortalNormalDeath) {
+            ImmortalityStatus.incrementImmortalityDeath(playerEntity);
+            //Immortals shouldn't be strengthened by SoulBound Deaths
+            if (ImmortalityStatus.getImmortality(playerEntity) || ImmortalityStatus.isTrueImmortal(playerEntity)) {
+                ImmortalityStatus.addImmortalityArmorT(playerEntity);
             }
-            //Increase Death Counter in Statistics
-            playerEntity.incrementStat(Stats.DEATHS);
-            if (dmgSource.getSource() instanceof ImmortalWither || (dmgSource.getSource() instanceof WitherSkullEntity witherSkullEntity && witherSkullEntity.getOwner() instanceof ImmortalWither)) {
-                killedByImmortalWither = true;
+        }
+        //Increase Death Counter in Statistics
+        playerEntity.incrementStat(Stats.DEATHS);
+        killedByImmortalWither = killedByImmortalWither(dmgSource);
+        boolean hasRealImmortality = !ImmortalityStatus.isSemiImmortal(playerEntity) && !ImmortalityStatus.getLiverImmortality(playerEntity);
+        if (!hasRealImmortality) {
+            //If LiverImmortality then use Degrading Mechanic
+            //Remove 1 Heart per Death
+            if (dmgSource.getSource() == null || dmgSource.getSource() == playerEntity) {
+                ImmortalityStatus.addNegativeHearts(playerEntity);
+                return 0;// Bow Suicide, or buggy DamageSource, so special handling
             }
-            if ((ImmortalityStatus.getImmortality(playerEntity) || ImmortalityStatus.isTrueImmortal(playerEntity)) && !ImmortalityStatus.isSemiImmortal(playerEntity)) {
-                //If real Immortality not LiverImmortality then use Leveling Mechanic
-                if (dmgSource.getSource() != null && dmgSource.getSource() != playerEntity) {
-                    if (dmgSource.getSource().isPlayer()) {
-                        PlayerEntity attackingPlayer = (PlayerEntity) dmgSource.getSource();
-                        if (attackingPlayer.getMainHandStack().hasEnchantments()) {
-                            if (EnchantmentHelper.getLevel(ImmortalityEnchants.Bane_Of_Life, attackingPlayer.getMainHandStack()) > 0) {
-                                //Killed By Bane Of Life
-                                ImmortalityStatus.setKilledByBaneOfLifeTime(playerEntity, ImmortalityStatus.getCurrentTime(playerEntity));
-                                ImmortalityStatus.incrementKilledByBaneOfLifeCount(playerEntity);
-                                if (ImmortalityStatus.getKilledByBaneOfLifeCount(playerEntity) >= 3) {
-                                    if (!ImmortalityStatus.isSemiImmortal(playerEntity)) {
-                                        ImmortalityStatus.setSemiImmortality(playerEntity, true);
-                                    }
-                                }
-                                playerEntity.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.bane_of_life, 60 * 20, 0, true, true));
-                                if (!ImmortalityData.getLiverExtracted(ImmortalityStatus.getPlayerComponent(playerEntity))) {
-                                    ImmortalityData.setLiverExtracted(ImmortalityStatus.getPlayerComponent(playerEntity), true);
-                                    ImmortalityData.setLiverExtractionTime(ImmortalityStatus.getPlayerComponent(playerEntity), ImmortalityStatus.getCurrentTime(playerEntity));
-                                    ImmortalityStatus.addRegrowingLiver(playerEntity);
-                                    playerEntity.sendMessage(Text.translatable("immortality.status.liver_removed_forcefully"), true);
-                                    attackingPlayer.giveItemStack(new ItemStack(ImmortalityItems.LiverOfImmortality));
-                                }
-                            }
-                        }
-                    } else if (killedByImmortalWither) {
+            if (dmgSource.getSource().isPlayer()) {
+                PlayerEntity attackingPlayer = (PlayerEntity) dmgSource.getSource();
+                if (attackingPlayer.getMainHandStack().hasEnchantments()) {
+                    if (EnchantmentHelper.getLevel(ImmortalityEnchants.Bane_Of_Life, attackingPlayer.getMainHandStack()) > 0) {
                         ImmortalityStatus.setKilledByBaneOfLifeTime(playerEntity, ImmortalityStatus.getCurrentTime(playerEntity));
                         ImmortalityStatus.incrementKilledByBaneOfLifeCount(playerEntity);
-                        if (ImmortalityStatus.getKilledByBaneOfLifeCount(playerEntity) >= 3) {
-                            if (!ImmortalityStatus.isSemiImmortal(playerEntity)) {
-                                ImmortalityStatus.setSemiImmortality(playerEntity, true);
-                            }
-                        }
-                        playerEntity.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.bane_of_life, 60 * 20, 0, true, true));
-                    }
-                }
-                if (dmgSource != soulBoundDamageSource && (ImmortalityData.getImmortalDeaths(ImmortalityStatus.getPlayerComponent(playerEntity)) + 1) % 5 == 0 && ImmortalityStatus.getAppliedBonusArmor(playerEntity) < ImmortalityStatus.immortalityBaseArmor * 10) {
-                    ImmortalityStatus.addImmortalityArmor(playerEntity);
-                    playerEntity.sendMessage(Text.translatable("immortality.status.skinHardened"), true);
-                }
-            } else if (ImmortalityStatus.getLiverImmortality(playerEntity) || ImmortalityStatus.isSemiImmortal(playerEntity)) {
-                //If LiverImmortality then use Degrading Mechanic
-                //Remove 1 Heart per Death
-                if (dmgSource.getSource() != null && dmgSource.getSource() != playerEntity) {
-                    if (dmgSource.getSource().isPlayer()) {
-                        PlayerEntity attackingPlayer = (PlayerEntity) dmgSource.getSource();
-                        if (attackingPlayer.getMainHandStack().hasEnchantments()) {
-                            if (EnchantmentHelper.getLevel(ImmortalityEnchants.Bane_Of_Life, attackingPlayer.getMainHandStack()) > 0) {
-                                ImmortalityStatus.setKilledByBaneOfLifeTime(playerEntity, ImmortalityStatus.getCurrentTime(playerEntity));
-                                ImmortalityStatus.incrementKilledByBaneOfLifeCount(playerEntity);
-                                ImmortalityStatus.addNegativeHearts(playerEntity); //Second Negative Hearts
-                                if (ImmortalityStatus.getImmortality(playerEntity) || ImmortalityStatus.getImmortality(playerEntity)) {
-                                    playerEntity.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.bane_of_life, 60 * 20, 0, true, true));
-                                    if (!ImmortalityData.getLiverExtracted(ImmortalityStatus.getPlayerComponent(playerEntity))) {
-                                        ImmortalityData.setLiverExtracted(ImmortalityStatus.getPlayerComponent(playerEntity), true);
-                                        ImmortalityData.setLiverExtractionTime(ImmortalityStatus.getPlayerComponent(playerEntity), ImmortalityStatus.getCurrentTime(playerEntity));
-                                        ImmortalityStatus.addRegrowingLiver(playerEntity);
-                                        playerEntity.sendMessage(Text.translatable("immortality.status.liver_removed_forcefully"), true);
-                                        attackingPlayer.giveItemStack(new ItemStack(ImmortalityItems.LiverOfImmortality));
-                                    }
-                                }
-                            }
-                        }
-                    } else if (killedByImmortalWither) {
-                        ImmortalityStatus.setKilledByBaneOfLifeTime(playerEntity, ImmortalityStatus.getCurrentTime(playerEntity));
-                        ImmortalityStatus.incrementKilledByBaneOfLifeCount(playerEntity);
-                        ImmortalityStatus.addNegativeHearts(playerEntity);
+                        ImmortalityStatus.addNegativeHearts(playerEntity); //Second Negative Hearts
                         if (ImmortalityStatus.getImmortality(playerEntity) || ImmortalityStatus.getImmortality(playerEntity)) {
                             playerEntity.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.bane_of_life, 60 * 20, 0, true, true));
+                            if (!ImmortalityData.getLiverExtracted(ImmortalityStatus.getPlayerComponent(playerEntity))) {
+                                ImmortalityData.setLiverExtracted(ImmortalityStatus.getPlayerComponent(playerEntity), true);
+                                ImmortalityData.setLiverExtractionTime(ImmortalityStatus.getPlayerComponent(playerEntity), ImmortalityStatus.getCurrentTime(playerEntity));
+                                ImmortalityStatus.addRegrowingLiver(playerEntity);
+                                playerEntity.sendMessage(Text.translatable("immortality.status.liver_removed_forcefully"), true);
+                                attackingPlayer.giveItemStack(new ItemStack(ImmortalityItems.LiverOfImmortality));
+                            }
                         }
                     }
                 }
-                if (ImmortalityStatus.isSemiImmortal(playerEntity)) {
-                    ImmortalityStatus.setSemiImmortalityLostHeartTime(playerEntity, ImmortalityStatus.getCurrentTime(playerEntity));
-                }
+            } else if (killedByImmortalWither) {
+                ImmortalityStatus.setKilledByBaneOfLifeTime(playerEntity, ImmortalityStatus.getCurrentTime(playerEntity));
+                ImmortalityStatus.incrementKilledByBaneOfLifeCount(playerEntity);
                 ImmortalityStatus.addNegativeHearts(playerEntity);
-                if (playerEntity.getMaxHealth() < 2) {
-                    //0 Hearts then remove LiverImmortality
-                    if (ImmortalityStatus.getLiverImmortality(playerEntity)) {
-                        ImmortalityStatus.removeFalseImmortality(playerEntity);
-                    }
-                    if (ImmortalityStatus.isSemiImmortal(playerEntity)) {
-                        ImmortalityStatus.removeNegativeHearts(playerEntity);
-                    }
-                    for (PlayerEntity players : playerEntity.getWorld().getPlayers()) {
-                        players.playSound(SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.PLAYERS, 1, 1);
-                    }
-                    if (ImmortalityStatus.getLifeElixirDropTime(playerEntity) == 0 || ImmortalityStatus.getCurrentTime(playerEntity) >= (ImmortalityStatus.getLifeElixirDropTime(playerEntity) + 300 * 20)) {
-                        ImmortalityStatus.setLifeElixirDropTime(playerEntity, ImmortalityStatus.getCurrentTime(playerEntity));
-                        ItemEntity itemEntity = new ItemEntity(EntityType.ITEM, playerEntity.getWorld());
-                        itemEntity.setPosition(playerEntity.getPos());
-                        itemEntity.setStack(new ItemStack(ImmortalityItems.LifeElixir));
-                        playerEntity.getWorld().spawnEntity(itemEntity);
-                    }
-                    if (!ImmortalityStatus.isSemiImmortal(playerEntity)) {
-                        for (PlayerEntity player : Objects.requireNonNull(playerEntity.getServer()).getPlayerManager().getPlayerList()) {
-                            if (dmgSource.getSource() != null && dmgSource.getSource() != playerEntity) {
-                                player.sendMessage(Text.translatable("immortality.last.death.player", playerEntity.getName().getString(), dmgSource.getSource().getName().getString()));
-                            } else {
-                                player.sendMessage(Text.translatable("immortality.last.death", playerEntity.getName().getString()));
-                            }
-                        }
-                    } else {
-                        if ((ImmortalityStatus.getImmortality(playerEntity) || ImmortalityStatus.isTrueImmortal(playerEntity))) {
-                            if (ImmortalityStatus.isTrueImmortal(playerEntity)) {
-                                for (PlayerEntity player : Objects.requireNonNull(playerEntity.getServer()).getPlayerManager().getPlayerList()) {
-                                    if (dmgSource.getSource() != null && dmgSource.getSource() != playerEntity) {
-                                        player.sendMessage(Text.translatable("immortality.trueImmortal_slayed.death.player", playerEntity.getName().getString(), dmgSource.getSource().getName().getString()));
-                                    } else {
-                                        player.sendMessage(Text.translatable("immortality.trueImmortal_slayed.death", playerEntity.getName().getString()));
-                                    }
-                                }
-                            } else {
-                                for (PlayerEntity player : Objects.requireNonNull(playerEntity.getServer()).getPlayerManager().getPlayerList()) {
-                                    if (dmgSource.getSource() != null && dmgSource.getSource() != playerEntity) {
-                                        player.sendMessage(Text.translatable("immortality.immortal_slayed.death.player", playerEntity.getName().getString(), dmgSource.getSource().getName().getString()));
-                                    } else {
-                                        player.sendMessage(Text.translatable("immortality.immortal_slayed.death", playerEntity.getName().getString()));
-                                    }
-                                }
-                            }
-                            ImmortalityStatus.convertSemiImmortalityIntoOtherImmortality(playerEntity);
-                        } else {
-                            //Just Semi Immortal
-                            for (PlayerEntity player : Objects.requireNonNull(playerEntity.getServer()).getPlayerManager().getPlayerList()) {
-                                if (dmgSource.getSource() != null && dmgSource.getSource() != playerEntity) {
-                                    player.sendMessage(Text.translatable("immortality.semiImmortal_slayed.death.player", playerEntity.getName().getString(), dmgSource.getSource().getName().getString()));
-                                } else {
-                                    player.sendMessage(Text.translatable("immortality.semiImmortal_slayed.death", playerEntity.getName().getString()));
-                                }
-                            }
-                        }
-                        ImmortalityStatus.resetKilledByBaneOfLifeTime(playerEntity);
-                        ImmortalityStatus.resetKilledByBaneOfLifeCount(playerEntity);
-                    }
-                    if (ImmortalityStatus.hasTargetGiftedImmortal(playerEntity)) {
-                        if (ImmortalityStatus.getTargetGiftedImmortalLivingEntity(playerEntity) != null) {
-                            Objects.requireNonNull(ImmortalityStatus.getTargetGiftedImmortalLivingEntity(playerEntity)).setHealth(1);
-                            Objects.requireNonNull(ImmortalityStatus.getTargetGiftedImmortalLivingEntity(playerEntity)).damage(soulBoundDamageSource, 1000);
-                        } else {
-                            ImmortalityStatus.removeTargetGiftedImmortal(playerEntity);
-                        }
-                    }
-                    playerEntity.setHealth(1); //Guaranteed Death, Just in Case
-                    return damageAmount + 1;
+                if (ImmortalityStatus.getImmortality(playerEntity) || ImmortalityStatus.getImmortality(playerEntity)) {
+                    playerEntity.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.bane_of_life, 60 * 20, 0, true, true));
                 }
             }
-            //Catching True Immortality in every Case, and also temporary Semi Immortality
-            ImmortalityAdvancementGiver.giveImmortalityAchievements(playerEntity);
+            if (ImmortalityStatus.isSemiImmortal(playerEntity)) {
+                ImmortalityStatus.setSemiImmortalityLostHeartTime(playerEntity, ImmortalityStatus.getCurrentTime(playerEntity));
+            }
+            ImmortalityStatus.addNegativeHearts(playerEntity);
+            if (playerEntity.getMaxHealth() < 2) {
+                //0 Hearts then remove LiverImmortality
+                if (ImmortalityStatus.getLiverImmortality(playerEntity)) {
+                    ImmortalityStatus.removeFalseImmortality(playerEntity);
+                }
+                if (ImmortalityStatus.isSemiImmortal(playerEntity)) {
+                    ImmortalityStatus.removeNegativeHearts(playerEntity);
+                }
+                for (PlayerEntity players : playerEntity.getWorld().getPlayers()) {
+                    players.playSound(SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.PLAYERS, 1, 1);
+                }
+                if (ImmortalityStatus.getLifeElixirDropTime(playerEntity) == 0 || ImmortalityStatus.getCurrentTime(playerEntity) >= (ImmortalityStatus.getLifeElixirDropTime(playerEntity) + 300 * 20)) {
+                    ImmortalityStatus.setLifeElixirDropTime(playerEntity, ImmortalityStatus.getCurrentTime(playerEntity));
+                    ItemEntity itemEntity = new ItemEntity(EntityType.ITEM, playerEntity.getWorld());
+                    itemEntity.setPosition(playerEntity.getPos());
+                    itemEntity.setStack(new ItemStack(ImmortalityItems.LifeElixir));
+                    playerEntity.getWorld().spawnEntity(itemEntity);
+                }
+                if (!ImmortalityStatus.isSemiImmortal(playerEntity)) {
+                    for (PlayerEntity player : Objects.requireNonNull(playerEntity.getServer()).getPlayerManager().getPlayerList()) {
+                        if (dmgSource.getSource() != null && dmgSource.getSource() != playerEntity) {
+                            player.sendMessage(Text.translatable("immortality.last.death.player", playerEntity.getName().getString(), dmgSource.getSource().getName().getString()));
+                        } else {
+                            player.sendMessage(Text.translatable("immortality.last.death", playerEntity.getName().getString()));
+                        }
+                    }
+                } else {
+                    if ((ImmortalityStatus.getImmortality(playerEntity) || ImmortalityStatus.isTrueImmortal(playerEntity))) {
+                        if (ImmortalityStatus.isTrueImmortal(playerEntity)) {
+                            for (PlayerEntity player : Objects.requireNonNull(playerEntity.getServer()).getPlayerManager().getPlayerList()) {
+                                if (dmgSource.getSource() != null && dmgSource.getSource() != playerEntity) {
+                                    player.sendMessage(Text.translatable("immortality.trueImmortal_slayed.death.player", playerEntity.getName().getString(), dmgSource.getSource().getName().getString()));
+                                } else {
+                                    player.sendMessage(Text.translatable("immortality.trueImmortal_slayed.death", playerEntity.getName().getString()));
+                                }
+                            }
+                        } else {
+                            for (PlayerEntity player : Objects.requireNonNull(playerEntity.getServer()).getPlayerManager().getPlayerList()) {
+                                if (dmgSource.getSource() != null && dmgSource.getSource() != playerEntity) {
+                                    player.sendMessage(Text.translatable("immortality.immortal_slayed.death.player", playerEntity.getName().getString(), dmgSource.getSource().getName().getString()));
+                                } else {
+                                    player.sendMessage(Text.translatable("immortality.immortal_slayed.death", playerEntity.getName().getString()));
+                                }
+                            }
+                        }
+                        ImmortalityStatus.convertSemiImmortalityIntoOtherImmortality(playerEntity);
+                    } else {
+                        //Just Semi Immortal
+                        for (PlayerEntity player : Objects.requireNonNull(playerEntity.getServer()).getPlayerManager().getPlayerList()) {
+                            if (dmgSource.getSource() != null && dmgSource.getSource() != playerEntity) {
+                                player.sendMessage(Text.translatable("immortality.semiImmortal_slayed.death.player", playerEntity.getName().getString(), dmgSource.getSource().getName().getString()));
+                            } else {
+                                player.sendMessage(Text.translatable("immortality.semiImmortal_slayed.death", playerEntity.getName().getString()));
+                            }
+                        }
+                    }
+                    ImmortalityStatus.resetKilledByBaneOfLifeTime(playerEntity);
+                    ImmortalityStatus.resetKilledByBaneOfLifeCount(playerEntity);
+                }
+                if (ImmortalityStatus.hasTargetGiftedImmortal(playerEntity)) {
+                    if (ImmortalityStatus.getTargetGiftedImmortalLivingEntity(playerEntity) != null) {
+                        Objects.requireNonNull(ImmortalityStatus.getTargetGiftedImmortalLivingEntity(playerEntity)).setHealth(1);
+                        Objects.requireNonNull(ImmortalityStatus.getTargetGiftedImmortalLivingEntity(playerEntity)).damage(soulBoundDamageSource, 1000);
+                    } else {
+                        ImmortalityStatus.removeTargetGiftedImmortal(playerEntity);
+                    }
+                }
+                playerEntity.setHealth(1); //Guaranteed Death, Just in Case
+                return damageAmount + 1;
+            }
+
+            return stopDeath(playerEntity);
         }
+//Because of stopDeath above only realImmortality will be run here
+        realImmortalDeathHandling(playerEntity, dmgSource);//No Return necessary, as they will become Semi Immortal, in order to be killable
+        return stopDeath(playerEntity);
+    }
+
+    private static float stopDeath(ServerPlayerEntity immortalPlayer) {
+//Catching True Immortality in every Case, and also temporary Semi Immortality
+        ImmortalityAdvancementGiver.giveImmortalityAchievements(immortalPlayer);
         //Prevent Death
-        playerEntity.setHealth(playerEntity.getMaxHealth());
+        immortalPlayer.setHealth(immortalPlayer.getMaxHealth());
         return 0;
     }
 
@@ -386,7 +359,8 @@ public final class ImmortalityInvokeImmortality {
         }
         ImmortalityStatus.incrementImmortalWitherDeaths(immortalWither);
         if (ImmortalityStatus.getImmortalWitherDeaths(immortalWither) < 5) { // Kill it 5 Times, and it won't be able to recover
-            immortalWither.setHealth(immortalWither.getMaxHealth() * (1 - ((1.0F * ImmortalityStatus.getImmortalWitherDeaths(immortalWither)) / 5)));
+            float lostLifePercent = (1.0F * ImmortalityStatus.getImmortalWitherDeaths(immortalWither)) / 5; // 0.2f -> 1.0f
+            immortalWither.setHealth(immortalWither.getMaxHealth() * (1 - lostLifePercent));
             immortalWither.getWorld().playSoundFromEntity(null, immortalWither, SoundEvents.BLOCK_AMETHYST_CLUSTER_FALL, SoundCategory.HOSTILE, 5, 1);
             ((ServerWorld) immortalWither.getWorld()).spawnParticles(ParticleTypes.SOUL, immortalWither.getX(), immortalWither.getY(), immortalWither.getZ(), 64, 0, 5, 0, 1);
             immortalWither.setInvulTimer(220);
@@ -395,6 +369,55 @@ public final class ImmortalityInvokeImmortality {
             return damageAmount;
         } else {
             return 0;
+        }
+    }
+
+    private static boolean killedByImmortalWither(DamageSource damageSource) {
+        boolean directlyByImmortalWither = damageSource.getSource() instanceof ImmortalWither;
+        boolean byWitherSkullFromImmortalWither = damageSource.getSource() instanceof WitherSkullEntity witherSkullEntity && witherSkullEntity.getOwner() instanceof ImmortalWither;
+        boolean killedByImmortalWither = directlyByImmortalWither || byWitherSkullFromImmortalWither;
+        return killedByImmortalWither;
+    }
+
+    private static void realImmortalDeathHandling(ServerPlayerEntity immortalPlayer, DamageSource damageSource) {
+        //If real Immortality not LiverImmortality then use Leveling Mechanic
+        if (damageSource.getSource() != null && damageSource.getSource() != immortalPlayer) {
+            if (damageSource.getSource().isPlayer()) {
+                PlayerEntity attackingPlayer = (PlayerEntity) damageSource.getSource();
+                if (attackingPlayer.getMainHandStack().hasEnchantments()) {
+                    if (EnchantmentHelper.getLevel(ImmortalityEnchants.Bane_Of_Life, attackingPlayer.getMainHandStack()) > 0) {
+                        //Killed By Bane Of Life
+                        ImmortalityStatus.setKilledByBaneOfLifeTime(immortalPlayer, ImmortalityStatus.getCurrentTime(immortalPlayer));
+                        ImmortalityStatus.incrementKilledByBaneOfLifeCount(immortalPlayer);
+                        if (ImmortalityStatus.getKilledByBaneOfLifeCount(immortalPlayer) >= 3) {
+                            if (!ImmortalityStatus.isSemiImmortal(immortalPlayer)) {
+                                ImmortalityStatus.setSemiImmortality(immortalPlayer, true);
+                            }
+                        }
+                        immortalPlayer.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.bane_of_life, 60 * 20, 0, true, true));
+                        if (!ImmortalityData.getLiverExtracted(ImmortalityStatus.getPlayerComponent(immortalPlayer))) {
+                            ImmortalityData.setLiverExtracted(ImmortalityStatus.getPlayerComponent(immortalPlayer), true);
+                            ImmortalityData.setLiverExtractionTime(ImmortalityStatus.getPlayerComponent(immortalPlayer), ImmortalityStatus.getCurrentTime(immortalPlayer));
+                            ImmortalityStatus.addRegrowingLiver(immortalPlayer);
+                            immortalPlayer.sendMessage(Text.translatable("immortality.status.liver_removed_forcefully"), true);
+                            attackingPlayer.giveItemStack(new ItemStack(ImmortalityItems.LiverOfImmortality));
+                        }
+                    }
+                }
+            } else if (killedByImmortalWither) {
+                ImmortalityStatus.setKilledByBaneOfLifeTime(immortalPlayer, ImmortalityStatus.getCurrentTime(immortalPlayer));
+                ImmortalityStatus.incrementKilledByBaneOfLifeCount(immortalPlayer);
+                if (ImmortalityStatus.getKilledByBaneOfLifeCount(immortalPlayer) >= 3) {
+                    if (!ImmortalityStatus.isSemiImmortal(immortalPlayer)) {
+                        ImmortalityStatus.setSemiImmortality(immortalPlayer, true);
+                    }
+                }
+                immortalPlayer.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.bane_of_life, 60 * 20, 0, true, true));
+            }
+        }
+        if (damageSource != soulBoundDamageSource && (ImmortalityData.getImmortalDeaths(ImmortalityStatus.getPlayerComponent(immortalPlayer)) + 1) % 5 == 0 && ImmortalityStatus.getAppliedBonusArmor(immortalPlayer) < ImmortalityStatus.immortalityBaseArmor * 10) {
+            ImmortalityStatus.addImmortalityArmor(immortalPlayer);
+            immortalPlayer.sendMessage(Text.translatable("immortality.status.skinHardened"), true);
         }
     }
 }
