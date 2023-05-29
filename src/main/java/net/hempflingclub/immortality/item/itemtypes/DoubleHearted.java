@@ -9,6 +9,7 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class DoubleHearted extends Item {
     public DoubleHearted(Settings settings) {
         super(settings);

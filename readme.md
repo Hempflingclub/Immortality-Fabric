@@ -59,23 +59,23 @@
 # TODO
 
 ## Artists
- |Textures|Models|Planned|
- |:-:|:-:|:-:|
- |[` `]|[` `]|Heart of Immortality|
- |[` `]|[` `]|Void Heart|
- |[` `]|[` `]|Liver of Immortality|
- |[` `]|[` `]|Holy Dagger|
- |[` `]|[` `]|True Immortality|
- |[` `]|[` `]|Bane Of Life|
- |[` `]|[` `]|Immortal Wither|
- |[`X`]|[`X`]|Current Holy Dagger|
+ | Textures | Models |       Planned        |
+ |:--------:|:------:|:--------------------:|
+ |  [` `]   | [` `]  | Heart of Immortality |
+ |  [` `]   | [` `]  |      Void Heart      |
+ |  [` `]   | [` `]  | Liver of Immortality |
+ |  [` `]   | [` `]  |     Holy Dagger      |
+ |  [` `]   | [` `]  |   True Immortality   |
+ |  [` `]   | [` `]  |     Bane Of Life     |
+ |  [` `]   | [` `]  |   Immortal Wither    |
+ |  [`X`]   | [`X`]  | Current Holy Dagger  |
 
 ---------------------------
 # Devs
-|Textures|Models|Planned|
- |:-:|:-:|:-:|
- |[`X`]|[`X`]|Life Elixir|
- |[`X`]|[`X`]|Current Textures except Holy Dagger|
+| Textures | Models |               Planned               |
+ |:--------:|:------:|:-----------------------------------:|
+ |  [`X`]   | [`X`]  |             Life Elixir             |
+ |  [`X`]   | [`X`]  | Current Textures except Holy Dagger |
 ### Planned
 - [x] Immortality "Steal" Enchantment to force harvest immortal Liver
 - [x] Heart/Liver of Immortality on Entitys not being Players (SoulBinding)

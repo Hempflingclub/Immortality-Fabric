@@ -9,7 +9,7 @@ import net.minecraft.util.registry.Registry;
 
 public final class ImmortalityEnchants {
     private final static EquipmentSlot[] equipmentSlotListMainHand = {EquipmentSlot.MAINHAND};
-    public static Enchantment Bane_Of_Life = new BaneOfLife(Enchantment.Rarity.VERY_RARE, EnchantmentTarget.WEAPON, equipmentSlotListMainHand);
+    public static final Enchantment Bane_Of_Life = new BaneOfLife(Enchantment.Rarity.VERY_RARE, EnchantmentTarget.WEAPON, equipmentSlotListMainHand);
 
     public static void registerEnchantments() {
         Immortality.LOGGER.debug("Registering Enchantments for " + Immortality.MOD_ID);

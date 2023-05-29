@@ -16,6 +16,7 @@ public final class ImmortalEntitys {
         return Registry.register(Registry.ENTITY_TYPE, new Identifier(Immortality.MOD_ID, name), entityType.build(name));
     }
 
+    @SuppressWarnings("DataFlowIssue")
     public static void registerEntitys() {
         Immortality.LOGGER.debug("Registering Entitys for " + Immortality.MOD_ID);
         FabricDefaultAttributeRegistry.register(ImmortalWither, net.hempflingclub.immortality.entitys.ImmortalWither.ImmortalWither.createImmortalWitherAttributes());
