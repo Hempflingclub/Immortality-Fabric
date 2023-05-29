@@ -53,8 +53,6 @@ public class ImmortalWither extends HostileEntity implements SkinOverlayOwner, R
     private static final TargetPredicate HEAD_TARGET_PREDICATE;
     private final float[] sideHeadPitches = new float[2];
     private final float[] sideHeadYaws = new float[2];
-    //private final float[] prevSideHeadPitches = new float[2];
-    //private final float[] prevSideHeadYaws = new float[2];
     private static final TrackedData<Integer> INVUL_TIMER;
     private static final TrackedData<Integer> TRACKED_ENTITY_ID_1;
     private static final TrackedData<Integer> TRACKED_ENTITY_ID_2;
@@ -277,11 +275,6 @@ public class ImmortalWither extends HostileEntity implements SkinOverlayOwner, R
         }
         super.tickMovement();
         int i;
-        // Can Be Uncommented for Head based Animations (So probably never)
-        /*for (i = 0; i < 2; ++i) {
-            this.prevSideHeadYaws[i] = this.sideHeadYaws[i];
-            this.prevSideHeadPitches[i] = this.sideHeadPitches[i];
-        }*/
         int j;
         for (i = 0; i < 2; ++i) {
             j = this.getTrackedEntityId(i + 1);
