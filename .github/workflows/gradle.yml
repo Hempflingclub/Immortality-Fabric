@@ -32,7 +32,7 @@ jobs:
         cache-disabled: true
         gradle-home-cache-cleanup: true
     - name: Install 7z
-      run: apt-get install 7zip -y
+      run: sudo apt-get install 7zip -y
     - name: 7z Compression
       run: 7zz a -t7z -mx=9 immortality-fabric-build.7z ./build/libs/*.jar
     - name: Upload to Gofile
