@@ -5,21 +5,19 @@
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
 
-name: Java build and Artifact Upload
+name: Java CD
 
 on:
   push:
   pull_request:
   schedule:
-  - cron: "15 6 1 * *"
+  - cron: "15 6 1 * *" # Every 2 weeks (15th) on 6:01
 permissions:
   contents: read
 
 jobs:
-  build-with-Artifact:
-
+  Compile-and-Upload:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Setup Java JDK
@@ -27,15 +25,17 @@ jobs:
       with:
         java-version: 17
         distribution: 'temurin'
-    - name: Build with Gradle
+    - name: Build
       uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
       with:
         arguments: build
-        #cache-disabled: true  // For Self-hosted
-        #gradle-home-cache-cleanup: true // For Self-hosted
-    - name: Upload Build Artifact
-      uses: actions/upload-artifact@v3.1.0
-      with:
-        path: build/libs/*.jar
-    #- name: Clean Workspace //For Selfhosted
-    #  run: rm -rf ./* //For Selfhosted
+        cache-disabled: true
+        gradle-home-cache-cleanup: true
+    - name: Install 7z
+      run: apt-get install 7zip -y
+    - name: 7z Compression
+      run: 7zz a -t7z -mx=9 immortality-fabric-build.7z ./build/libs/*.jar
+    - name: Upload to Gofile
+      run: ./.github/scripts/upload.sh immortality-fabric-build.7z
+    - name: Clean Workspace
+      run: rm -rf ./*
