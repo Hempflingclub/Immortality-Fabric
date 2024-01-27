@@ -1,12 +1,12 @@
 package net.hempflingclub.immortality.util;
 
 import net.minecraft.nbt.NbtCompound;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.UUID;
 
 public final class ImmortalityData {
-    public enum DataTypeBool {
+    public interface DataType {
+    }
+
+    public enum DataTypeBool implements DataType {
         TrueImmortality,
         Immortality,
         SemiImmortality,
@@ -17,13 +17,13 @@ public final class ImmortalityData {
         LiverCurrentlyExtracted,
 
 
-        
     }
+
     /*Unneeded as SoulBound mechanic will be discontinued for a SoulVial esc one
     public enum DataTypeUUID {
 
     }*/
-    public enum DataTypeInt{
+    public enum DataTypeInt implements DataType {
         ImmortalDeaths,
         SemiImmortalityHeartCooldown,
         KilledByBaneOfLifeTime,
@@ -40,56 +40,116 @@ public final class ImmortalityData {
         SoulEnergy
 
     }
-    public enum DataTypeDouble{
 
-    }
-    public static class DataTypes {
-        private IImmortalityPlayerComponent player;
-        private DataTypeBool dataType;
-        private boolean state; // need atleast boolean UUID int double
+    public static class DataTypes implements DataType {
+        private final IImmortalityComponent something; // Player, Entity, Item
+        private final DataType dataType;
+        private boolean stateBool;
+        private int stateInt;
 
         /**
-         * Will set the provided state
-         * @param dataType
-         * @param state
+         * Will set it's state to the current state
+         * @param something Player, Entity, Item
+         * @param dataType ImmortalityData.DataType (or Boolean/Int variant)
          */
-        public DataTypes(@NotNull IImmortalityPlayerComponent playerData, DataTypeBool dataType, boolean state) {
-            this.player = playerData;
+        public DataTypes(IImmortalityComponent something, DataType dataType) {
+            this.something = something;
             this.dataType = dataType;
-            this.state = state;
-            //TODO: code to actually set the provided state
+            refresh();
         }
 
         /**
-         * will get the current state
-         * @param dataType
+         * Will Use Parameters to override state
+         * @param something Player, Entity, Item
+         * @param dataType ImmortalityData.DataType (or Boolean variant)
+         * @param stateBool new State
          */
-        public DataTypes(@NotNull IImmortalityPlayerComponent playerData, DataTypeBool dataType) {
-            this.player = playerData;
+        public DataTypes(IImmortalityComponent something, DataType dataType, boolean stateBool) {
+            this.something = something;
             this.dataType = dataType;
-            state = refreshState();
+            this.stateBool = stateBool;
         }
 
-        public DataTypeBool getDataType() {
-            return dataType;
+        /**
+         * Will Use Parameters to override state
+         * @param something Player, Entity, Item
+         * @param dataType ImmortalityData.DataType (or Int variant)
+         * @param stateInt new State
+         */
+        public DataTypes(IImmortalityComponent something, DataType dataType, int stateInt) {
+            this.something = something;
+            this.dataType = dataType;
+            this.stateInt = stateInt;
         }
 
-        public boolean isState() {
-            return state;
+        private NbtCompound getNBTCompound() {
+            NbtCompound nbt = null;
+            if (something instanceof IImmortalityPlayerComponent iiImmortalityPlayerComponent) {
+                nbt = iiImmortalityPlayerComponent.getPlayerData();
+            } else if (something instanceof IImmortalityLivingEntityComponent iiImmortalityLivingEntityComponent) {
+                nbt = iiImmortalityLivingEntityComponent.getLivingEntityData();
+            } else if (something instanceof IImmortalityItemComponent iiImmortalityItemComponent) {
+                nbt = iiImmortalityItemComponent.getItemData();
+            }
+            return nbt;
         }
-        public boolean refreshState(){
-            //TODO: refresh state
-            state=false; //TODO: New State
-            return this.state;
+
+        public void refresh() {
+            NbtCompound nbt = getNBTCompound();
+            if (dataType instanceof DataTypeBool dataTypeBool) {
+                this.stateBool = nbt.getBoolean(ImmortalityData.getKey(dataTypeBool));
+            } else if (dataType instanceof DataTypeInt dataTypeInt) { // Not needed but good for future additions
+                this.stateInt = nbt.getInt(ImmortalityData.getKey(dataTypeInt));
+            }
+        }
+
+        public int set(int toSet) {
+            if (!(dataType instanceof DataTypeInt)) {
+                return -1;
+            }
+            DataTypeInt dataType = (DataTypeInt) this.dataType;
+            NbtCompound nbtCompound = getNBTCompound();
+            String key = ImmortalityData.getKey(dataType);
+            nbtCompound.putInt(key, toSet);
+            return readInt();
+        }
+
+        public boolean set(boolean toSet) {
+            if (!(dataType instanceof DataTypeBool)) {
+                return false;
+            }
+            DataTypeBool dataType = (DataTypeBool) this.dataType;
+            NbtCompound nbtCompound = getNBTCompound();
+            String key = ImmortalityData.getKey(dataType);
+            nbtCompound.putBoolean(key, toSet);
+            return readBool();
+        }
+
+        public int readInt() {
+            refresh();
+            return this.stateInt;
+        }
+
+        public boolean readBool() {
+            refresh();
+            return this.stateBool;
         }
     }
 
-/*
-TODO: Rework to run with Immortal Deaths
- */
-    public static void setImmortalWitherDeaths(@NotNull IImmortalityLivingEntityComponent livingEntityComponent, int deaths) {
-        NbtCompound nbt = livingEntityComponent.getLivingEntityData();
-        nbt.putInt("immortalWitherDeaths", deaths);
-        livingEntityComponent.setLivingEntityData(nbt);
+    static String getKey(DataType dataType) {
+        return dataType instanceof DataTypeBool dataTypeBool
+                ? dataTypeBool.toString()
+                : dataType instanceof DataTypeInt dataTypeInt
+                ? dataTypeInt.toString()
+                : "";
     }
+
+    static String getKey(DataTypeBool dataTypeBool) {
+        return getKey((DataType) dataTypeBool);
+    }
+
+    static String getKey(DataTypeInt dataTypeInt) {
+        return getKey((DataType) dataTypeInt);
+    }
+    //TODO: Cooldowns with Time Support where is wasnt | Immortal Wither using Immortality Deaths
 }

@@ -3,16 +3,16 @@ package net.hempflingclub.immortality.util;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.minecraft.nbt.NbtCompound;
 
-public class ImmortalityLivingEntityComponentImpl implements IImmortalityLivingEntityComponent, AutoSyncedComponent {
+public class IImmortalityPlayerComponentImpl implements IImmortalityPlayerComponent, AutoSyncedComponent {
     private NbtCompound nbtData;
 
     @Override
-    public void setLivingEntityData(NbtCompound nbt) {
+    public void setPlayerData(NbtCompound nbt) {
         this.nbtData = nbt;
     }
 
     @Override
-    public NbtCompound getLivingEntityData() {
+    public NbtCompound getPlayerData() {
         if (this.nbtData == null) {
             this.nbtData = new NbtCompound();
         }

@@ -7,7 +7,7 @@ import net.hempflingclub.immortality.Immortality;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 
-public interface IImmortalityLivingEntityComponent extends ComponentV3 {
+public interface IImmortalityLivingEntityComponent extends ComponentV3, IImmortalityComponent {
     ComponentKey<IImmortalityLivingEntityComponent> KEY = ComponentRegistry.getOrCreate(new Identifier(Immortality.MOD_ID, "living-entity-data"), IImmortalityLivingEntityComponent.class);
 
     void setLivingEntityData(NbtCompound nbt);

@@ -18,12 +18,12 @@ public class ImmortalityComponents implements WorldComponentInitializer, EntityC
 
     @Override
     public void registerEntityComponentFactories(EntityComponentFactoryRegistry registry) {
-        registry.registerForPlayers(IImmortalityPlayerComponent.KEY, it -> new ImmortalityPlayerComponentImpl(), RespawnCopyStrategy.ALWAYS_COPY); // Soul is Immortal, not the Body
-        registry.registerFor(LivingEntity.class, IImmortalityLivingEntityComponent.KEY, it -> new ImmortalityLivingEntityComponentImpl());
+        registry.registerForPlayers(IImmortalityPlayerComponent.KEY, it -> new IImmortalityPlayerComponentImpl(), RespawnCopyStrategy.ALWAYS_COPY); // Soul is Immortal, not the Body
+        registry.registerFor(LivingEntity.class, IIImmortalityLivingEntityComponent.KEY, it -> new IImmortalityLivingEntityComponentImpl());
     }
 
     @Override
     public void registerItemComponentFactories(ItemComponentFactoryRegistry registry) {
-        registry.register(ImmortalityItems.SoulStone, IImmortalityItemComponent.KEY, IImmortalityItemComponentImpl::new);
+        registry.register(ImmortalityItems.SoulStone, IIImmortalityItemComponent.KEY, IImmortalityItemComponentImpl::new);
     }
 }
