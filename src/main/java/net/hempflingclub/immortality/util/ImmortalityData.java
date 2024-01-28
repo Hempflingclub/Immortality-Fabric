@@ -103,6 +103,11 @@ public final class ImmortalityData {
             }
         }
 
+        /**
+         * Will only set if the Enum is DataTypeInt
+         * @param toSet
+         * @return will return the int the game has saved, or -1 if invalid Enum
+         */
         public int set(int toSet) {
             if (!(dataType instanceof DataTypeInt)) {
                 return -1;
@@ -114,6 +119,11 @@ public final class ImmortalityData {
             return readInt();
         }
 
+        /**
+         * Will only set if the Enum is DataTypeBool
+         * @param toSet
+         * @return will return the bool the game has saved, or false if invalid Enum
+         */
         public boolean set(boolean toSet) {
             if (!(dataType instanceof DataTypeBool)) {
                 return false;
