@@ -49,8 +49,9 @@ public final class ImmortalityData {
 
         /**
          * Will set it's state to the current state
+         *
          * @param something Player, Entity, Item
-         * @param dataType ImmortalityData.DataType (or Boolean/Int variant)
+         * @param dataType  ImmortalityData.DataType (or Boolean/Int variant)
          */
         public DataTypes(IImmortalityComponent something, DataType dataType) {
             this.something = something;
@@ -60,8 +61,9 @@ public final class ImmortalityData {
 
         /**
          * Will Use Parameters to override state
+         *
          * @param something Player, Entity, Item
-         * @param dataType ImmortalityData.DataType (or Boolean variant)
+         * @param dataType  ImmortalityData.DataType (or Boolean variant)
          * @param stateBool new State
          */
         public DataTypes(IImmortalityComponent something, DataType dataType, boolean stateBool) {
@@ -72,9 +74,10 @@ public final class ImmortalityData {
 
         /**
          * Will Use Parameters to override state
+         *
          * @param something Player, Entity, Item
-         * @param dataType ImmortalityData.DataType (or Int variant)
-         * @param stateInt new State
+         * @param dataType  ImmortalityData.DataType (or Int variant)
+         * @param stateInt  new State
          */
         public DataTypes(IImmortalityComponent something, DataType dataType, int stateInt) {
             this.something = something;
@@ -105,6 +108,7 @@ public final class ImmortalityData {
 
         /**
          * Will only set if the Enum is DataTypeInt
+         *
          * @param toSet
          * @return will return the int the game has saved, or -1 if invalid Enum
          */
@@ -121,6 +125,7 @@ public final class ImmortalityData {
 
         /**
          * Will only set if the Enum is DataTypeBool
+         *
          * @param toSet
          * @return will return the bool the game has saved, or false if invalid Enum
          */
@@ -143,6 +148,10 @@ public final class ImmortalityData {
         public boolean readBool() {
             refresh();
             return this.stateBool;
+        }
+
+        public IImmortalityComponent getIImmortalityComponent() {
+            return something;
         }
     }
 

@@ -13,10 +13,15 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 
 public class PlayerTickHandler implements ServerTickEvents.StartTick {
+    public static MinecraftServer minecraftServer;
+    int counter = 0;
+
     @Override
     public void onStartTick(MinecraftServer server) {
-        int currentTime = ImmortalityStatus.getCurrentTime(server);
-        if (currentTime % 20 == 0) {
+        if (counter++ % 20 == 0) {
+            counter %= 20;
+            int currentTime = ImmortalityStatus.getCurrentTime(server);
+            minecraftServer = server;
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
                 //Run Stuff
                 if (currentTime % 100 == 0) { // Every 5sec
