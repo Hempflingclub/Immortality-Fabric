@@ -44,9 +44,9 @@ public class LiverOfImmortality extends Item {
             playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 50, 0, false, false));
             playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 50, 0, false, false));
             ImmortalityAdvancementGiver.giveImmortalityAchievements(playerEntity);
-        } else if (ImmortalityStatus.canEatLiverOfImmortality(playerEntity) && ImmortalityData.getLiverExtracted(ImmortalityStatus.getPlayerComponent(playerEntity)) && !world.isClient()) {
+        } else if (ImmortalityStatus.canEatLiverOfImmortality(playerEntity) && ImmortalityData.getLiverExtracted(ImmortalityStatus.getComponent(playerEntity)) && !world.isClient()) {
             //Remove Debuff
-            ImmortalityData.setLiverExtractionTime(ImmortalityStatus.getPlayerComponent(playerEntity), 0);
+            ImmortalityData.setLiverExtractionTime(ImmortalityStatus.getComponent(playerEntity), 0);
             playerEntity.sendMessage(Text.translatable("immortality.status.liver_regrown"), true);
 
         } else if (!world.isClient() && ImmortalityStatus.isTrueImmortal(playerEntity)) {

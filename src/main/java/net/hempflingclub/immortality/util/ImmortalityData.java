@@ -87,23 +87,21 @@ public final class ImmortalityData {
 
         private NbtCompound getNBTCompound() {
             NbtCompound nbt = null;
-            if (something instanceof IImmortalityPlayerComponent iiImmortalityPlayerComponent) {
+            if (something instanceof IImmortalityPlayerComponent iiImmortalityPlayerComponent)
                 nbt = iiImmortalityPlayerComponent.getPlayerData();
-            } else if (something instanceof IImmortalityLivingEntityComponent iiImmortalityLivingEntityComponent) {
+            else if (something instanceof IImmortalityLivingEntityComponent iiImmortalityLivingEntityComponent)
                 nbt = iiImmortalityLivingEntityComponent.getLivingEntityData();
-            } else if (something instanceof IImmortalityItemComponent iiImmortalityItemComponent) {
+            else if (something instanceof IImmortalityItemComponent iiImmortalityItemComponent)
                 nbt = iiImmortalityItemComponent.getItemData();
-            }
             return nbt;
         }
 
         public void refresh() {
             NbtCompound nbt = getNBTCompound();
-            if (dataType instanceof DataTypeBool dataTypeBool) {
+            if (dataType instanceof DataTypeBool dataTypeBool)
                 this.stateBool = nbt.getBoolean(ImmortalityData.getKey(dataTypeBool));
-            } else if (dataType instanceof DataTypeInt dataTypeInt) { // Not needed but good for future additions
+            else if (dataType instanceof DataTypeInt dataTypeInt)  // Not needed but good for future additions
                 this.stateInt = nbt.getInt(ImmortalityData.getKey(dataTypeInt));
-            }
         }
 
         /**
@@ -113,9 +111,7 @@ public final class ImmortalityData {
          * @return will return the int the game has saved, or -1 if invalid Enum
          */
         public int set(int toSet) {
-            if (!(dataType instanceof DataTypeInt)) {
-                return -1;
-            }
+            if (!(dataType instanceof DataTypeInt)) return -1;
             DataTypeInt dataType = (DataTypeInt) this.dataType;
             NbtCompound nbtCompound = getNBTCompound();
             String key = ImmortalityData.getKey(dataType);
@@ -130,9 +126,7 @@ public final class ImmortalityData {
          * @return will return the bool the game has saved, or false if invalid Enum
          */
         public boolean set(boolean toSet) {
-            if (!(dataType instanceof DataTypeBool)) {
-                return false;
-            }
+            if (!(dataType instanceof DataTypeBool)) return false;
             DataTypeBool dataType = (DataTypeBool) this.dataType;
             NbtCompound nbtCompound = getNBTCompound();
             String key = ImmortalityData.getKey(dataType);
@@ -170,5 +164,4 @@ public final class ImmortalityData {
     static String getKey(DataTypeInt dataTypeInt) {
         return getKey((DataType) dataTypeInt);
     }
-    //TODO: Cooldowns with Time Support where is wasnt | Immortal Wither using Immortality Deaths
 }

@@ -157,9 +157,9 @@ public final class ImmortalityInvokeImmortality {
                 ImmortalityStatus.addNegativeHearts(playerEntity); //Second Negative Hearts
                 if (ImmortalityStatus.getImmortality(playerEntity) || ImmortalityStatus.getImmortality(playerEntity)) {
                     playerEntity.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.bane_of_life, 60 * 20, 0, true, true));
-                    if (!ImmortalityData.getLiverExtracted(ImmortalityStatus.getPlayerComponent(playerEntity))) {
-                        ImmortalityData.setLiverExtracted(ImmortalityStatus.getPlayerComponent(playerEntity), true);
-                        ImmortalityData.setLiverExtractionTime(ImmortalityStatus.getPlayerComponent(playerEntity), ImmortalityStatus.getCurrentTime(playerEntity));
+                    if (!ImmortalityData.getLiverExtracted(ImmortalityStatus.getComponent(playerEntity))) {
+                        ImmortalityData.setLiverExtracted(ImmortalityStatus.getComponent(playerEntity), true);
+                        ImmortalityData.setLiverExtractionTime(ImmortalityStatus.getComponent(playerEntity), ImmortalityStatus.getCurrentTime(playerEntity));
                         ImmortalityStatus.addRegrowingLiver(playerEntity);
                         playerEntity.sendMessage(Text.translatable("immortality.status.liver_removed_forcefully"), true);
                         attackingPlayer.giveItemStack(new ItemStack(ImmortalityItems.LiverOfImmortality));
@@ -397,9 +397,9 @@ public final class ImmortalityInvokeImmortality {
                             }
                         }
                         immortalPlayer.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.bane_of_life, 60 * 20, 0, true, true));
-                        if (!ImmortalityData.getLiverExtracted(ImmortalityStatus.getPlayerComponent(immortalPlayer))) {
-                            ImmortalityData.setLiverExtracted(ImmortalityStatus.getPlayerComponent(immortalPlayer), true);
-                            ImmortalityData.setLiverExtractionTime(ImmortalityStatus.getPlayerComponent(immortalPlayer), ImmortalityStatus.getCurrentTime(immortalPlayer));
+                        if (!ImmortalityData.getLiverExtracted(ImmortalityStatus.getComponent(immortalPlayer))) {
+                            ImmortalityData.setLiverExtracted(ImmortalityStatus.getComponent(immortalPlayer), true);
+                            ImmortalityData.setLiverExtractionTime(ImmortalityStatus.getComponent(immortalPlayer), ImmortalityStatus.getCurrentTime(immortalPlayer));
                             ImmortalityStatus.addRegrowingLiver(immortalPlayer);
                             immortalPlayer.sendMessage(Text.translatable("immortality.status.liver_removed_forcefully"), true);
                             attackingPlayer.giveItemStack(new ItemStack(ImmortalityItems.LiverOfImmortality));
@@ -417,7 +417,7 @@ public final class ImmortalityInvokeImmortality {
                 immortalPlayer.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.bane_of_life, 60 * 20, 0, true, true));
             }
         }
-        if (damageSource != soulBoundDamageSource && (ImmortalityData.getImmortalDeaths(ImmortalityStatus.getPlayerComponent(immortalPlayer)) + 1) % 5 == 0 && ImmortalityStatus.getAppliedBonusArmor(immortalPlayer) < ImmortalityStatus.immortalityBaseArmor * 10) {
+        if (damageSource != soulBoundDamageSource && (ImmortalityData.getImmortalDeaths(ImmortalityStatus.getComponent(immortalPlayer)) + 1) % 5 == 0 && ImmortalityStatus.getAppliedBonusArmor(immortalPlayer) < ImmortalityStatus.immortalityBaseArmor * 10) {
             ImmortalityStatus.addImmortalityArmor(immortalPlayer);
             immortalPlayer.sendMessage(Text.translatable("immortality.status.skinHardened"), true);
         }

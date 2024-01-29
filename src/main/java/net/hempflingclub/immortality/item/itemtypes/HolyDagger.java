@@ -69,10 +69,10 @@ public class HolyDagger extends Item {
         if (!world.isClient) {
             if (!playerEntity.isSneaking()) {
                 if (ImmortalityStatus.getImmortality(playerEntity) || ImmortalityStatus.isSemiImmortal(playerEntity)) {
-                    if (ImmortalityData.getLiverExtracted(ImmortalityStatus.getPlayerComponent(playerEntity)) || ImmortalityStatus.isSemiImmortal(playerEntity)) {
-                        ImmortalityData.setHeartExtractionAmount(ImmortalityStatus.getPlayerComponent(playerEntity), ImmortalityData.getHeartExtractionAmount(ImmortalityStatus.getPlayerComponent(playerEntity)) + 1);
-                        if (ImmortalityData.getHeartExtractionAmount(ImmortalityStatus.getPlayerComponent(playerEntity)) < 7) {
-                            playerEntity.sendMessage(Text.translatable("immortality.status.heart_extraction", 7 - ImmortalityData.getHeartExtractionAmount(ImmortalityStatus.getPlayerComponent(playerEntity))), true);
+                    if (ImmortalityData.getLiverExtracted(ImmortalityStatus.getComponent(playerEntity)) || ImmortalityStatus.isSemiImmortal(playerEntity)) {
+                        ImmortalityData.setHeartExtractionAmount(ImmortalityStatus.getComponent(playerEntity), ImmortalityData.getHeartExtractionAmount(ImmortalityStatus.getComponent(playerEntity)) + 1);
+                        if (ImmortalityData.getHeartExtractionAmount(ImmortalityStatus.getComponent(playerEntity)) < 7) {
+                            playerEntity.sendMessage(Text.translatable("immortality.status.heart_extraction", 7 - ImmortalityData.getHeartExtractionAmount(ImmortalityStatus.getComponent(playerEntity))), true);
                         } else {
                             world.playSoundFromEntity(null, playerEntity, SoundEvents.ENTITY_WITHER_DEATH, SoundCategory.PLAYERS, 1, 1);
                             playerEntity.setHealth(1);
@@ -84,11 +84,11 @@ public class HolyDagger extends Item {
                             playerEntity.damage(new DamageSource(Text.translatable("immortality", playerEntity.getName()).getString()).setBypassesArmor().setBypassesProtection().setUnblockable(), 2000000000);
                         }
                     } else {
-                        if (!ImmortalityData.getLiverOnceExtracted(ImmortalityStatus.getPlayerComponent(playerEntity))) {
-                            ImmortalityData.setLiverOnceExtracted(ImmortalityStatus.getPlayerComponent(playerEntity), true);
+                        if (!ImmortalityData.getLiverOnceExtracted(ImmortalityStatus.getComponent(playerEntity))) {
+                            ImmortalityData.setLiverOnceExtracted(ImmortalityStatus.getComponent(playerEntity), true);
                         }
-                        ImmortalityData.setLiverExtracted(ImmortalityStatus.getPlayerComponent(playerEntity), true);
-                        ImmortalityData.setLiverExtractionTime(ImmortalityStatus.getPlayerComponent(playerEntity), ImmortalityStatus.getCurrentTime(playerEntity));
+                        ImmortalityData.setLiverExtracted(ImmortalityStatus.getComponent(playerEntity), true);
+                        ImmortalityData.setLiverExtractionTime(ImmortalityStatus.getComponent(playerEntity), ImmortalityStatus.getCurrentTime(playerEntity));
                         ImmortalityStatus.addRegrowingLiver(playerEntity);
                         playerEntity.heal(0);
                         playerEntity.giveItemStack(new ItemStack(ImmortalityItems.LiverOfImmortality));

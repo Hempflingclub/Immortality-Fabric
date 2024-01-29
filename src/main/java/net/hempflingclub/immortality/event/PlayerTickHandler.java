@@ -25,7 +25,7 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
                 //Run Stuff
                 if (currentTime % 100 == 0) { // Every 5sec
-                    if (ImmortalityData.getLiverExtracted(ImmortalityStatus.getPlayerComponent(player))) {
+                    if (ImmortalityData.getLiverExtracted(ImmortalityStatus.getComponent(player))) {
                         if (ImmortalityStatus.getRegeneratingHearts(player) != ImmortalityStatus.regrowingImmortalityLiver) {
                             ImmortalityStatus.addRegrowingLiver(player);
                         }
@@ -36,8 +36,8 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                         }
                     }
                 }
-                if (ImmortalityData.getHeartExtractionAmount(ImmortalityStatus.getPlayerComponent(player)) > 0) {
-                    ImmortalityData.setHeartExtractionAmount(ImmortalityStatus.getPlayerComponent(player), 0);
+                if (ImmortalityData.getHeartExtractionAmount(ImmortalityStatus.getComponent(player)) > 0) {
+                    ImmortalityData.setHeartExtractionAmount(ImmortalityStatus.getComponent(player), 0);
                 }
                 if (currentTime >= (ImmortalityStatus.getLifeElixirDropTime(player) + 300 * 20)) {
                     ImmortalityStatus.resetLifeElixirDropTime(player);
@@ -94,17 +94,17 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                         ImmortalityStatus.removeFalseImmortality(player);
                         ImmortalityStatus.setImmortality(player, false);
                     }
-                    if (ImmortalityData.getLiverExtracted(ImmortalityStatus.getPlayerComponent(player))) {
+                    if (ImmortalityData.getLiverExtracted(ImmortalityStatus.getComponent(player))) {
                         //Give Extraction debuffs
                         player.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 20 * 5, 0, false, false));
-                        if (currentTime >= (ImmortalityData.getLiverExtractionTime(ImmortalityStatus.getPlayerComponent(player)) + (20 * 300)) || ImmortalityData.getLiverExtractionTime(ImmortalityStatus.getPlayerComponent(player)) == 0) { // After 5mins Liver has regrown
+                        if (currentTime >= (ImmortalityData.getLiverExtractionTime(ImmortalityStatus.getComponent(player)) + (20 * 300)) || ImmortalityData.getLiverExtractionTime(ImmortalityStatus.getComponent(player)) == 0) { // After 5mins Liver has regrown
                             ImmortalityStatus.removeRegrowing(player);
-                            ImmortalityData.setLiverExtracted(ImmortalityStatus.getPlayerComponent(player), false);
+                            ImmortalityData.setLiverExtracted(ImmortalityStatus.getComponent(player), false);
                             player.sendMessage(Text.translatable("immortality.status.liver_regrown"), true);
                         }
                     }
                     //Include Functionality for Death Leveling
-                    int immortalDeaths = ImmortalityData.getImmortalDeaths(ImmortalityStatus.getPlayerComponent(player));
+                    int immortalDeaths = ImmortalityData.getImmortalDeaths(ImmortalityStatus.getComponent(player));
                     if (ImmortalityStatus.isTrueImmortal(player)) {
                         //He has Trilogy and Required Hearts
                         //Radiating Immortality repairing unliving things
