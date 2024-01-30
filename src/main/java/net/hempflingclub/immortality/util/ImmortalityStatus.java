@@ -1,8 +1,10 @@
 package net.hempflingclub.immortality.util;
 
+import net.hempflingclub.immortality.entitys.ImmortalWither.ImmortalWither;
 import net.hempflingclub.immortality.event.PlayerTickHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
@@ -331,6 +333,9 @@ public final class ImmortalityStatus {
         ItemStack itemStack;
         IImmortalityComponent immortalityComponent;
         ImmortalityData.DataType dataType;
+        ImmortalityData.DataTypes dataTypes;
+        int valueInt;
+        boolean valueBool;
 
         private SpecificLogicApplier(ServerPlayerEntity serverPlayerEntity, ImmortalityData.DataType dataType) {
             this.serverPlayerEntity = serverPlayerEntity;
@@ -357,6 +362,9 @@ public final class ImmortalityStatus {
         }
 
         private void doLogic() {
+            this.dataTypes = new ImmortalityData.DataTypes(this.immortalityComponent, this.dataType);
+            if (dataType instanceof ImmortalityData.DataTypeInt) valueInt = dataTypes.readInt();
+            if (dataType instanceof ImmortalityData.DataTypeBool) valueBool = dataTypes.readBool();
             if (this.isType == ImmortalityStatus.isType.ServerPlayerEntity)
                 doPlayerLogic();
             else if (this.isType == ImmortalityStatus.isType.LivingEntity)
@@ -364,17 +372,35 @@ public final class ImmortalityStatus {
             else if (this.isType == ImmortalityStatus.isType.ItemStack)
                 doItemStackLogic();
         }
+
         //TODO: Cooldowns with Time Support where is wasnt | Immortal Wither using Immortality Deaths
         private void doPlayerLogic() {
             //TODO:
+            if(dataType == ImmortalityData.DataTypeInt.ImmortalDeaths){}
+            else if(dataType == ImmortalityData.DataTypeInt.BonusArmor){}//TODO: for all dataTypes
         }
 
         private void doLivingEntityLogic() {
             //TODO:
+            if (livingEntity instanceof ServerPlayerEntity serverPlayer) {
+                this.serverPlayerEntity = serverPlayer;
+                doPlayerLogic();
+                return;
+            }
+            else if (livingEntity instanceof ImmortalWither immortalWither) {
+                EntityAttributeInstance maxHealthInstance = immortalWither.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+                if (dataType == ImmortalityData.DataTypeInt.ImmortalDeaths) {
+                    //Applying Health based on Heads left
+                    int health_diff = (int) (-1f * ((valueInt / 3f) * immortalWither.getMaxHealth()));
+                    assert maxHealthInstance != null;
+                    maxHealthInstance.clearModifiers();
+                    maxHealthInstance.addPersistentModifier(new EntityAttributeModifier("health-deficit", health_diff, EntityAttributeModifier.Operation.ADDITION));
+                }
+            }
         }
 
         private void doItemStackLogic() {
-            //TODO:
+            //TODO: not yet necessary but to be adjusted as needed
         }
     }
 }
