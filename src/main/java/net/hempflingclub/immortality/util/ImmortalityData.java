@@ -11,6 +11,7 @@ public final class ImmortalityData {
         Immortality,
         SemiImmortality,
         FalseImmortality,
+        ImmortalHeart,
         VoidHeart,
         ExistingSoulVial,
         LiverExtractedEver,

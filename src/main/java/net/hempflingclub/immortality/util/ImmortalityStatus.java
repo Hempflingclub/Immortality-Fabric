@@ -2,7 +2,9 @@ package net.hempflingclub.immortality.util;
 
 import net.hempflingclub.immortality.entitys.ImmortalWither.ImmortalWither;
 import net.hempflingclub.immortality.event.PlayerTickHandler;
+import net.hempflingclub.immortality.item.ImmortalityItems;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.player.PlayerEntity;
@@ -11,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.World;
 
 import java.util.*;
 
@@ -22,6 +25,8 @@ public final class ImmortalityStatus {
     public static final int immortalityHardeningArmorToughnessAddition = 1;
     public static final int immortalityBaseArmorAddition = 1;
     public static final int lifeElixirHealthAddition = 2;
+    public static final int REQ_BONUS_HEARTS_FOR_IMMORTALITY = 10;
+    public static final int REQ_DEATHS_FOR_TRUE_IMMORTALITY = 50;
 
     public static int incrementGeneric(ServerPlayerEntity serverPlayerEntity, ImmortalityData.DataTypeInt dataTypeInt) {
         IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
@@ -320,6 +325,73 @@ public final class ImmortalityStatus {
         return IImmortalityItemComponent.KEY.get(itemStack);
     }
 
+            /*
+            ▗██████████████████▙▖                                                               ▗▟███████████████████████▌
+            █████████████████████▄                                                           ▗▄██████████████████████████▌
+           ▟███████████████████████▄                █▙▙▙▄▄▄▖▖                              ▗▟████████████████████████████▌
+          ▗█████████████████████████▙▖              ▜██████████▟▄▖▖                       ▟███████████████████████████████
+          ▟███████████████████████████▙▖            ▝██████████████▙▙▖                  ▗█████████████████████████████████▘
+          ██████████████████████████████▄            ▐█████████████████▙▄              ▗██████████████████████████████████▌
+         ▐████████████████████████████████▄           ▜███████████████████▙▖          ▗███████████████████████████████████▌  ▖
+         ▜█████████████████████████████████▙▖          ▜█████████████████████▄▖       █████████████████████████████████████
+         ████████████████████████████████████▙          ▀██████████████████████▄▖    ▟█████████████████████████████████████
+        ▗██████████████████████████████████████▖          ▝▟█████████████████████▙▖  ▜████████████████████████████████████▙
+        ▐██████████████████████████████████████▛▌   ▗▗▄▟▟▄█████████████████████████▙▖  ▜███████████████████████████████████
+        ▟███████████████████████████████████▛▀   ▄▟▟██████████████████████████████████▟▄▐█████████████████████████████████▙
+        ▟█████████████████████████████████▀▘ ▗▄██████▜▛█▜▛▛▛███████████████████████████████████████████████████████████████
+        ▟████████████████████████████████                       ▐█████████████████████████████████████████████████████████▙
+        ▟█████████████████████████████████▙█▟▙█▟██████████████████████████████████████████████████████████████████████████▌
+        ▐█████████████████████████████████████████████████████████████████████████████████████████████████████████████████▌
+        ▝█████████████████████████████████████████████████████████████████████████████████████████████████████████████████▘
+         █████████████████████████████████████████████████████████████████████████████████████████████████████████████████▘
+         ▜████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+          ███████████████████████████████████████████████████████████████████████████████████████████████████████████████▌
+          ▜█████████████████████████████████████████████████████████████████████████████████████████████████████████████▛
+           ▜████████████████████████████████████████████████████████████████████████████████████████████████████████████▘
+           ▝████████████████████████████████████████████████████████████████▛▛▛▀▀▀▀▀▀▝▝▝▝▝▝▝▝▝   ▝▝▝▝▝▀████████████████▘
+            ▝███████████▛▛▛▛█████████████████████▜█▜██████████████████████▛▘            ▄▄▄▄▄▄▟▙  ▗▄▄▙████████████████▘
+             ▀██████████ ▖                          ▐█████████████████████▘             ▐███████▙  ▜█████████████████▘
+              ▀████████████▘ ▗████████▘             ▐████████████████████▛              ▐████████▌  ███████████████▀
+               ▀██████████▘ ▗█████████              ▐████████████████████▛              ▐█████████▖ ▐████████████▛
+                ▝████████▛  ▟█████████▖             ▐████████████████████▛              ▐█████████▙  ██████████▀▘
+                  ▜██████▘ ▗██████████              ▜████████████████████▛              ▐█████████▙  ▐█████▛▘     ▖▖▖▖▖▖▖▖  ▖
+    ▄▖▖▖      ▗    ▀█████  ▟██████████              ██████████████████████              ▟██████████  ▜██████▙████████████▘
+    ▀█████▙▙▙▟▄▄▄▄▄▟████▙  ███████████▌            ▗██████████████████████▖             ▟██████████  ▟█████████████████▀
+     ▝██████████████████▌ ▗███████████▌            ▐██████████████████████▙▖           ▟███████████  ▟███████████████▛▘
+       ▜████████████████▙  ▜███████████▖           ████████████████████████▙▖         ▟████████████  ▟█████████████▛▘
+        ▝▀███████████████▖ ▝████████████▖         ▟██████████████████████████▙▗    ▗▄█████████████▙▖▗████████████▛▘  ▖
+           ▝▀█████████████▖ ▝████████████▙▖     ▄▟█████▛▀▝▝▝▝▀▀▜███████████████████████████████████████████████▛▘   ▘
+               ▀███████████▄▟███████████████▟▟▟█████████▄▄▄▄▄▙████████████████████████████████▛▀█████▜▜███████▌
+               ▟████▀▚▘▖▖▖█████▜▛███████████████████████████████████████████████████████████▜▗▐▝▖█▛▀▖▚▜████████▙▖
+              ▗████▄▚▙█▘▌▚▛▛▀▝▖▚▟██████████████████████████████████████████████████████████▞▖▙▌▌▞▚▘▙▙████████████▙▖
+             ▗████████▛▞▝▖▚▐▟█▟█████████████████████████████████████████████▀▜████████████████▛▖▚▚████████████████▙▖
+            ▗██████████▙█▟██████████████████████████████████▀▘▘▘▀▀▀▜▜▜▜▜▀▀▘  ▄██████████████████████████████████████▄
+           ▗█████████████████████████████████████▛▘▝▀▜▜▛▛▀   ▄▄▄▄▖▖▗   ▗▗▗▄▟█████████████████████████████████████████▄
+          ▗███████████████████████████████████████▙▄▗    ▗▄▟██████████████████████████████████████████████████████████▙
+         ▗██████████▛▛▛▛███████████████████████████████████████████████████████████████████████████▛▀▘  ▀▀▀▀▀▀▀▀▘▀       ▖
+         ▝▝▀▀▀▀▘▘▘       ▝▀████████████████████████████████████████████████████████████████████▛▀▘
+                             ▀▀▛██████████████████████████████████████████████████████████▛▛▀▘
+                                 ▝▝▀▛██████████████████████████████████████████████▀▘▀▝▘
+                                       ▘▀▀▀▛██████████████████████████████████████▙▟▄▖
+                                     ▙▙▄▄▗       ▘▀▀██████████████████████████████████▌
+                                      ▀██████▙█▟▙██████████████████████████████████████▌ ▝
+                                       ▝▜███████████████████████████████████████████████▌
+                                          ▀▛█████████████████████████████████████████████▌
+                                             ▀████████████████████████████████████████████▌
+                                            ▄▟█████████████████████████████████████████████▙ ▝
+                                          ▄█████████████████████████████████████████████████▄
+                                        ▗▙███████████████████████████████████████████████████▖
+                                       ▗▛▛▛▀▀▀▀███████████████████████████████████████████████▖
+                                               ▟███████████████████████████████████████████████
+                                            ▘ ▐████████████████████████████████████████████████▙
+                                             ▗██████████████████████████████████████████████████▌
+                                             ▟███████████████████████████████████████████████████
+                                            ▟████████████████████████████████████████████████████▌
+                                         ▝ ▗██████████████████████████████████████████████████████  ▘
+                                           ▟██████████████████████████████████████████████████████▖
+                                        ▝  ████████████████████████████████████████████████████████
+     */
+
     private enum isType {
         ServerPlayerEntity,
         LivingEntity,
@@ -373,12 +445,152 @@ public final class ImmortalityStatus {
                 doItemStackLogic();
         }
 
-        //TODO: Cooldowns with Time Support where is wasnt | Immortal Wither using Immortality Deaths
+        //TODO: Cooldowns with Time Support where is wasnt
         private void doPlayerLogic() {
-            //TODO:
-            if(dataType == ImmortalityData.DataTypeInt.ImmortalDeaths){}
-            else if(dataType == ImmortalityData.DataTypeInt.BonusArmor){}//TODO: for all dataTypes
+            if (dataType instanceof ImmortalityData.DataTypeInt) doPlayerLogicInt();
+            else if (dataType instanceof ImmortalityData.DataTypeBool) doPlayerLogicBool();
         }
+
+        private void doPlayerLogicInt() {
+            //TODO:
+            if (dataType == ImmortalityData.DataTypeInt.ImmortalDeaths)
+                checkEveryImmortality();
+            else if (dataType == ImmortalityData.DataTypeInt.SemiImmortalityHeartCooldown) {
+            } else if (dataType == ImmortalityData.DataTypeInt.KilledByBaneOfLifeTime) {
+            } else if (dataType == ImmortalityData.DataTypeInt.KilledByBaneOfLifeCurrentAmount)
+                checkEveryImmortality();
+            else if (dataType == ImmortalityData.DataTypeInt.LiverExtractionAmount) {
+            } else if (dataType == ImmortalityData.DataTypeInt.LiverExtractionTime) {
+            } else if (dataType == ImmortalityData.DataTypeInt.HeartExtractionAmount) {
+            } else if (dataType == ImmortalityData.DataTypeInt.LifeElixirTime) {
+            } else if (dataType == ImmortalityData.DataTypeInt.LifeElixirDropCooldown) {
+            } else if (dataType == ImmortalityData.DataTypeInt.BonusHearts)
+                checkEveryImmortality();
+            else if (dataType == ImmortalityData.DataTypeInt.TemporaryNegativeHearts) {
+            } else if (dataType == ImmortalityData.DataTypeInt.BonusArmor) {
+            } else if (dataType == ImmortalityData.DataTypeInt.BonusArmorToughness) {
+            } else if (dataType == ImmortalityData.DataTypeInt.SoulEnergy) {
+            }
+        }
+
+        private void doPlayerLogicBool() {
+            //Todo:
+            if (dataType == ImmortalityData.DataTypeBool.TrueImmortality)
+                checkEveryImmortality();
+            else if (dataType == ImmortalityData.DataTypeBool.Immortality)
+                checkEveryImmortality();
+            else if (dataType == ImmortalityData.DataTypeBool.SemiImmortality)
+                checkEveryImmortality();
+            else if (dataType == ImmortalityData.DataTypeBool.FalseImmortality)
+                checkEveryImmortality();
+            else if (dataType == ImmortalityData.DataTypeBool.ImmortalHeart) {
+                checkImmortalHeart(); // Ensure Player should actually be able to earn one, if not refund it
+                checkEveryImmortality();
+            } else if (dataType == ImmortalityData.DataTypeBool.VoidHeart)
+                checkEveryImmortality();
+            else if (dataType == ImmortalityData.DataTypeBool.ExistingSoulVial) {
+            } else if (dataType == ImmortalityData.DataTypeBool.LiverExtractedEver)
+                checkEveryImmortality();
+            else if (dataType == ImmortalityData.DataTypeBool.LiverCurrentlyExtracted)
+                checkEveryImmortality();
+
+        }
+
+        /* Specific Player logic checks
+        ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        */
+        private void checkEveryImmortality() {
+            checkTrueImmortal();
+            checkImmortal();
+            checkSemiImmortal();
+            checkFalseImmortal();
+        }
+
+        private void checkTrueImmortal() {
+            {
+                //Checking if should instead be TrueImmortality, can be also Semi Immortal
+
+                boolean isTrueImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.TrueImmortality);
+                if (isTrueImmortal)
+                    return; //Not unsetting True Immortality, just because Target already is True Immortal and some false Immortality value is set
+                boolean voidHeart = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.VoidHeart);
+                if (!voidHeart) return;
+                boolean liverExtractedEver = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.LiverExtractedEver);
+                if (!liverExtractedEver) return;
+                int immortalDeaths = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.ImmortalDeaths);
+                if (immortalDeaths < ImmortalityStatus.REQ_DEATHS_FOR_TRUE_IMMORTALITY) return;
+                boolean isImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.Immortality);
+                if (!isImmortal) return; //At least needs to be Immortal
+            }
+            toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.TrueImmortality);
+            //Is Final Form, cannot be removed except for all reset
+        }
+
+        private void checkImmortal() {
+            {
+                //Check if Immortal or should unset Immortality, can be both Immortal and Semi Immortal
+                boolean isTrueImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.TrueImmortality);
+                boolean isImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.Immortality);
+                if (isTrueImmortal && isImmortal) {
+                    //Illegal state, should only be either or
+                    toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.Immortality);
+                    return;
+                }
+                if (isImmortal)
+                    return; // If not True Immortal no need to check other states, as Semi Immortality is allowed
+                boolean isSemiImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.SemiImmortality);
+                if (!isSemiImmortal) return; //At least needs to be Semi Immortal
+                int bonusHearts = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusHearts);
+                if (bonusHearts < ImmortalityStatus.REQ_BONUS_HEARTS_FOR_IMMORTALITY) return;
+                boolean immortalHeart = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.ImmortalHeart);
+                if (!immortalHeart) return;
+            }
+            toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.Immortality);
+        }
+
+        private void checkSemiImmortal() {
+            {//TODO: complicated state, as is also possible as temporary
+                //Check if Should be Semi Immortal / Should False Immortality rank up
+            }
+            toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.SemiImmortality);
+        }
+
+        private void checkFalseImmortal() {
+            {//TODO:
+                //Check if Should still be False Immortal
+            }
+            toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.FalseImmortality);
+        }
+
+        private void checkImmortalHeart() {
+            //Checking if Player should earn one, otherwise refund it
+            if (shouldEarnOrKeepImmortalHeart()) return; //He won't get it removed
+            //Refunding and removing State
+            toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.ImmortalHeart);
+            World world = this.serverPlayerEntity.world;
+            double x = this.serverPlayerEntity.getX();
+            double y = this.serverPlayerEntity.getY();
+            double z = this.serverPlayerEntity.getZ();
+
+            world.spawnEntity(new ItemEntity(world, x, y, z, new ItemStack(ImmortalityItems.HeartOfImmortality)));
+        }
+
+        private boolean shouldEarnOrKeepImmortalHeart() {
+            boolean isTrueImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.TrueImmortality);
+            if(isTrueImmortal) return true;
+            boolean isImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.Immortality);
+            if(isImmortal) return true;
+            boolean isSemiImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.SemiImmortality);
+            int bonusHearts = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusHearts);
+            if(isSemiImmortal)
+                if(bonusHearts>=ImmortalityStatus.REQ_BONUS_HEARTS_FOR_IMMORTALITY)
+                    return true;
+            return false;
+        }
+
+/* Specific Player logic checks END
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+*/
 
         private void doLivingEntityLogic() {
             //TODO:
@@ -386,8 +598,8 @@ public final class ImmortalityStatus {
                 this.serverPlayerEntity = serverPlayer;
                 doPlayerLogic();
                 return;
-            }
-            else if (livingEntity instanceof ImmortalWither immortalWither) {
+            } else if (livingEntity instanceof ImmortalWither immortalWither) {
+                if (!(dataType instanceof ImmortalityData.DataTypeInt)) return;
                 EntityAttributeInstance maxHealthInstance = immortalWither.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
                 if (dataType == ImmortalityData.DataTypeInt.ImmortalDeaths) {
                     //Applying Health based on Heads left
