@@ -26,7 +26,7 @@ public final class ImmortalityData {
     }*/
     public enum DataTypeInt implements DataType {
         ImmortalDeaths,
-        SemiImmortalityHeartCooldown,
+        SemiImmortalityHeartCooldownSeconds,
         KilledByBaneOfLifeTime,
         KilledByBaneOfLifeCurrentAmount,
         LiverExtractionAmount,

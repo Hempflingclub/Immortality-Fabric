@@ -27,6 +27,9 @@ public final class ImmortalityStatus {
     public static final int lifeElixirHealthAddition = 2;
     public static final int REQ_BONUS_HEARTS_FOR_IMMORTALITY = 10;
     public static final int REQ_DEATHS_FOR_TRUE_IMMORTALITY = 50;
+    public static final int REQ_BANE_OF_LIFE_DEATHS_FOR_TEMP_SEMI_IMMORTALITY = 3;
+    public static final int REQ_SECONDS_COOLDOWN_TO_CLEAR_SEMI_IMMORTALITY_DEATHS = 30;
+    public static final int BASE_SEMI_IMMORTALITY_HEART_COOLDOWN_BASE_SECONDS = 300;
 
     public static int incrementGeneric(ServerPlayerEntity serverPlayerEntity, ImmortalityData.DataTypeInt dataTypeInt) {
         IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
@@ -398,6 +401,10 @@ public final class ImmortalityStatus {
         ItemStack
     }
 
+    /**TODO:
+     * Should be used on a fixed timer, to actively apply logic
+     * and also run on specific Events (Death, Dimension Hopping, Using specific Items)
+     */
     private static class SpecificLogicApplier {
         isType isType;
         ServerPlayerEntity serverPlayerEntity;
@@ -453,21 +460,29 @@ public final class ImmortalityStatus {
 
         private void doPlayerLogicInt() {
             //TODO:
-            if (dataType == ImmortalityData.DataTypeInt.ImmortalDeaths)
+            if (dataType == ImmortalityData.DataTypeInt.ImmortalDeaths) {
+                checkTemporaryNegativeHearts();
                 checkEveryImmortality();
-            else if (dataType == ImmortalityData.DataTypeInt.SemiImmortalityHeartCooldown) {
+            } else if (dataType == ImmortalityData.DataTypeInt.SemiImmortalityHeartCooldownSeconds) {
+                checkBaneOfLife();
+                checkSemiImmortal();
             } else if (dataType == ImmortalityData.DataTypeInt.KilledByBaneOfLifeTime) {
-            } else if (dataType == ImmortalityData.DataTypeInt.KilledByBaneOfLifeCurrentAmount)
+                checkBaneOfLife();
+                checkSemiImmortal();
+            } else if (dataType == ImmortalityData.DataTypeInt.KilledByBaneOfLifeCurrentAmount) {
+                checkBaneOfLife();
                 checkEveryImmortality();
-            else if (dataType == ImmortalityData.DataTypeInt.LiverExtractionAmount) {
+            } else if (dataType == ImmortalityData.DataTypeInt.LiverExtractionAmount) {
             } else if (dataType == ImmortalityData.DataTypeInt.LiverExtractionTime) {
             } else if (dataType == ImmortalityData.DataTypeInt.HeartExtractionAmount) {
             } else if (dataType == ImmortalityData.DataTypeInt.LifeElixirTime) {
+                checkLifeElixir();
             } else if (dataType == ImmortalityData.DataTypeInt.LifeElixirDropCooldown) {
             } else if (dataType == ImmortalityData.DataTypeInt.BonusHearts)
                 checkEveryImmortality();
-            else if (dataType == ImmortalityData.DataTypeInt.TemporaryNegativeHearts) {
-            } else if (dataType == ImmortalityData.DataTypeInt.BonusArmor) {
+            else if (dataType == ImmortalityData.DataTypeInt.TemporaryNegativeHearts)
+                checkTemporaryNegativeHearts();
+            else if (dataType == ImmortalityData.DataTypeInt.BonusArmor) {
             } else if (dataType == ImmortalityData.DataTypeInt.BonusArmorToughness) {
             } else if (dataType == ImmortalityData.DataTypeInt.SoulEnergy) {
             }
@@ -496,9 +511,15 @@ public final class ImmortalityStatus {
 
         }
 
-        /* Specific Player logic checks
-        ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        */
+/* Specific Player logic checks
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+*/
+
+        /**
+         * Checking Which Immortality to apply or clear
+         */
         private void checkEveryImmortality() {
             checkTrueImmortal();
             checkImmortal();
@@ -506,6 +527,9 @@ public final class ImmortalityStatus {
             checkFalseImmortal();
         }
 
+        /**
+         * Checks if Player should rank up to True Immortality
+         */
         private void checkTrueImmortal() {
             {
                 //Checking if should instead be TrueImmortality, can be also Semi Immortal
@@ -526,6 +550,9 @@ public final class ImmortalityStatus {
             //Is Final Form, cannot be removed except for all reset
         }
 
+        /**
+         * Checks if Player should rank up to Immortality, or Lose it if they already have True Immortality
+         */
         private void checkImmortal() {
             {
                 //Check if Immortal or should unset Immortality, can be both Immortal and Semi Immortal
@@ -548,20 +575,73 @@ public final class ImmortalityStatus {
             toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.Immortality);
         }
 
+        /**
+         * Checks if Should rank up from False Immortality, or lose when Ranking up to Immortality
+         * Also Checks if it should be kept as a Temporary State for higher types of Immortality
+         */
         private void checkSemiImmortal() {
-            {//TODO: complicated state, as is also possible as temporary
-                //Check if Should be Semi Immortal / Should False Immortality rank up
+            boolean isSemiImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.SemiImmortality);
+
+            if (isSemiImmortal) {
+                //Checking if Player should Lose Semi Immortality
+                boolean isImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.Immortality);
+                boolean isTrueImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.TrueImmortality);
+                //Needs Higher Immortality
+                if (!(isImmortal || isTrueImmortal)) return; // Not removing when Player is only Semi Immortal
+                int killedByBaneOfLifeCurrentAmount = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.KilledByBaneOfLifeCurrentAmount);
+                // Should keep it, as it's temporary
+                if (killedByBaneOfLifeCurrentAmount >= REQ_BANE_OF_LIFE_DEATHS_FOR_TEMP_SEMI_IMMORTALITY) return;
+                //Will also clear, when just promoted to normal Immortality
+            } else {
+                //Check if should become Semi Immortality // Rank Up from False Immortality
+                boolean isFalseImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.FalseImmortality);
+                if (isFalseImmortal) {
+                    //Promotion Logic
+                    int bonusHearts = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusHearts);
+                    if (bonusHearts < ImmortalityStatus.REQ_BONUS_HEARTS_FOR_IMMORTALITY) return;
+                    // That's about it
+                } else {
+                    //Temporary State Logic
+                    int killedByBaneOfLifeCurrentAmount = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.KilledByBaneOfLifeCurrentAmount);
+                    if (killedByBaneOfLifeCurrentAmount < REQ_BANE_OF_LIFE_DEATHS_FOR_TEMP_SEMI_IMMORTALITY) return;
+
+                    boolean isImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.Immortality);
+                    boolean isTrueImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.TrueImmortality);
+                    //Needs Higher Immortality
+                    if (!(isImmortal || isTrueImmortal)) return; // Not removing when Player is only Semi Immortal
+                }
             }
             toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.SemiImmortality);
         }
 
+        /**
+         * Checks if Player has at least 1 Heart to keep False Immortality, and also clears if conflicting with other type of Immortality
+         */
         private void checkFalseImmortal() {
-            {//TODO:
+            {
+                boolean isFalseImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.FalseImmortality);
+                if (!isFalseImmortal) return;
+
                 //Check if Should still be False Immortal
+                boolean isSemiImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.SemiImmortality);
+                boolean isImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.Immortality);
+                boolean isTrueImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.TrueImmortality);
+                // Will check if other has other Immortality
+                if (isSemiImmortal || isImmortal || isTrueImmortal) {
+                    //Turn off False Immortality, conflicting with other Immortality
+                    toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.FalseImmortality);
+                    return;
+                }
+                //Check if at least 1 Heart is left
+                int maxHealth = (int) this.serverPlayerEntity.getMaxHealth();
+                if (maxHealth >= 2) return;
             }
             toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.FalseImmortality);
         }
 
+        /**
+         * Checks if Player able to rank up from Semi Immortality to Immortality with Heart, otherwise refund it
+         */
         private void checkImmortalHeart() {
             //Checking if Player should earn one, otherwise refund it
             if (shouldEarnOrKeepImmortalHeart()) return; //He won't get it removed
@@ -575,20 +655,98 @@ public final class ImmortalityStatus {
             world.spawnEntity(new ItemEntity(world, x, y, z, new ItemStack(ImmortalityItems.HeartOfImmortality)));
         }
 
+        /**
+         * The determining Logic for checkImmortalHeart()
+         *
+         * @return should earn or keep Immortal Heart
+         */
         private boolean shouldEarnOrKeepImmortalHeart() {
             boolean isTrueImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.TrueImmortality);
-            if(isTrueImmortal) return true;
+            if (isTrueImmortal) return true;
             boolean isImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.Immortality);
-            if(isImmortal) return true;
+            if (isImmortal) return true;
             boolean isSemiImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.SemiImmortality);
             int bonusHearts = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusHearts);
-            if(isSemiImmortal)
-                if(bonusHearts>=ImmortalityStatus.REQ_BONUS_HEARTS_FOR_IMMORTALITY)
+            if (isSemiImmortal)
+                if (bonusHearts >= ImmortalityStatus.REQ_BONUS_HEARTS_FOR_IMMORTALITY)
                     return true;
             return false;
         }
 
+        /**
+         * Will clear Negative Hearts, if not killed within ImmortalityStatus.REQ_SECONDS_COOLDOWN_TO_CLEAR_SEMI_IMMORTALITY_DEATHS for higher Type of Immortality than Semi Immortality
+         */
+        private void checkBaneOfLife() {
+            int killedByBaneOfLifeCurrentAmount = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.KilledByBaneOfLifeCurrentAmount);
+            if (killedByBaneOfLifeCurrentAmount == 0) return; //Nothing to do
+            int currentTimeSeconds = getCurrentTime(this.serverPlayerEntity) / 20;
+            int killedByBaneOfLifeTimeSeconds = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.KilledByBaneOfLifeTime) / 20;
+            if (currentTimeSeconds > killedByBaneOfLifeTimeSeconds + ImmortalityStatus.REQ_SECONDS_COOLDOWN_TO_CLEAR_SEMI_IMMORTALITY_DEATHS) {
+                //Clear Bane Of Life Deaths
+                ImmortalityStatus.addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.KilledByBaneOfLifeCurrentAmount, -killedByBaneOfLifeCurrentAmount);
+                //If higher Immortality than Semi Immortality, instantly regain all lost Hearts
+                boolean isImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.Immortality);
+                boolean isTrueImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.TrueImmortality);
+                if (!(isImmortal || isTrueImmortal)) return;
+                int temporaryNegativeHearts = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.TemporaryNegativeHearts);
+                ImmortalityStatus.addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.TemporaryNegativeHearts, -temporaryNegativeHearts);
+            }
+        }
+
+        /**
+         * Applies Negative Hearts
+         * Will regen Negative Hearts for Semi Immortality
+         * Will give Negative Hearts to False/Semi Immortality on Death
+         */
+        private void checkTemporaryNegativeHearts() {
+            //Applying Negative Hearts
+            {
+                EntityAttributeInstance healthModifier = this.serverPlayerEntity.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+                int negativeHearts = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.TemporaryNegativeHearts);
+                boolean isFalseImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.FalseImmortality);
+                boolean isSemiImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.SemiImmortality);
+                if (!(isFalseImmortal || isSemiImmortal)) {
+                    //When not False/Semi Immortal clear Negative Hearts
+                    negativeHearts = 0;
+                }
+                assert healthModifier != null;
+                healthModifier.clearModifiers();
+                healthModifier.addPersistentModifier(new EntityAttributeModifier("negative-hearts", (negativeHearts * ImmortalityStatus.negativeImmortalityHeartsHealthAddition), EntityAttributeModifier.Operation.ADDITION));
+            }
+            //Giving Negative Hearts on Death to False/Semi Immortality
+            if (this.dataType instanceof ImmortalityData.DataTypeInt)
+                if (this.dataType == ImmortalityData.DataTypeInt.ImmortalDeaths) {
+                    boolean isFalseImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.FalseImmortality);
+                    boolean isSemiImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.SemiImmortality);
+                    //Needs to be either or to get Negative Hearts, or for any underlying Logic as Negative Hearts are applied first anyway
+                    if (!(isFalseImmortal || isSemiImmortal)) return;
+                    //This will result in this function being called again, and applying the first part, of giving negative Hearts
+                    incrementGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.TemporaryNegativeHearts);
+                }
+            {
+                //Needs to be Semi Immortal to allow possibility of regenerating his Negative Hearts
+                boolean isSemiImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.SemiImmortality);
+                if (!isSemiImmortal) return;
+                int currentTimeSeconds = getCurrentTime(this.serverPlayerEntity) / 20;
+                int timeLostHeartSeconds = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.KilledByBaneOfLifeTime) / 20;
+                int heartRegenCooldown = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.SemiImmortalityHeartCooldownSeconds);
+                int diffCooldown = (timeLostHeartSeconds + ImmortalityStatus.BASE_SEMI_IMMORTALITY_HEART_COOLDOWN_BASE_SECONDS) - currentTimeSeconds;
+                heartRegenCooldown -= diffCooldown;
+                if (heartRegenCooldown > 0) return;
+                //Set Last Regenerated Heart Time
+                new ImmortalityData.DataTypes(getComponent(this.serverPlayerEntity), ImmortalityData.DataTypeInt.KilledByBaneOfLifeTime, currentTimeSeconds * 20);
+                //Give new Cooldown to Heart Regen
+                addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.SemiImmortalityHeartCooldownSeconds, ImmortalityStatus.BASE_SEMI_IMMORTALITY_HEART_COOLDOWN_BASE_SECONDS);
+                //Regen a Heart
+                addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.TemporaryNegativeHearts, -1);
+            }
+        }
+        private void checkLifeElixir(){
+            //TODO:
+        }
 /* Specific Player logic checks END
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 */
 
@@ -603,7 +761,7 @@ public final class ImmortalityStatus {
                 EntityAttributeInstance maxHealthInstance = immortalWither.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
                 if (dataType == ImmortalityData.DataTypeInt.ImmortalDeaths) {
                     //Applying Health based on Heads left
-                    int health_diff = (int) (-1f * ((valueInt / 3f) * immortalWither.getMaxHealth()));
+                    int health_diff = (int) -((valueInt / 3f) * immortalWither.getMaxHealth());
                     assert maxHealthInstance != null;
                     maxHealthInstance.clearModifiers();
                     maxHealthInstance.addPersistentModifier(new EntityAttributeModifier("health-deficit", health_diff, EntityAttributeModifier.Operation.ADDITION));
