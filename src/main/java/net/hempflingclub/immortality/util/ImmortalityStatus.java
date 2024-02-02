@@ -10,12 +10,18 @@ import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particle.ParticleEffect;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.world.World;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public final class ImmortalityStatus {
     public static final MinecraftServer minecraftServer = PlayerTickHandler.minecraftServer;
@@ -30,12 +36,18 @@ public final class ImmortalityStatus {
     public static final int REQ_BANE_OF_LIFE_DEATHS_FOR_TEMP_SEMI_IMMORTALITY = 3;
     public static final int REQ_SECONDS_COOLDOWN_TO_CLEAR_SEMI_IMMORTALITY_DEATHS = 30;
     public static final int BASE_SEMI_IMMORTALITY_HEART_COOLDOWN_BASE_SECONDS = 300;
+    public static final int BASE_BONUS_HEART_CHANCE_PERCENT = 50;
+    public static final int IMMORTAL_BONUS_HEART_CHANCE_PERCENT = 75;
+    public static final int TRUE_IMMORTAL_BONUS_HEART_CHANCE_PERCENT = 100;
+    public static final int LIFE_ELIXIR_SECONDS_TO_FINISH = 150;
+    public static final String BONUS_HEALTH_KEY = "bonus-health";
+    public static final String NEGATIVE_HEALTH_KEY = "negative-health";
 
     public static int incrementGeneric(ServerPlayerEntity serverPlayerEntity, ImmortalityData.DataTypeInt dataTypeInt) {
         IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityPlayerComponent, dataTypeInt);
         int newValue = incrementGeneric(dataTypes);
-        specificLogicApplier(serverPlayerEntity);
+        specificAllLogicApplier(serverPlayerEntity);
         return newValue;
     }
 
@@ -43,7 +55,7 @@ public final class ImmortalityStatus {
         IImmortalityLivingEntityComponent iImmortalityLivingEntityComponent = getComponent(livingEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityLivingEntityComponent, dataTypeInt);
         int newValue = incrementGeneric(dataTypes);
-        specificLogicApplier(livingEntity);
+        specificAllLogicApplier(livingEntity);
         return newValue;
     }
 
@@ -51,7 +63,7 @@ public final class ImmortalityStatus {
         IImmortalityItemComponent iImmortalityItemComponent = getComponent(itemStack);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityItemComponent, dataTypeInt);
         int newValue = incrementGeneric(dataTypes);
-        specificLogicApplier(itemStack);
+        specificAllLogicApplier(itemStack);
         return newValue;
     }
 
@@ -70,7 +82,7 @@ public final class ImmortalityStatus {
         IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityPlayerComponent, dataTypeBool);
         boolean newValue = toggleGeneric(dataTypes);
-        specificLogicApplier(serverPlayerEntity);
+        specificAllLogicApplier(serverPlayerEntity);
         return newValue;
     }
 
@@ -78,7 +90,7 @@ public final class ImmortalityStatus {
         IImmortalityLivingEntityComponent iImmortalityLivingEntityComponent = getComponent(livingEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityLivingEntityComponent, dataTypeBool);
         boolean newValue = toggleGeneric(dataTypes);
-        specificLogicApplier(livingEntity);
+        specificAllLogicApplier(livingEntity);
         return newValue;
     }
 
@@ -86,7 +98,7 @@ public final class ImmortalityStatus {
         IImmortalityItemComponent iImmortalityItemComponent = getComponent(itemStack);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityItemComponent, dataTypeBool);
         boolean newValue = toggleGeneric(dataTypes);
-        specificLogicApplier(itemStack);
+        specificAllLogicApplier(itemStack);
         return newValue;
     }
 
@@ -154,7 +166,7 @@ public final class ImmortalityStatus {
         IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityPlayerComponent, dataTypeInt);
         int newValue = addGeneric(dataTypes, addition);
-        specificLogicApplier(serverPlayerEntity);
+        specificAllLogicApplier(serverPlayerEntity);
         return newValue;
     }
 
@@ -162,7 +174,7 @@ public final class ImmortalityStatus {
         IImmortalityLivingEntityComponent iImmortalityLivingEntityComponent = getComponent(livingEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityLivingEntityComponent, dataTypeInt);
         int newValue = addGeneric(dataTypes, addition);
-        specificLogicApplier(livingEntity);
+        specificAllLogicApplier(livingEntity);
         return newValue;
     }
 
@@ -170,7 +182,7 @@ public final class ImmortalityStatus {
         IImmortalityItemComponent iImmortalityItemComponent = getComponent(itemStack);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityItemComponent, dataTypeInt);
         int newValue = addGeneric(dataTypes, addition);
-        specificLogicApplier(itemStack);
+        specificAllLogicApplier(itemStack);
         return newValue;
     }
 
@@ -196,13 +208,13 @@ public final class ImmortalityStatus {
         IImmortalityComponent immortalityComponent = dataTypes.getIImmortalityComponent();
         if (immortalityComponent instanceof IImmortalityPlayerComponent iImmortalityPlayerComponent) {
             ServerPlayerEntity serverPlayerEntity = findPlayer(iImmortalityPlayerComponent);
-            specificLogicApplier(serverPlayerEntity);
+            specificAllLogicApplier(serverPlayerEntity);
         } else if (immortalityComponent instanceof IImmortalityLivingEntityComponent iImmortalityLivingEntityComponent) {
             LivingEntity livingEntity = findEntity(iImmortalityLivingEntityComponent);
-            specificLogicApplier(livingEntity);
+            specificAllLogicApplier(livingEntity);
         } else if (immortalityComponent instanceof IImmortalityItemComponent iImmortalityItemComponent) {
             ItemStack itemStack = findItemStack(iImmortalityItemComponent); //TODO: Probably also search in BlockEntity of Soul Urn
-            specificLogicApplier(itemStack);
+            specificAllLogicApplier(itemStack);
         }
     }
 
@@ -254,7 +266,7 @@ public final class ImmortalityStatus {
         return target;
     }
 
-    public static void specificLogicApplier(ServerPlayerEntity serverPlayerEntity) {
+    public static void specificAllLogicApplier(ServerPlayerEntity serverPlayerEntity) {
         serverPlayerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
         IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
         for (ImmortalityData.DataTypeInt dataTypeInt : ImmortalityData.DataTypeInt.values())
@@ -263,7 +275,7 @@ public final class ImmortalityStatus {
             new SpecificLogicApplier(serverPlayerEntity, dataTypeBool);
     }
 
-    public static void specificLogicApplier(LivingEntity livingEntity) {
+    public static void specificAllLogicApplier(LivingEntity livingEntity) {
         livingEntity.syncComponent(IImmortalityLivingEntityComponent.KEY);
         IImmortalityLivingEntityComponent iImmortalityLivingEntityComponent = getComponent(livingEntity);
         for (ImmortalityData.DataTypeInt dataTypeInt : ImmortalityData.DataTypeInt.values())
@@ -272,7 +284,7 @@ public final class ImmortalityStatus {
             new SpecificLogicApplier(livingEntity, dataTypeBool);
     }
 
-    public static void specificLogicApplier(ItemStack itemStack) {
+    public static void specificAllLogicApplier(ItemStack itemStack) {
         //itemStack.syncComponent(IImmortalityItemComponent.KEY); // Sadly this cannot be done, but should probably be fine
         IImmortalityItemComponent iImmortalityItemComponent = getComponent(itemStack);
         for (ImmortalityData.DataTypeInt dataTypeInt : ImmortalityData.DataTypeInt.values())
@@ -401,7 +413,8 @@ public final class ImmortalityStatus {
         ItemStack
     }
 
-    /**TODO:
+    /**
+     * TODO:
      * Should be used on a fixed timer, to actively apply logic
      * and also run on specific Events (Death, Dimension Hopping, Using specific Items)
      */
@@ -461,6 +474,7 @@ public final class ImmortalityStatus {
         private void doPlayerLogicInt() {
             //TODO:
             if (dataType == ImmortalityData.DataTypeInt.ImmortalDeaths) {
+                checkLifeElixir();
                 checkTemporaryNegativeHearts();
                 checkEveryImmortality();
             } else if (dataType == ImmortalityData.DataTypeInt.SemiImmortalityHeartCooldownSeconds) {
@@ -478,9 +492,10 @@ public final class ImmortalityStatus {
             } else if (dataType == ImmortalityData.DataTypeInt.LifeElixirTime) {
                 checkLifeElixir();
             } else if (dataType == ImmortalityData.DataTypeInt.LifeElixirDropCooldown) {
-            } else if (dataType == ImmortalityData.DataTypeInt.BonusHearts)
+            } else if (dataType == ImmortalityData.DataTypeInt.BonusHearts) {
+                checkBonusHearts();
                 checkEveryImmortality();
-            else if (dataType == ImmortalityData.DataTypeInt.TemporaryNegativeHearts)
+            } else if (dataType == ImmortalityData.DataTypeInt.TemporaryNegativeHearts)
                 checkTemporaryNegativeHearts();
             else if (dataType == ImmortalityData.DataTypeInt.BonusArmor) {
             } else if (dataType == ImmortalityData.DataTypeInt.BonusArmorToughness) {
@@ -711,7 +726,7 @@ public final class ImmortalityStatus {
                 }
                 assert healthModifier != null;
                 healthModifier.clearModifiers();
-                healthModifier.addPersistentModifier(new EntityAttributeModifier("negative-hearts", (negativeHearts * ImmortalityStatus.negativeImmortalityHeartsHealthAddition), EntityAttributeModifier.Operation.ADDITION));
+                healthModifier.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.NEGATIVE_HEALTH_KEY, (negativeHearts * ImmortalityStatus.negativeImmortalityHeartsHealthAddition), EntityAttributeModifier.Operation.ADDITION));
             }
             //Giving Negative Hearts on Death to False/Semi Immortality
             if (this.dataType instanceof ImmortalityData.DataTypeInt)
@@ -741,8 +756,127 @@ public final class ImmortalityStatus {
                 addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.TemporaryNegativeHearts, -1);
             }
         }
-        private void checkLifeElixir(){
-            //TODO:
+
+        /**
+         * Will give appropriate Bonus Hearts
+         * If not any type of Immortality, clear Bonus Hearts
+         */
+        private void checkBonusHearts() {
+            {
+                //Applying Bonus Hearts
+                int bonusHearts = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusHearts);
+
+                boolean isFalseImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.FalseImmortality);
+                boolean isSemiImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.SemiImmortality);
+                boolean isImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.Immortality);
+                boolean isTrueImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.TrueImmortality);
+                //Needs to be any Immortality, to sustain/have bonus hearts
+                if (!(isFalseImmortal || isSemiImmortal || isImmortal || isTrueImmortal)) {
+                    //If not any Immortality remove Bonus Hearts
+                    addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusHearts, -bonusHearts);
+                    bonusHearts = 0;
+                }
+                EntityAttributeInstance maxHealthInstance = this.serverPlayerEntity.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+                assert maxHealthInstance != null;
+                {
+                    //Removing old Modifier
+                    Set<EntityAttributeModifier> entityAttributeModifiers = maxHealthInstance.getModifiers(EntityAttributeModifier.Operation.ADDITION);
+                    EntityAttributeModifier oldHealthBonus = null;
+                    for (EntityAttributeModifier entityAttributeModifier : entityAttributeModifiers) {
+                        if (!entityAttributeModifier.getName().equals(ImmortalityStatus.BONUS_HEALTH_KEY))
+                            continue;
+                        oldHealthBonus = entityAttributeModifier;
+                        break;
+                    }
+                    //Could possibly not yet have one, so null check
+                    if (oldHealthBonus != null) maxHealthInstance.removeModifier(oldHealthBonus);
+                }
+                maxHealthInstance.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.NEGATIVE_HEALTH_KEY, (bonusHearts * ImmortalityStatus.immortalityHeartsHealthAddition), EntityAttributeModifier.Operation.ADDITION));
+            }
+        }
+
+        /**
+         * Will handle Life Elixir
+         * giving Bonus Health on life elixir drinking, after effect wears off time
+         * enforcing Immortality tier based percentages for chance of it working
+         * With Audio/Visual Effects
+         * Life Elixir Dropping on Final Killing Semi Immortal or higher
+         */
+        private void checkLifeElixir() {
+            //TODO: NEEDS TO HAPPEN IN INVOKE IMMORTALITY | TO RESET LIFE ELIXIR TIME OR IT WILL JUST WORK EVEN IF THEY DIED
+            int lifeElixirTime = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.LifeElixirTime);
+            final int[] lifeElixirChances = {ImmortalityStatus.BASE_BONUS_HEART_CHANCE_PERCENT, ImmortalityStatus.IMMORTAL_BONUS_HEART_CHANCE_PERCENT, ImmortalityStatus.TRUE_IMMORTAL_BONUS_HEART_CHANCE_PERCENT};
+            //lifeElixirChances[0] = normal
+            //lifeElixirChances[1] = for Immortal
+            //lifeElixirChances[2] = for True Immortal
+            World world = this.serverPlayerEntity.world;
+            int x = (int) this.serverPlayerEntity.getX();
+            int y = (int) this.serverPlayerEntity.getY();
+            int z = (int) this.serverPlayerEntity.getZ();
+            if (lifeElixirTime > 0) {
+                //Check if Required Time has been reached
+                int currentTimeSeconds = getCurrentTime(this.serverPlayerEntity);
+                int lifeElixirTimeSeconds = lifeElixirTime / 20;
+                int secondsPassed = currentTimeSeconds - lifeElixirTimeSeconds;
+                if (secondsPassed < ImmortalityStatus.LIFE_ELIXIR_SECONDS_TO_FINISH) return;
+
+                boolean isImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.Immortality);
+                boolean isTrueImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.TrueImmortality);
+                int lifeElixirChance = lifeElixirChances[0];
+                if (isImmortal) lifeElixirChance = lifeElixirChances[1];
+                else if (isTrueImmortal) lifeElixirChance = lifeElixirChances[2];
+                int randomInt = ThreadLocalRandom.current().nextInt(0, 100);
+                //Apply RNG
+                boolean success = false;
+                if (lifeElixirChance > randomInt) success = true;
+                //Check if they even have an Immortality
+                boolean isFalseImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.FalseImmortality);
+                boolean isSemiImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.SemiImmortality);
+                if (!(isFalseImmortal || isSemiImmortal || isImmortal || isTrueImmortal)) success = false;
+                //Reset LifeElixirTime
+                addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.LifeElixirTime, -lifeElixirTime);
+                if (success) {
+                    //Add Bonus Heart
+                    incrementGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusHearts);
+                    //Positive Audio/Visual Feedback
+                    {
+                        //Particles
+                        ParticleEffect particleEffect = ParticleTypes.HEART;
+                        world.addParticle(particleEffect, x, y, z, 0, 1, 0);
+                        //Audio
+                        SoundEvent soundEvent = SoundEvents.ENTITY_BEE_POLLINATE;
+                        SoundCategory soundCategory = SoundCategory.PLAYERS;
+                        world.playSound(x, y, z, soundEvent, soundCategory, 1, 1, true);
+                    }
+                } else {
+                    //Fail Audio/Visual Feedback
+                    {
+                        //Particles
+                        ParticleEffect particleEffect = ParticleTypes.SCULK_CHARGE_POP;
+                        world.addParticle(particleEffect, x, y, z, 0, 1, 0);
+                        //Audio
+                        SoundEvent soundEvent = SoundEvents.BLOCK_CHAIN_HIT;
+                        SoundCategory soundCategory = SoundCategory.PLAYERS;
+                        world.playSound(x, y, z, soundEvent, soundCategory, 1, 1, true);
+                    }
+                }
+            }
+            //TODO: Global reducing of lifeElixirDropCooldown, except when exactly 0, but without setting to 0 itself
+            int lifeElixirDropCooldown = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.LifeElixirDropCooldown);
+            if (lifeElixirDropCooldown < 0) {
+                //Logic to Handle Life Elixir Drop on Final Killing a Semi Immortal or higher
+                boolean isSemiImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.SemiImmortality);
+                boolean isImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.Immortality);
+                boolean isTrueImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.TrueImmortality);
+                if(!(isSemiImmortal||isImmortal|isTrueImmortal)) return;
+
+                //Dropping item
+                ItemEntity lifeElixirItemEntity = new ItemEntity(world, x, y, z, new ItemStack(ImmortalityItems.LifeElixir));
+                world.spawnEntity(lifeElixirItemEntity);
+
+                //Giving implicit 0, to indicate to no longer reduce it
+                addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.LifeElixirDropCooldown, -lifeElixirDropCooldown);
+            }
         }
 /* Specific Player logic checks END
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -763,8 +897,19 @@ public final class ImmortalityStatus {
                     //Applying Health based on Heads left
                     int health_diff = (int) -((valueInt / 3f) * immortalWither.getMaxHealth());
                     assert maxHealthInstance != null;
-                    maxHealthInstance.clearModifiers();
-                    maxHealthInstance.addPersistentModifier(new EntityAttributeModifier("health-deficit", health_diff, EntityAttributeModifier.Operation.ADDITION));
+                    {
+                        //Removing old Modifier
+                        Set<EntityAttributeModifier> entityAttributeModifiers = maxHealthInstance.getModifiers(EntityAttributeModifier.Operation.ADDITION);
+                        EntityAttributeModifier oldHealthDeficit = null;
+                        for (EntityAttributeModifier entityAttributeModifier : entityAttributeModifiers) {
+                            if (!entityAttributeModifier.getName().equals(ImmortalityStatus.NEGATIVE_HEALTH_KEY))
+                                continue;
+                            oldHealthDeficit = entityAttributeModifier;
+                            break;
+                        }
+                        if (oldHealthDeficit != null) maxHealthInstance.removeModifier(oldHealthDeficit);
+                    }
+                    maxHealthInstance.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.NEGATIVE_HEALTH_KEY, health_diff, EntityAttributeModifier.Operation.ADDITION));
                 }
             }
         }
