@@ -42,6 +42,10 @@ public final class ImmortalityStatus {
     public static final int LIFE_ELIXIR_SECONDS_TO_FINISH = 150;
     public static final String BONUS_HEALTH_KEY = "bonus-health";
     public static final String NEGATIVE_HEALTH_KEY = "negative-health";
+    public static final int DEATHS_FOR_BONUS_ARMOR = 5;
+    public static final int DEATHS_FOR_BONUS_ARMOR_SCALING = 2;
+    public static final int DEATHS_FOR_BONUS_ARMOR_TOUGHNESS = 20;
+    public static final int DEATHS_FOR_BONUS_ARMOR_TOUGHNESS_SCALING = 2;
 
     public static int incrementGeneric(ServerPlayerEntity serverPlayerEntity, ImmortalityData.DataTypeInt dataTypeInt) {
         IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
@@ -487,19 +491,24 @@ public final class ImmortalityStatus {
                 checkBaneOfLife();
                 checkEveryImmortality();
             } else if (dataType == ImmortalityData.DataTypeInt.LiverExtractionAmount) {
-            } else if (dataType == ImmortalityData.DataTypeInt.LiverExtractionTime) {
-            } else if (dataType == ImmortalityData.DataTypeInt.HeartExtractionAmount) {
+                checkLiverExtraction();
+            } else if (dataType == ImmortalityData.DataTypeInt.LiverExtractionCooldown) {
+                checkLiverExtraction();
             } else if (dataType == ImmortalityData.DataTypeInt.LifeElixirTime) {
                 checkLifeElixir();
             } else if (dataType == ImmortalityData.DataTypeInt.LifeElixirDropCooldown) {
+                checkLifeElixir();
             } else if (dataType == ImmortalityData.DataTypeInt.BonusHearts) {
                 checkBonusHearts();
                 checkEveryImmortality();
             } else if (dataType == ImmortalityData.DataTypeInt.TemporaryNegativeHearts)
                 checkTemporaryNegativeHearts();
             else if (dataType == ImmortalityData.DataTypeInt.BonusArmor) {
+                checkBonusArmor();
             } else if (dataType == ImmortalityData.DataTypeInt.BonusArmorToughness) {
+                checkBonusArmorToughness();
             } else if (dataType == ImmortalityData.DataTypeInt.SoulEnergy) {
+                checkSoulEnergy();
             }
         }
 
@@ -791,7 +800,7 @@ public final class ImmortalityStatus {
                     //Could possibly not yet have one, so null check
                     if (oldHealthBonus != null) maxHealthInstance.removeModifier(oldHealthBonus);
                 }
-                maxHealthInstance.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.NEGATIVE_HEALTH_KEY, (bonusHearts * ImmortalityStatus.immortalityHeartsHealthAddition), EntityAttributeModifier.Operation.ADDITION));
+                maxHealthInstance.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.BONUS_HEALTH_KEY, (bonusHearts * ImmortalityStatus.immortalityHeartsHealthAddition), EntityAttributeModifier.Operation.ADDITION));
             }
         }
 
@@ -868,7 +877,7 @@ public final class ImmortalityStatus {
                 boolean isSemiImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.SemiImmortality);
                 boolean isImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.Immortality);
                 boolean isTrueImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.TrueImmortality);
-                if(!(isSemiImmortal||isImmortal|isTrueImmortal)) return;
+                if (!(isSemiImmortal || isImmortal | isTrueImmortal)) return;
 
                 //Dropping item
                 ItemEntity lifeElixirItemEntity = new ItemEntity(world, x, y, z, new ItemStack(ImmortalityItems.LifeElixir));
@@ -877,6 +886,50 @@ public final class ImmortalityStatus {
                 //Giving implicit 0, to indicate to no longer reduce it
                 addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.LifeElixirDropCooldown, -lifeElixirDropCooldown);
             }
+        }
+
+        /**
+         * TODO:
+         */
+        private void checkLiverExtraction() {
+            //TODO
+            //Checking if Liver should be extractable (right Immortality) (Cooldown is cool)
+            //If then drop Liver and set cooldown
+            //If not then if problem wasn't cooldown reset cooldown to deactivate function call
+            {
+
+            }
+        }
+
+        /**
+         * TODO
+         */
+        private void checkBonusArmor() {
+            //TODO
+            //Check Immortality, and Immortal Deaths to find the right Bonus Armor to apply
+            //Apply Bonus Armor accordingly / clear if no Immortality
+            {
+
+            }
+        }
+
+        /**
+         * TODO
+         */
+        private void checkBonusArmorToughness() {
+            //TODO
+            //Check Immortality, and Immortal Deaths to find the right Bonus Armor Toughness to apply
+            //Apply Bonus Armor Toughness accordingly / clear if no Immortality
+            {
+
+            }
+        }
+
+        /**
+         * TODO
+         */
+        private void checkSoulEnergy() {
+            //TODO: This is a planned feature, using the new Item, and Soul Urn, so not yet to be implemented before Refactor is done
         }
 /* Specific Player logic checks END
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
