@@ -42,6 +42,8 @@ public final class ImmortalityStatus {
     public static final int LIFE_ELIXIR_SECONDS_TO_FINISH = 150;
     public static final String BONUS_HEALTH_KEY = "bonus-health";
     public static final String NEGATIVE_HEALTH_KEY = "negative-health";
+    public static final String BONUS_ARMOR_KEY = "bonus-armor";
+    public static final String BONUS_ARMOR_TOUGHNESS_KEY = "bonus-armor-toughness";
     public static final int DEATHS_FOR_BONUS_ARMOR = 5;
     public static final int DEATHS_FOR_BONUS_ARMOR_SCALING = 2;
     public static final int DEATHS_FOR_BONUS_ARMOR_TOUGHNESS = 20;
@@ -902,26 +904,86 @@ public final class ImmortalityStatus {
         }
 
         /**
-         * TODO
+         * Applying Bonus Armor
+         * Also clears if no type of Immortality
          */
         private void checkBonusArmor() {
             //TODO
             //Check Immortality, and Immortal Deaths to find the right Bonus Armor to apply
             //Apply Bonus Armor accordingly / clear if no Immortality
             {
+                //Determining bonus Armor
+                boolean isFalseImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.FalseImmortality);
+                boolean isSemiImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.SemiImmortality);
+                boolean isImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.Immortality);
+                boolean isTrueImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.TrueImmortality);
+                int bonusArmor = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusArmor);
+                //Needs any type of Immortality to be allowed bonus Armor
+                if(!(isFalseImmortal||isSemiImmortal||isImmortal||isTrueImmortal)) {
+                    addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusArmor,-bonusArmor);
+                    bonusArmor = 0;
+                }
+                int appliedBonusArmor = ImmortalityStatus.immortalityBaseArmorAddition * bonusArmor;
 
+                //Actually Applying
+                EntityAttributeInstance armorInstance = this.serverPlayerEntity.getAttributeInstance(EntityAttributes.GENERIC_ARMOR);
+                assert armorInstance != null;
+                {
+                    //Removing old Modifier
+                    Set<EntityAttributeModifier> entityAttributeModifiers = armorInstance.getModifiers(EntityAttributeModifier.Operation.ADDITION);
+                    EntityAttributeModifier oldArmorBonus = null;
+                    for (EntityAttributeModifier entityAttributeModifier : entityAttributeModifiers) {
+                        if (!entityAttributeModifier.getName().equals(ImmortalityStatus.BONUS_ARMOR_KEY))
+                            continue;
+                        oldArmorBonus = entityAttributeModifier;
+                        break;
+                    }
+                    //Could possibly not yet have one, so null check
+                    if (oldArmorBonus != null) armorInstance.removeModifier(oldArmorBonus);
+                }
+                armorInstance.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.BONUS_HEALTH_KEY, appliedBonusArmor, EntityAttributeModifier.Operation.ADDITION));
             }
         }
 
         /**
-         * TODO
+         * Applying Bonus Armor Toughness
+         * Also clears if no type of Immortality
          */
         private void checkBonusArmorToughness() {
             //TODO
             //Check Immortality, and Immortal Deaths to find the right Bonus Armor Toughness to apply
             //Apply Bonus Armor Toughness accordingly / clear if no Immortality
             {
+                //Determining bonus Armor Toughness
+                boolean isFalseImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.FalseImmortality);
+                boolean isSemiImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.SemiImmortality);
+                boolean isImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.Immortality);
+                boolean isTrueImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.TrueImmortality);
+                int bonusArmorToughness = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusArmorToughness);
+                //Needs any type of Immortality to be allowed bonus Armor
+                if(!(isFalseImmortal||isSemiImmortal||isImmortal||isTrueImmortal)) {
+                    addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusArmor,-bonusArmorToughness);
+                    bonusArmorToughness = 0;
+                }
+                int appliedBonusArmorToughness = ImmortalityStatus.immortalityHardeningArmorToughnessAddition * bonusArmorToughness;
 
+                //Actually Applying
+                EntityAttributeInstance armorToughnessInstance = this.serverPlayerEntity.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS);
+                assert armorToughnessInstance != null;
+                {
+                    //Removing old Modifier
+                    Set<EntityAttributeModifier> entityAttributeModifiers = armorToughnessInstance.getModifiers(EntityAttributeModifier.Operation.ADDITION);
+                    EntityAttributeModifier oldArmorToughnessBonus = null;
+                    for (EntityAttributeModifier entityAttributeModifier : entityAttributeModifiers) {
+                        if (!entityAttributeModifier.getName().equals(ImmortalityStatus.BONUS_ARMOR_TOUGHNESS_KEY))
+                            continue;
+                        oldArmorToughnessBonus = entityAttributeModifier;
+                        break;
+                    }
+                    //Could possibly not yet have one, so null check
+                    if (oldArmorToughnessBonus != null) armorToughnessInstance.removeModifier(oldArmorToughnessBonus);
+                }
+                armorToughnessInstance.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.BONUS_HEALTH_KEY, appliedBonusArmorToughness, EntityAttributeModifier.Operation.ADDITION));
             }
         }
 
