@@ -7,10 +7,12 @@ public final class ImmortalityData {
     }
 
     public enum DataTypeBool implements DataType {
-        TrueImmortality,
-        Immortality,
-        SemiImmortality,
-        FalseImmortality,
+        //TODO: Adding Sigma Immortality with Soul urns/vials
+        //TODO: Also probably find out how to show Immortality above players, like above name
+        AlphaImmortality, //Formerly True
+        BetaImmortality, //Formerly Normal
+        GammaImmortality, //Formerly Semi
+        DeltaImmortality, //Formerly False
         ImmortalHeart,
         VoidHeart,
         ExistingSoulVial,
@@ -26,7 +28,7 @@ public final class ImmortalityData {
     }*/
     public enum DataTypeInt implements DataType {
         ImmortalDeaths,
-        SemiImmortalityHeartCooldownSeconds,
+        GammaImmortalityHeartCooldownSeconds,
         KilledByBaneOfLifeTime,
         KilledByBaneOfLifeCurrentAmount,
         LiverExtractionAmount,
