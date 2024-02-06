@@ -950,6 +950,22 @@ public final class ImmortalityStatus {
                     addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusArmor, -bonusArmor);
                     bonusArmor = 0;
                 }
+                //Scale Armor
+                {
+                    int immortalDeaths = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.ImmortalDeaths);
+                    int deathsForNextBoni = ImmortalityStatus.DEATHS_FOR_BONUS_ARMOR;
+                    int boniToBeApplied = 0;
+                    while (immortalDeaths >= deathsForNextBoni) {
+                        //Increase Bonus Armor
+                        boniToBeApplied++;
+                        //Scale until, no longer enough Deaths
+                        deathsForNextBoni *= ImmortalityStatus.DEATHS_FOR_BONUS_ARMOR_SCALING;
+                    }
+                    //Apply Scaling to applied Armor
+                    bonusArmor *= boniToBeApplied;
+                }
+
+
                 int appliedBonusArmor = ImmortalityStatus.immortalityBaseArmorAddition * bonusArmor;
 
                 //Actually Applying
@@ -992,6 +1008,22 @@ public final class ImmortalityStatus {
                     addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusArmor, -bonusArmorToughness);
                     bonusArmorToughness = 0;
                 }
+                //Scale Armor Toughness
+                {
+                    int immortalDeaths = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.ImmortalDeaths);
+                    int deathsForNextBoni = ImmortalityStatus.DEATHS_FOR_BONUS_ARMOR_TOUGHNESS;
+                    int boniToBeApplied = 0;
+                    while (immortalDeaths >= deathsForNextBoni) {
+                        //Increase Bonus Armor Toughness
+                        boniToBeApplied++;
+                        //Scale until, no longer enough Deaths
+                        deathsForNextBoni *= ImmortalityStatus.DEATHS_FOR_BONUS_ARMOR_TOUGHNESS_SCALING;
+                    }
+                    //Apply Scaling to applied Armor Toughness
+                    bonusArmorToughness *= boniToBeApplied;
+                }
+
+
                 int appliedBonusArmorToughness = ImmortalityStatus.immortalityHardeningArmorToughnessAddition * bonusArmorToughness;
 
                 //Actually Applying
