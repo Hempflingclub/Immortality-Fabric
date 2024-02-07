@@ -54,7 +54,7 @@ public final class ImmortalityStatus {
         IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityPlayerComponent, dataTypeInt);
         int newValue = incrementGeneric(dataTypes);
-        specificAllLogicApplier(serverPlayerEntity);
+        specificSpecializedLogicApplier(serverPlayerEntity,dataTypeInt);
         return newValue;
     }
 
@@ -62,7 +62,7 @@ public final class ImmortalityStatus {
         IImmortalityLivingEntityComponent iImmortalityLivingEntityComponent = getComponent(livingEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityLivingEntityComponent, dataTypeInt);
         int newValue = incrementGeneric(dataTypes);
-        specificAllLogicApplier(livingEntity);
+        specificSpecializedLogicApplier(livingEntity,dataTypeInt);
         return newValue;
     }
 
@@ -70,7 +70,7 @@ public final class ImmortalityStatus {
         IImmortalityItemComponent iImmortalityItemComponent = getComponent(itemStack);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityItemComponent, dataTypeInt);
         int newValue = incrementGeneric(dataTypes);
-        specificAllLogicApplier(itemStack);
+        specificSpecializedLogicApplier(itemStack,dataTypeInt);
         return newValue;
     }
 
@@ -89,7 +89,7 @@ public final class ImmortalityStatus {
         IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityPlayerComponent, dataTypeBool);
         boolean newValue = toggleGeneric(dataTypes);
-        specificAllLogicApplier(serverPlayerEntity);
+        specificSpecializedLogicApplier(serverPlayerEntity,dataTypeBool);
         return newValue;
     }
 
@@ -97,7 +97,7 @@ public final class ImmortalityStatus {
         IImmortalityLivingEntityComponent iImmortalityLivingEntityComponent = getComponent(livingEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityLivingEntityComponent, dataTypeBool);
         boolean newValue = toggleGeneric(dataTypes);
-        specificAllLogicApplier(livingEntity);
+        specificSpecializedLogicApplier(livingEntity,dataTypeBool);
         return newValue;
     }
 
@@ -105,7 +105,7 @@ public final class ImmortalityStatus {
         IImmortalityItemComponent iImmortalityItemComponent = getComponent(itemStack);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityItemComponent, dataTypeBool);
         boolean newValue = toggleGeneric(dataTypes);
-        specificAllLogicApplier(itemStack);
+        specificSpecializedLogicApplier(itemStack,dataTypeBool);
         return newValue;
     }
 
@@ -173,7 +173,7 @@ public final class ImmortalityStatus {
         IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityPlayerComponent, dataTypeInt);
         int newValue = addGeneric(dataTypes, addition);
-        specificAllLogicApplier(serverPlayerEntity);
+        specificSpecializedLogicApplier(serverPlayerEntity,dataTypeInt);
         return newValue;
     }
 
@@ -181,7 +181,7 @@ public final class ImmortalityStatus {
         IImmortalityLivingEntityComponent iImmortalityLivingEntityComponent = getComponent(livingEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityLivingEntityComponent, dataTypeInt);
         int newValue = addGeneric(dataTypes, addition);
-        specificAllLogicApplier(livingEntity);
+        specificSpecializedLogicApplier(livingEntity,dataTypeInt);
         return newValue;
     }
 
@@ -189,7 +189,7 @@ public final class ImmortalityStatus {
         IImmortalityItemComponent iImmortalityItemComponent = getComponent(itemStack);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityItemComponent, dataTypeInt);
         int newValue = addGeneric(dataTypes, addition);
-        specificAllLogicApplier(itemStack);
+        specificSpecializedLogicApplier(itemStack,dataTypeInt);
         return newValue;
     }
 
@@ -207,21 +207,21 @@ public final class ImmortalityStatus {
 
     public static void logicApplier(IImmortalityComponent something, ImmortalityData.DataType dataType) {
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(something, dataType);
-        logicApplier(dataTypes);
+        logicApplier(dataTypes,dataType);
     }
 
-    public static void logicApplier(ImmortalityData.DataTypes dataTypes) {
+    public static void logicApplier(ImmortalityData.DataTypes dataTypes, ImmortalityData.DataType dataType) {
         //Loop over all Entities until found matching component, and then run logic to reapply fitting status
         IImmortalityComponent immortalityComponent = dataTypes.getIImmortalityComponent();
         if (immortalityComponent instanceof IImmortalityPlayerComponent iImmortalityPlayerComponent) {
             ServerPlayerEntity serverPlayerEntity = findPlayer(iImmortalityPlayerComponent);
-            specificAllLogicApplier(serverPlayerEntity);
+            specificSpecializedLogicApplier(serverPlayerEntity,dataType);
         } else if (immortalityComponent instanceof IImmortalityLivingEntityComponent iImmortalityLivingEntityComponent) {
             LivingEntity livingEntity = findEntity(iImmortalityLivingEntityComponent);
-            specificAllLogicApplier(livingEntity);
+            specificSpecializedLogicApplier(livingEntity,dataType);
         } else if (immortalityComponent instanceof IImmortalityItemComponent iImmortalityItemComponent) {
             ItemStack itemStack = findItemStack(iImmortalityItemComponent); //TODO: Probably also search in BlockEntity of Soul Urn
-            specificAllLogicApplier(itemStack);
+            specificSpecializedLogicApplier(itemStack,dataType);
         }
     }
 
@@ -273,18 +273,28 @@ public final class ImmortalityStatus {
         return target;
     }
 
+    public static void specificSpecializedLogicApplier(ServerPlayerEntity serverPlayerEntity, ImmortalityData.DataType dataType){
+        serverPlayerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
+        new SpecificLogicApplier(serverPlayerEntity, dataType);
+    }
+    public static void specificSpecializedLogicApplier(LivingEntity livingEntity, ImmortalityData.DataType dataType){
+        livingEntity.syncComponent(IImmortalityLivingEntityComponent.KEY);
+        new SpecificLogicApplier(livingEntity, dataType);
+    }
+    public static void specificSpecializedLogicApplier(ItemStack itemStack, ImmortalityData.DataType dataType){
+        new SpecificLogicApplier(itemStack, dataType);
+    }
     public static void specificAllLogicApplier(ServerPlayerEntity serverPlayerEntity) {
         serverPlayerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
-        IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
         for (ImmortalityData.DataTypeInt dataTypeInt : ImmortalityData.DataTypeInt.values())
             new SpecificLogicApplier(serverPlayerEntity, dataTypeInt);
         for (ImmortalityData.DataTypeBool dataTypeBool : ImmortalityData.DataTypeBool.values())
             new SpecificLogicApplier(serverPlayerEntity, dataTypeBool);
+
     }
 
     public static void specificAllLogicApplier(LivingEntity livingEntity) {
         livingEntity.syncComponent(IImmortalityLivingEntityComponent.KEY);
-        IImmortalityLivingEntityComponent iImmortalityLivingEntityComponent = getComponent(livingEntity);
         for (ImmortalityData.DataTypeInt dataTypeInt : ImmortalityData.DataTypeInt.values())
             new SpecificLogicApplier(livingEntity, dataTypeInt);
         for (ImmortalityData.DataTypeBool dataTypeBool : ImmortalityData.DataTypeBool.values())
@@ -293,7 +303,6 @@ public final class ImmortalityStatus {
 
     public static void specificAllLogicApplier(ItemStack itemStack) {
         //itemStack.syncComponent(IImmortalityItemComponent.KEY); // Sadly this cannot be done, but should probably be fine
-        IImmortalityItemComponent iImmortalityItemComponent = getComponent(itemStack);
         for (ImmortalityData.DataTypeInt dataTypeInt : ImmortalityData.DataTypeInt.values())
             new SpecificLogicApplier(itemStack, dataTypeInt);
         for (ImmortalityData.DataTypeBool dataTypeBool : ImmortalityData.DataTypeBool.values())
