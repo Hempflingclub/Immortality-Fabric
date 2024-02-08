@@ -30,7 +30,6 @@ public final class ImmortalityStatus {
     public static final int regrowingImmortalityLiverHealthAddition = -10; //TODO: Maybe remove or implement? Not sure
     public static final int immortalityHardeningArmorToughnessAddition = 1;
     public static final int immortalityBaseArmorAddition = 1;
-    public static final int lifeElixirHealthAddition = 2;
     public static final int REQ_BONUS_HEARTS_FOR_IMMORTALITY = 10;
     public static final int REQ_DEATHS_FOR_ALPHA_IMMORTALITY = 50;
     public static final int REQ_BANE_OF_LIFE_DEATHS_FOR_TEMP_GAMMA_IMMORTALITY = 3;
@@ -430,7 +429,7 @@ public final class ImmortalityStatus {
     }
 
     /**
-     * TODO:
+     * TODO: HIGH PRIORITY
      * Should be used on a fixed timer, to actively apply logic
      * and also run on specific Events (Death, Dimension Hopping, Using specific Items)
      */
@@ -488,7 +487,6 @@ public final class ImmortalityStatus {
         }
 
         private void doPlayerLogicInt() {
-            //TODO:
             if (dataType == ImmortalityData.DataTypeInt.ImmortalDeaths) {
                 checkLifeElixir();
                 checkTemporaryNegativeHearts();
@@ -525,7 +523,6 @@ public final class ImmortalityStatus {
         }
 
         private void doPlayerLogicBool() {
-            //Todo:
             if (dataType == ImmortalityData.DataTypeBool.AlphaImmortality)
                 checkEveryImmortality();
             else if (dataType == ImmortalityData.DataTypeBool.BetaImmortality)
@@ -944,7 +941,6 @@ public final class ImmortalityStatus {
          * Also clears if no type of Immortality
          */
         private void checkBonusArmor() {
-            //TODO
             //Check Immortality, and Immortal Deaths to find the right Bonus Armor to apply
             //Apply Bonus Armor accordingly / clear if no Immortality
             {
@@ -1002,7 +998,6 @@ public final class ImmortalityStatus {
          * Also clears if no type of Immortality
          */
         private void checkBonusArmorToughness() {
-            //TODO
             //Check Immortality, and Immortal Deaths to find the right Bonus Armor Toughness to apply
             //Apply Bonus Armor Toughness accordingly / clear if no Immortality
             {
@@ -1068,7 +1063,6 @@ public final class ImmortalityStatus {
 */
 
         private void doLivingEntityLogic() {
-            //TODO:
             if (livingEntity instanceof ServerPlayerEntity serverPlayer) {
                 this.serverPlayerEntity = serverPlayer;
                 doPlayerLogic();
