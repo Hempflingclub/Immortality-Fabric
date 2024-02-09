@@ -3,10 +3,12 @@ package net.hempflingclub.immortality.util;
 import net.hempflingclub.immortality.entitys.ImmortalWither.ImmortalWither;
 import net.hempflingclub.immortality.event.PlayerTickHandler;
 import net.hempflingclub.immortality.item.ImmortalityItems;
+import net.hempflingclub.immortality.statuseffect.ModEffectRegistry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.*;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
@@ -18,6 +20,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 import net.minecraft.world.World;
 
 import java.util.*;
@@ -707,14 +710,22 @@ public final class ImmortalityStatus {
         }
 
         /**
-         * Will clear Negative Hearts, if not killed within ImmortalityStatus.REQ_SECONDS_COOLDOWN_TO_CLEAR_GAMMA_IMMORTALITY_DEATHS for higher Type of Immortality than Gamma Immortality
+         * Will clear Negative Hearts,
+         * if not killed within ImmortalityStatus.REQ_SECONDS_COOLDOWN_TO_CLEAR_GAMMA_IMMORTALITY_DEATHS for higher Type of Immortality than Gamma Immortality
          */
         private void checkBaneOfLife() {
             int killedByBaneOfLifeCurrentAmount = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.KilledByBaneOfLifeCurrentAmount);
             if (killedByBaneOfLifeCurrentAmount == 0) return; //Nothing to do
             int currentTimeSeconds = getCurrentTime(this.serverPlayerEntity) / 20;
             int killedByBaneOfLifeTimeSeconds = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.KilledByBaneOfLifeTime) / 20;
-            if (currentTimeSeconds > killedByBaneOfLifeTimeSeconds + ImmortalityStatus.REQ_SECONDS_COOLDOWN_TO_CLEAR_SEMI_IMMORTALITY_DEATHS) {
+            //Time left until clear in secs
+            int diffTimeSeconds = (killedByBaneOfLifeTimeSeconds + ImmortalityStatus.REQ_SECONDS_COOLDOWN_TO_CLEAR_SEMI_IMMORTALITY_DEATHS)-currentTimeSeconds;
+            // Give Bane Of Life effect, to indicate Temporary Status
+            if(killedByBaneOfLifeCurrentAmount>=ImmortalityStatus.REQ_BANE_OF_LIFE_DEATHS_FOR_TEMP_GAMMA_IMMORTALITY)
+                if (!this.serverPlayerEntity.hasStatusEffect(ModEffectRegistry.bane_of_life))
+                    this.serverPlayerEntity.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.bane_of_life, 5 * 20, 0, true, true));
+            //Should be cleared
+            if (diffTimeSeconds<0) {
                 //Clear Bane Of Life Deaths
                 ImmortalityStatus.addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.KilledByBaneOfLifeCurrentAmount, -killedByBaneOfLifeCurrentAmount);
                 //If higher Immortality than Gamma Immortality, instantly regain all lost Hearts
@@ -772,6 +783,8 @@ public final class ImmortalityStatus {
                 addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.GammaImmortalityHeartCooldownSeconds, ImmortalityStatus.BASE_SEMI_IMMORTALITY_HEART_COOLDOWN_BASE_SECONDS);
                 //Regen a Heart
                 addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.TemporaryNegativeHearts, -1);
+                //Give Feedback Message
+                this.serverPlayerEntity.sendMessage(Text.translatable("immortality.status.heart_restored"), true);
             }
         }
 
@@ -912,7 +925,7 @@ public final class ImmortalityStatus {
                 addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.LiverExtractionCooldown, -liverExtractionCooldown);
                 assert isLiverCurrentlyExtracted;
                 toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.LiverCurrentlyExtracted);
-                //TODO: send notification to player, that their liver is extractable again
+                this.serverPlayerEntity.sendMessage(Text.translatable("immortality.status.liver_regrown"), true);
             } else if (isLiverCurrentlyExtracted && liverExtractionCooldown == 0) {
                 //Just Extracted Liver, no Cooldown active yet
                 boolean shouldExtract = true;

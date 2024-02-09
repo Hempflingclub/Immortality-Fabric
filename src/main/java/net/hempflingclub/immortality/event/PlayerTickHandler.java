@@ -11,171 +11,52 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
+import org.spongepowered.include.com.google.common.collect.Iterables;
+
+import java.util.Iterator;
 
 public class PlayerTickHandler implements ServerTickEvents.StartTick {
     public static MinecraftServer minecraftServer;
-    int counter = 0;
+    long counter = 0;//TODO use ImmortalityStatus refactor to use logic here
 
     @Override
     public void onStartTick(MinecraftServer server) {
         if (counter++ % 20 == 0) {
-            counter %= 20;
-            int currentTime = ImmortalityStatus.getCurrentTime(server);
+            //int currentTime = ImmortalityStatus.getCurrentTime(server);
             minecraftServer = server;
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                //Run Stuff
-                if (currentTime % 100 == 0) { // Every 5sec
-                    if (ImmortalityData.getLiverExtracted(ImmortalityStatus.getComponent(player))) {
-                        if (ImmortalityStatus.getRegeneratingHearts(player) != ImmortalityStatus.regrowingImmortalityLiver) {
-                            ImmortalityStatus.addRegrowingLiver(player);
-                        }
-                    }
-                    if (ImmortalityStatus.hasTargetGiftedImmortal(player)) {
-                        if (!(ImmortalityStatus.isSemiImmortal(player) || ImmortalityStatus.getLiverImmortality(player) || ImmortalityStatus.getImmortality(player) || ImmortalityStatus.isTrueImmortal(player)) || ImmortalityStatus.getTargetGiftedImmortalLivingEntity(player) == null) {
-                            ImmortalityStatus.removeTargetGiftedImmortal(player);
-                        }
-                    }
-                }
-                if (ImmortalityData.getHeartExtractionAmount(ImmortalityStatus.getComponent(player)) > 0) {
-                    ImmortalityData.setHeartExtractionAmount(ImmortalityStatus.getComponent(player), 0);
-                }
-                if (currentTime >= (ImmortalityStatus.getLifeElixirDropTime(player) + 300 * 20)) {
-                    ImmortalityStatus.resetLifeElixirDropTime(player);
-                }
-                if (ImmortalityStatus.getKilledByBaneOfLifeCount(player) > 0) {
-                    if (ImmortalityStatus.getImmortality(player) || ImmortalityStatus.isTrueImmortal(player)) {
-                        //Give Effect
-                        if (!player.hasStatusEffect(ModEffectRegistry.bane_of_life)) {
-                            player.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.bane_of_life, 5 * 20, 0, true, true));
-                        }
-                    }
-                    if (currentTime >= (ImmortalityStatus.getKilledByBaneOfLifeTime(player) + 60 * 20) || ImmortalityStatus.getKilledByBaneOfLifeTime(player) == 0) {
-                        if ((ImmortalityStatus.getImmortality(player) || ImmortalityStatus.isTrueImmortal(player)) && ImmortalityStatus.isSemiImmortal(player)) {
-                            ImmortalityStatus.convertSemiImmortalityIntoOtherImmortality(player);
-                        }
-                        ImmortalityStatus.resetKilledByBaneOfLifeTime(player);
-                        ImmortalityStatus.resetKilledByBaneOfLifeCount(player);
-                    }
-                } else if ((ImmortalityStatus.getNegativeHearts(player) > 0) && (currentTime >= (ImmortalityStatus.getSemiImmortalityLostHeartTime(player) + 300 * 20)) && ImmortalityStatus.isSemiImmortal(player)) {
-                    ImmortalityStatus.removeOneNegativeHeart(player);
-                    player.setHealth(player.getHealth() + 2);
-                    player.sendMessage(Text.translatable("immortality.status.heart_restored"), true);
-                    if (ImmortalityStatus.getNegativeHearts(player) > 0) {
-                        ImmortalityStatus.setSemiImmortalityLostHeartTime(player, currentTime);
-                    } else {
-                        ImmortalityStatus.resetSemiImmortalityLostHeartTime(player);
-                    }
-                } else if (currentTime % 600 == 0) {
-                    if (ImmortalityStatus.getLifeElixirBonus(player) > ImmortalityStatus.getLifeElixirAppliedHealth(player)) {
-                        for (int i = 0; i < ((ImmortalityStatus.getLifeElixirBonus(player) - ImmortalityStatus.getLifeElixirAppliedHealth(player)) / ImmortalityStatus.lifeElixirHealth); i++) {
-                            ImmortalityStatus.addLifeElixirBonusHealth(player);
-                        }
-                    } else if (ImmortalityStatus.getLiverHearts(player) > ImmortalityStatus.getBonusHearts(player)) {
-                        for (int i = 0; i < ((ImmortalityStatus.getLiverHearts(player) - ImmortalityStatus.getBonusHearts(player)) / ImmortalityStatus.immortalityHearts); i++) {
-                            ImmortalityStatus.addImmortalityHeartsBonus(player);
-                        }
-                    } else if (ImmortalityStatus.getLostHearts(player) > ImmortalityStatus.getNegativeHearts(player)) {
-                        for (int i = 0; i < ((ImmortalityStatus.getLostHearts(player) - ImmortalityStatus.getNegativeHearts(player)) / ImmortalityStatus.immortalityHearts); i++) {
-                            ImmortalityStatus.addNegativeHeartsBonus(player);
-                        }
-                    } else if (ImmortalityStatus.getArmorBonus(player) > ImmortalityStatus.getAppliedBonusArmor(player)) {
-                        for (int i = 0; i < ((ImmortalityStatus.getArmorBonus(player) - ImmortalityStatus.getAppliedBonusArmor(player)) / ImmortalityStatus.immortalityBaseArmor); i++) {
-                            ImmortalityStatus.addImmortalityArmorBonus(player);
-                        }
-                    } else if (ImmortalityStatus.getArmorTBonus(player) > ImmortalityStatus.getAppliedBonusArmorT(player)) {
-                        for (int i = 0; i < ((ImmortalityStatus.getArmorTBonus(player) - ImmortalityStatus.getAppliedBonusArmorT(player)) / ImmortalityStatus.immortalityHardening); i++) {
-                            ImmortalityStatus.addImmortalityArmorTBonus(player);
-                        }
-                    }
-                }
-                if (ImmortalityStatus.getImmortality(player)) {
-                    if (ImmortalityStatus.getLiverImmortality(player)) {
-                        //Illegal State shouldn't have both
-                        ImmortalityStatus.removeFalseImmortality(player);
-                        ImmortalityStatus.setImmortality(player, false);
-                    }
-                    if (ImmortalityData.getLiverExtracted(ImmortalityStatus.getComponent(player))) {
-                        //Give Extraction debuffs
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 20 * 5, 0, false, false));
-                        if (currentTime >= (ImmortalityData.getLiverExtractionTime(ImmortalityStatus.getComponent(player)) + (20 * 300)) || ImmortalityData.getLiverExtractionTime(ImmortalityStatus.getComponent(player)) == 0) { // After 5mins Liver has regrown
-                            ImmortalityStatus.removeRegrowing(player);
-                            ImmortalityData.setLiverExtracted(ImmortalityStatus.getComponent(player), false);
-                            player.sendMessage(Text.translatable("immortality.status.liver_regrown"), true);
-                        }
-                    }
-                    //Include Functionality for Death Leveling
-                    int immortalDeaths = ImmortalityData.getImmortalDeaths(ImmortalityStatus.getComponent(player));
-                    if (ImmortalityStatus.isTrueImmortal(player)) {
-                        //He has Trilogy and Required Hearts
-                        //Radiating Immortality repairing unliving things
-                        boolean repaired = false;
-                        for (ItemStack item : player.getArmorItems()) {
-                            if (item.isDamaged() && !repaired) {
-                                item.setDamage(item.getDamage() - 1);
-                                repaired = true;
-                            }
-                        }
-                        for (ItemStack item : player.getHandItems()) {
-                            if (item.isDamaged() && !repaired) {
-                                item.setDamage(item.getDamage() - 1);
-                                repaired = true;
-                            }
-                        }
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 20 * 5, 2, false, false));
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20 * 5, 1, false, false));
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, 20 * 5, 0, false, false));
-                        player.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.trilogy, 20 * 5, 0, false, false));
-                    } else if (immortalDeaths >= 25) {
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 20 * 5, 2, false, false));
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20 * 5, 1, false, false));
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.STRENGTH, 20 * 5, 0, false, false));
-                        player.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.immortality, 20 * 5, 0, false, false));
-                    } else if (immortalDeaths >= 20) {
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 20 * 5, 2, false, false));
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20 * 5, 1, false, false));
-                        player.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.immortality, 20 * 5, 0, false, false));
-                    } else if (immortalDeaths >= 15) {
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 20 * 5, 2, false, false));
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20 * 5, 0, false, false));
-                        player.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.immortality, 20 * 5, 0, false, false));
-                    } else if (immortalDeaths >= 10) {
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 20 * 5, 1, false, false));
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 20 * 5, 0, false, false));
-                        player.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.immortality, 20 * 5, 0, false, false));
-                    } else if (immortalDeaths >= 5) {
-                        player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 20 * 5, 0, false, false));
-                        player.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.immortality, 20 * 5, 0, false, false));
-                    } else {
-                        player.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.immortality, 20 * 5, 0, false, false));
-                    }
-                    if (player.isOnFire()) {
-                        player.getWorld().playSoundFromEntity(null, player, SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.PLAYERS, 1, 1);
-                        player.setOnFire(false);
-                    }
-                    if (ImmortalityStatus.isSemiImmortal(player)) {
-                        player.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.semi_immortality, 20 * 5, 0, false, false));
-                    }
-                } else if (ImmortalityStatus.getLiverImmortality(player)) {
-                    if (player.isOnFire()) {
-                        player.getWorld().playSoundFromEntity(null, player, SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.PLAYERS, 1, 1);
-                        player.setOnFire(false);
-                    }
-                    player.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.liver_immortality, 20 * 5, 0, false, false));
-                } else if (ImmortalityStatus.isSemiImmortal(player)) {
-                    player.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.semi_immortality, 20 * 5, 0, false, false));
-                }
-                //Not Immortal
-                if (ImmortalityStatus.getVoidHeart(player)) {
-                    if (!ImmortalityStatus.isTrueImmortal(player)) {
-                        player.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.void_heart, 20 * 5, 0, false, false));
-                    }
-                    if (currentTime % 600 == 0 || (ImmortalityStatus.isTrueImmortal(player)) || (currentTime % 150 == 0 && (ImmortalityStatus.getImmortality(player) || ImmortalityStatus.isSemiImmortal(player)))) {
-                        player.getHungerManager().add(1, 1);
-                    }
-                }
-                //Not Void Heart
+                //Every 5sec
+                if (counter % 100 == 0) {
+                    //TODO: Reduce all applicable Cooldowns by 5sec, if not EXACTLY 0, and also not set to 0 by itself
 
-                //Not Liver Immortality
+                    //Alpha Immortal Item Healing Effect
+                    if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.AlphaImmortality)) {
+                        Iterable<ItemStack> inventory = Iterables.concat(player.getArmorItems(), player.getHandItems());
+                        for (ItemStack item : inventory)
+                            if (item.isDamaged()) {
+                                //Don't give more than full repair
+                                int newDamage = Math.max(0, item.getDamage() - 5);
+                                item.setDamage(newDamage);
+                                //Only repair 1 Damage/sec, and for at most 1 Item
+                                break;
+                            }
+                    }
+
+                }
+                //Every 30 sec
+                if (counter % 600 == 0) {
+                    //Check every state of general Logic for Player
+                    ImmortalityStatus.specificAllLogicApplier(player);
+                    //Apply Void Heart + boost per Immortality Stage
+                    if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.VoidHeart)) {
+                        int foodRegen = 1;
+                        if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.DeltaImmortality)) foodRegen += 1;
+                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.GammaImmortality)) foodRegen += 2;
+                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.BetaImmortality)) foodRegen += 3;
+                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.AlphaImmortality)) foodRegen += 4;
+                        player.getHungerManager().add(foodRegen, foodRegen);
+                    }
+                }
             }
         }
     }
