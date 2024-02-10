@@ -48,7 +48,7 @@ public final class ImmortalityStatus {
     public static final String NEGATIVE_HEALTH_KEY = "negative-health";
     public static final String BONUS_ARMOR_KEY = "bonus-armor";
     public static final String BONUS_ARMOR_TOUGHNESS_KEY = "bonus-armor-toughness";
-    public static final int DEATHS_FOR_BONUS_ARMOR = 5; //TODO: Implement these Scalings
+    public static final int DEATHS_FOR_BONUS_ARMOR = 5;
     public static final int DEATHS_FOR_BONUS_ARMOR_SCALING = 2;
     public static final int DEATHS_FOR_BONUS_ARMOR_TOUGHNESS = 20;
     public static final int DEATHS_FOR_BONUS_ARMOR_TOUGHNESS_SCALING = 2;
@@ -435,6 +435,8 @@ public final class ImmortalityStatus {
 
     /**
      * TODO: HIGH PRIORITY
+     * TODO: DONE: fixed Timer
+     * TODO: TBD: Death, Dimension Hopping, Using specific Items
      * Should be used on a fixed timer, to actively apply logic
      * and also run on specific Events (Death, Dimension Hopping, Using specific Items)
      */
@@ -485,7 +487,6 @@ public final class ImmortalityStatus {
                 doItemStackLogic();
         }
 
-        //TODO: Cooldowns with Time Support where is wasnt
         private void doPlayerLogic() {
             if (dataType instanceof DataTypeInt) doPlayerLogicInt();
             else if (dataType instanceof DataTypeBool) doPlayerLogicBool();
@@ -894,7 +895,6 @@ public final class ImmortalityStatus {
                     }
                 }
             }
-            //TODO: Global reducing of lifeElixirDropCooldown, except when exactly 0, but without setting to 0 itself
             int lifeElixirDropCooldown = getInt(this.serverPlayerEntity, DataTypeInt.LifeElixirDropCooldownSeconds);
             if (lifeElixirDropCooldown < 0) {
                 //Logic to Handle Life Elixir Drop on Final Killing a Gamma Immortal or higher
@@ -921,7 +921,6 @@ public final class ImmortalityStatus {
             boolean isLiverCurrentlyExtracted = getBool(this.serverPlayerEntity, DataTypeBool.LiverCurrentlyExtracted);
             int liverExtractionCooldown = getInt(this.serverPlayerEntity, DataTypeInt.LiverExtractionCooldownSeconds);
             boolean isDeltaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.DeltaImmortality);
-            //TODO: implicitly no longer reducing Cooldown if exactly 0, in global timer
             //Reset liverExtraction status after Cooldown
             if (liverExtractionCooldown < 0) {
                 addGeneric(this.serverPlayerEntity, DataTypeInt.LiverExtractionCooldownSeconds, -liverExtractionCooldown);
@@ -935,7 +934,7 @@ public final class ImmortalityStatus {
                 //If not extracting reset all
                 if (!shouldExtract) {
                     toggleGeneric(this.serverPlayerEntity, DataTypeBool.LiverCurrentlyExtracted);
-                    //TODO: Notify, Liver not extractable
+                    this.serverPlayerEntity.sendMessage(Text.literal("Liver not regrown"),true);
                     return;
                 }
                 //If extracting increment cooldown, and drop Liver
