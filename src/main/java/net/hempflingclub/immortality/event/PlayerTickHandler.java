@@ -61,14 +61,10 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                     //Apply Void Heart + boost per Immortality Stage
                     if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.VoidHeart)) {
                         int foodRegen = 1;
-                        if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.DeltaImmortality))
-                            foodRegen += 1;
-                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.GammaImmortality))
-                            foodRegen += 2;
-                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.BetaImmortality))
-                            foodRegen += 3;
-                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.AlphaImmortality))
-                            foodRegen += 4;
+                        if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.DeltaImmortality)) foodRegen += 1;
+                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.GammaImmortality)) foodRegen += 2;
+                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.BetaImmortality)) foodRegen += 3;
+                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.AlphaImmortality)) foodRegen += 4;
                         player.getHungerManager().add(foodRegen, foodRegen);
                     }
                 }
