@@ -1,19 +1,15 @@
 package net.hempflingclub.immortality.event;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.hempflingclub.immortality.statuseffect.ModEffectRegistry;
 import net.hempflingclub.immortality.util.ImmortalityData;
+import net.hempflingclub.immortality.util.ImmortalityData.DataTypeInt;
 import net.hempflingclub.immortality.util.ImmortalityStatus;
-import net.minecraft.entity.effect.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
 import org.spongepowered.include.com.google.common.collect.Iterables;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 
 public class PlayerTickHandler implements ServerTickEvents.StartTick {
     public static MinecraftServer minecraftServer;
@@ -27,8 +23,23 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
                 //Every 5sec
                 if (counter % 100 == 0) {
-                    //TODO: Reduce all applicable Cooldowns by 5sec, if not EXACTLY 0, and also not set to 0 by itself
-
+                    //Reducing All every Cooldown by 5sec (except at 0)
+                    {
+                        ArrayList<DataTypeInt> dataTypesCooldown = new ArrayList<>();
+                        dataTypesCooldown.add(DataTypeInt.GammaImmortalityHeartCooldownSeconds);
+                        dataTypesCooldown.add(DataTypeInt.LiverExtractionCooldownSeconds);
+                        dataTypesCooldown.add(DataTypeInt.LifeElixirDropCooldownSeconds);
+                        for (DataTypeInt dataTypeCooldown : dataTypesCooldown) {
+                            int secondsToReduce = 5;
+                            int currentCooldownSeconds = ImmortalityStatus.getInt(player, dataTypeCooldown);
+                            //Not do anything on 0 sec Cooldown
+                            if (currentCooldownSeconds == 0) continue;
+                            //Making sure to not hit 0 by itself
+                            if (currentCooldownSeconds - secondsToReduce == 0) secondsToReduce--;
+                            //Reduce by 5 (6) seconds
+                            ImmortalityStatus.addGeneric(player, dataTypeCooldown, -secondsToReduce);
+                        }
+                    }
                     //Alpha Immortal Item Healing Effect
                     if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.AlphaImmortality)) {
                         Iterable<ItemStack> inventory = Iterables.concat(player.getArmorItems(), player.getHandItems());
@@ -50,10 +61,14 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                     //Apply Void Heart + boost per Immortality Stage
                     if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.VoidHeart)) {
                         int foodRegen = 1;
-                        if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.DeltaImmortality)) foodRegen += 1;
-                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.GammaImmortality)) foodRegen += 2;
-                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.BetaImmortality)) foodRegen += 3;
-                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.AlphaImmortality)) foodRegen += 4;
+                        if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.DeltaImmortality))
+                            foodRegen += 1;
+                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.GammaImmortality))
+                            foodRegen += 2;
+                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.BetaImmortality))
+                            foodRegen += 3;
+                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.AlphaImmortality))
+                            foodRegen += 4;
                         player.getHungerManager().add(foodRegen, foodRegen);
                     }
                 }

@@ -32,9 +32,9 @@ public final class ImmortalityData {
         KilledByBaneOfLifeTime,
         KilledByBaneOfLifeCurrentAmount,
         LiverExtractionAmount,
-        LiverExtractionCooldown,
+        LiverExtractionCooldownSeconds,
         LifeElixirTime,
-        LifeElixirDropCooldown,
+        LifeElixirDropCooldownSeconds,
         BonusHearts,
         TemporaryNegativeHearts, //Logically decide based on if Semi/HeartCooldown or False Immortal if to regen or keep
         BonusArmor,

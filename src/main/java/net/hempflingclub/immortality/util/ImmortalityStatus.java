@@ -4,6 +4,8 @@ import net.hempflingclub.immortality.entitys.ImmortalWither.ImmortalWither;
 import net.hempflingclub.immortality.event.PlayerTickHandler;
 import net.hempflingclub.immortality.item.ImmortalityItems;
 import net.hempflingclub.immortality.statuseffect.ModEffectRegistry;
+import net.hempflingclub.immortality.util.ImmortalityData.DataTypeBool;
+import net.hempflingclub.immortality.util.ImmortalityData.DataTypeInt;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
@@ -52,7 +54,7 @@ public final class ImmortalityStatus {
     public static final int DEATHS_FOR_BONUS_ARMOR_TOUGHNESS_SCALING = 2;
     public static final int COOLDOWN_SECONDS_FOR_LIVER_REGROWTH = 600;
 
-    public static int incrementGeneric(ServerPlayerEntity serverPlayerEntity, ImmortalityData.DataTypeInt dataTypeInt) {
+    public static int incrementGeneric(ServerPlayerEntity serverPlayerEntity, DataTypeInt dataTypeInt) {
         IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityPlayerComponent, dataTypeInt);
         int newValue = incrementGeneric(dataTypes);
@@ -60,7 +62,7 @@ public final class ImmortalityStatus {
         return newValue;
     }
 
-    public static int incrementGeneric(LivingEntity livingEntity, ImmortalityData.DataTypeInt dataTypeInt) {
+    public static int incrementGeneric(LivingEntity livingEntity, DataTypeInt dataTypeInt) {
         IImmortalityLivingEntityComponent iImmortalityLivingEntityComponent = getComponent(livingEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityLivingEntityComponent, dataTypeInt);
         int newValue = incrementGeneric(dataTypes);
@@ -68,7 +70,7 @@ public final class ImmortalityStatus {
         return newValue;
     }
 
-    public static int incrementGeneric(ItemStack itemStack, ImmortalityData.DataTypeInt dataTypeInt) {
+    public static int incrementGeneric(ItemStack itemStack, DataTypeInt dataTypeInt) {
         IImmortalityItemComponent iImmortalityItemComponent = getComponent(itemStack);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityItemComponent, dataTypeInt);
         int newValue = incrementGeneric(dataTypes);
@@ -76,7 +78,7 @@ public final class ImmortalityStatus {
         return newValue;
     }
 
-    public static int incrementGeneric(IImmortalityComponent something, ImmortalityData.DataTypeInt dataTypeInt) {
+    public static int incrementGeneric(IImmortalityComponent something, DataTypeInt dataTypeInt) {
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(something, dataTypeInt);
         int newValue = incrementGeneric(dataTypes);
         logicApplier(something, dataTypeInt);
@@ -87,7 +89,7 @@ public final class ImmortalityStatus {
         return addGeneric(dataTypes, 1);
     }
 
-    public static boolean toggleGeneric(ServerPlayerEntity serverPlayerEntity, ImmortalityData.DataTypeBool dataTypeBool) {
+    public static boolean toggleGeneric(ServerPlayerEntity serverPlayerEntity, DataTypeBool dataTypeBool) {
         IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityPlayerComponent, dataTypeBool);
         boolean newValue = toggleGeneric(dataTypes);
@@ -95,7 +97,7 @@ public final class ImmortalityStatus {
         return newValue;
     }
 
-    public static boolean toggleGeneric(LivingEntity livingEntity, ImmortalityData.DataTypeBool dataTypeBool) {
+    public static boolean toggleGeneric(LivingEntity livingEntity, DataTypeBool dataTypeBool) {
         IImmortalityLivingEntityComponent iImmortalityLivingEntityComponent = getComponent(livingEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityLivingEntityComponent, dataTypeBool);
         boolean newValue = toggleGeneric(dataTypes);
@@ -103,7 +105,7 @@ public final class ImmortalityStatus {
         return newValue;
     }
 
-    public static boolean toggleGeneric(ItemStack itemStack, ImmortalityData.DataTypeBool dataTypeBool) {
+    public static boolean toggleGeneric(ItemStack itemStack, DataTypeBool dataTypeBool) {
         IImmortalityItemComponent iImmortalityItemComponent = getComponent(itemStack);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityItemComponent, dataTypeBool);
         boolean newValue = toggleGeneric(dataTypes);
@@ -111,7 +113,7 @@ public final class ImmortalityStatus {
         return newValue;
     }
 
-    public static boolean toggleGeneric(IImmortalityComponent something, ImmortalityData.DataTypeBool dataTypeBool) {
+    public static boolean toggleGeneric(IImmortalityComponent something, DataTypeBool dataTypeBool) {
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(something, dataTypeBool);
         boolean newValue = toggleGeneric(dataTypes);
         logicApplier(something, dataTypeBool);
@@ -123,22 +125,22 @@ public final class ImmortalityStatus {
         return dataTypes.set(!curValue);
     }
 
-    public static int getInt(ServerPlayerEntity serverPlayerEntity, ImmortalityData.DataTypeInt dataTypeInt) {
+    public static int getInt(ServerPlayerEntity serverPlayerEntity, DataTypeInt dataTypeInt) {
         IImmortalityComponent immortalityComponent = getComponent(serverPlayerEntity);
         return getInt(immortalityComponent, dataTypeInt);
     }
 
-    public static int getInt(LivingEntity livingEntity, ImmortalityData.DataTypeInt dataTypeInt) {
+    public static int getInt(LivingEntity livingEntity, DataTypeInt dataTypeInt) {
         IImmortalityComponent immortalityComponent = getComponent(livingEntity);
         return getInt(immortalityComponent, dataTypeInt);
     }
 
-    public static int getInt(ItemStack itemStack, ImmortalityData.DataTypeInt dataTypeInt) {
+    public static int getInt(ItemStack itemStack, DataTypeInt dataTypeInt) {
         IImmortalityComponent immortalityComponent = getComponent(itemStack);
         return getInt(immortalityComponent, dataTypeInt);
     }
 
-    public static int getInt(IImmortalityComponent something, ImmortalityData.DataTypeInt dataTypeInt) {
+    public static int getInt(IImmortalityComponent something, DataTypeInt dataTypeInt) {
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(something, dataTypeInt);
         return getInt(dataTypes);
     }
@@ -147,22 +149,22 @@ public final class ImmortalityStatus {
         return dataTypes.readInt();
     }
 
-    public static boolean getBool(ServerPlayerEntity serverPlayerEntity, ImmortalityData.DataTypeBool dataTypeBool) {
+    public static boolean getBool(ServerPlayerEntity serverPlayerEntity, DataTypeBool dataTypeBool) {
         IImmortalityComponent immortalityComponent = getComponent(serverPlayerEntity);
         return getBool(immortalityComponent, dataTypeBool);
     }
 
-    public static boolean getBool(LivingEntity livingEntity, ImmortalityData.DataTypeBool dataTypeBool) {
+    public static boolean getBool(LivingEntity livingEntity, DataTypeBool dataTypeBool) {
         IImmortalityComponent immortalityComponent = getComponent(livingEntity);
         return getBool(immortalityComponent, dataTypeBool);
     }
 
-    public static boolean getBool(ItemStack itemStack, ImmortalityData.DataTypeBool dataTypeBool) {
+    public static boolean getBool(ItemStack itemStack, DataTypeBool dataTypeBool) {
         IImmortalityComponent immortalityComponent = getComponent(itemStack);
         return getBool(immortalityComponent, dataTypeBool);
     }
 
-    public static boolean getBool(IImmortalityComponent something, ImmortalityData.DataTypeBool dataTypeBool) {
+    public static boolean getBool(IImmortalityComponent something, DataTypeBool dataTypeBool) {
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(something, dataTypeBool);
         return getBool(dataTypes);
     }
@@ -171,7 +173,7 @@ public final class ImmortalityStatus {
         return dataTypes.readBool();
     }
 
-    public static int addGeneric(ServerPlayerEntity serverPlayerEntity, ImmortalityData.DataTypeInt dataTypeInt, int addition) {
+    public static int addGeneric(ServerPlayerEntity serverPlayerEntity, DataTypeInt dataTypeInt, int addition) {
         IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityPlayerComponent, dataTypeInt);
         int newValue = addGeneric(dataTypes, addition);
@@ -179,7 +181,7 @@ public final class ImmortalityStatus {
         return newValue;
     }
 
-    public static int addGeneric(LivingEntity livingEntity, ImmortalityData.DataTypeInt dataTypeInt, int addition) {
+    public static int addGeneric(LivingEntity livingEntity, DataTypeInt dataTypeInt, int addition) {
         IImmortalityLivingEntityComponent iImmortalityLivingEntityComponent = getComponent(livingEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityLivingEntityComponent, dataTypeInt);
         int newValue = addGeneric(dataTypes, addition);
@@ -187,7 +189,7 @@ public final class ImmortalityStatus {
         return newValue;
     }
 
-    public static int addGeneric(ItemStack itemStack, ImmortalityData.DataTypeInt dataTypeInt, int addition) {
+    public static int addGeneric(ItemStack itemStack, DataTypeInt dataTypeInt, int addition) {
         IImmortalityItemComponent iImmortalityItemComponent = getComponent(itemStack);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityItemComponent, dataTypeInt);
         int newValue = addGeneric(dataTypes, addition);
@@ -195,7 +197,7 @@ public final class ImmortalityStatus {
         return newValue;
     }
 
-    public static int addGeneric(IImmortalityComponent something, ImmortalityData.DataTypeInt dataTypeInt, int addition) {
+    public static int addGeneric(IImmortalityComponent something, DataTypeInt dataTypeInt, int addition) {
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(something, dataTypeInt);
         int newValue = addGeneric(dataTypes, addition);
         logicApplier(something, dataTypeInt);
@@ -288,26 +290,26 @@ public final class ImmortalityStatus {
     }
     public static void specificAllLogicApplier(ServerPlayerEntity serverPlayerEntity) {
         serverPlayerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
-        for (ImmortalityData.DataTypeInt dataTypeInt : ImmortalityData.DataTypeInt.values())
+        for (DataTypeInt dataTypeInt : DataTypeInt.values())
             new SpecificLogicApplier(serverPlayerEntity, dataTypeInt);
-        for (ImmortalityData.DataTypeBool dataTypeBool : ImmortalityData.DataTypeBool.values())
+        for (DataTypeBool dataTypeBool : DataTypeBool.values())
             new SpecificLogicApplier(serverPlayerEntity, dataTypeBool);
 
     }
 
     public static void specificAllLogicApplier(LivingEntity livingEntity) {
         livingEntity.syncComponent(IImmortalityLivingEntityComponent.KEY);
-        for (ImmortalityData.DataTypeInt dataTypeInt : ImmortalityData.DataTypeInt.values())
+        for (DataTypeInt dataTypeInt : DataTypeInt.values())
             new SpecificLogicApplier(livingEntity, dataTypeInt);
-        for (ImmortalityData.DataTypeBool dataTypeBool : ImmortalityData.DataTypeBool.values())
+        for (DataTypeBool dataTypeBool : DataTypeBool.values())
             new SpecificLogicApplier(livingEntity, dataTypeBool);
     }
 
     public static void specificAllLogicApplier(ItemStack itemStack) {
         //itemStack.syncComponent(IImmortalityItemComponent.KEY); // Sadly this cannot be done, but should probably be fine
-        for (ImmortalityData.DataTypeInt dataTypeInt : ImmortalityData.DataTypeInt.values())
+        for (DataTypeInt dataTypeInt : DataTypeInt.values())
             new SpecificLogicApplier(itemStack, dataTypeInt);
-        for (ImmortalityData.DataTypeBool dataTypeBool : ImmortalityData.DataTypeBool.values())
+        for (DataTypeBool dataTypeBool : DataTypeBool.values())
             new SpecificLogicApplier(itemStack, dataTypeBool);
     }
 
@@ -318,9 +320,9 @@ public final class ImmortalityStatus {
      */
     public static void removeEverything(ServerPlayerEntity serverPlayerEntity) {
         IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
-        for (ImmortalityData.DataTypeBool dataTypeBool : ImmortalityData.DataTypeBool.values())
+        for (DataTypeBool dataTypeBool : DataTypeBool.values())
             new ImmortalityData.DataTypes(iImmortalityPlayerComponent, dataTypeBool, false); //Will set all possible states to false
-        for (ImmortalityData.DataTypeInt dataTypeInt : ImmortalityData.DataTypeInt.values())
+        for (DataTypeInt dataTypeInt : DataTypeInt.values())
             new ImmortalityData.DataTypes(iImmortalityPlayerComponent, dataTypeInt, 0); //Will set all possible states to 0
         serverPlayerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
     }
@@ -328,11 +330,11 @@ public final class ImmortalityStatus {
     public static void removeEverythingExcept(ServerPlayerEntity serverPlayerEntity, ImmortalityData.DataType... dataType) {
         IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
         ArrayList<ImmortalityData.DataType> dataTypesExceptions = new ArrayList<ImmortalityData.DataType>(Arrays.asList(dataType));
-        for (ImmortalityData.DataTypeBool dataTypeBool : ImmortalityData.DataTypeBool.values())
+        for (DataTypeBool dataTypeBool : DataTypeBool.values())
             if (!dataTypesExceptions.contains(dataTypeBool))
                 new ImmortalityData.DataTypes(iImmortalityPlayerComponent, dataTypeBool, false); //Will set all possible states except provided exceptions to false
 
-        for (ImmortalityData.DataTypeInt dataTypeInt : ImmortalityData.DataTypeInt.values())
+        for (DataTypeInt dataTypeInt : DataTypeInt.values())
             if (!dataTypesExceptions.contains(dataTypeInt))
                 new ImmortalityData.DataTypes(iImmortalityPlayerComponent, dataTypeInt, 0); //Will set all possible states except provided exceptions to 0
         serverPlayerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
@@ -473,8 +475,8 @@ public final class ImmortalityStatus {
 
         private void doLogic() {
             this.dataTypes = new ImmortalityData.DataTypes(this.immortalityComponent, this.dataType);
-            if (dataType instanceof ImmortalityData.DataTypeInt) valueInt = dataTypes.readInt();
-            if (dataType instanceof ImmortalityData.DataTypeBool) valueBool = dataTypes.readBool();
+            if (dataType instanceof DataTypeInt) valueInt = dataTypes.readInt();
+            if (dataType instanceof DataTypeBool) valueBool = dataTypes.readBool();
             if (this.isType == ImmortalityStatus.isType.ServerPlayerEntity)
                 doPlayerLogic();
             else if (this.isType == ImmortalityStatus.isType.LivingEntity)
@@ -485,64 +487,64 @@ public final class ImmortalityStatus {
 
         //TODO: Cooldowns with Time Support where is wasnt
         private void doPlayerLogic() {
-            if (dataType instanceof ImmortalityData.DataTypeInt) doPlayerLogicInt();
-            else if (dataType instanceof ImmortalityData.DataTypeBool) doPlayerLogicBool();
+            if (dataType instanceof DataTypeInt) doPlayerLogicInt();
+            else if (dataType instanceof DataTypeBool) doPlayerLogicBool();
         }
 
         private void doPlayerLogicInt() {
-            if (dataType == ImmortalityData.DataTypeInt.ImmortalDeaths) {
+            if (dataType == DataTypeInt.ImmortalDeaths) {
                 checkLifeElixir();
                 checkTemporaryNegativeHearts();
                 checkEveryImmortality();
-            } else if (dataType == ImmortalityData.DataTypeInt.GammaImmortalityHeartCooldownSeconds) {
+            } else if (dataType == DataTypeInt.GammaImmortalityHeartCooldownSeconds) {
                 checkBaneOfLife();
                 checkGammaImmortal();
-            } else if (dataType == ImmortalityData.DataTypeInt.KilledByBaneOfLifeTime) {
+            } else if (dataType == DataTypeInt.KilledByBaneOfLifeTime) {
                 checkBaneOfLife();
                 checkGammaImmortal();
-            } else if (dataType == ImmortalityData.DataTypeInt.KilledByBaneOfLifeCurrentAmount) {
+            } else if (dataType == DataTypeInt.KilledByBaneOfLifeCurrentAmount) {
                 checkBaneOfLife();
                 checkEveryImmortality();
-            } else if (dataType == ImmortalityData.DataTypeInt.LiverExtractionAmount) {
+            } else if (dataType == DataTypeInt.LiverExtractionAmount) {
                 checkLiverExtraction();
-            } else if (dataType == ImmortalityData.DataTypeInt.LiverExtractionCooldown) {
+            } else if (dataType == DataTypeInt.LiverExtractionCooldownSeconds) {
                 checkLiverExtraction();
-            } else if (dataType == ImmortalityData.DataTypeInt.LifeElixirTime) {
+            } else if (dataType == DataTypeInt.LifeElixirTime) {
                 checkLifeElixir();
-            } else if (dataType == ImmortalityData.DataTypeInt.LifeElixirDropCooldown) {
+            } else if (dataType == DataTypeInt.LifeElixirDropCooldownSeconds) {
                 checkLifeElixir();
-            } else if (dataType == ImmortalityData.DataTypeInt.BonusHearts) {
+            } else if (dataType == DataTypeInt.BonusHearts) {
                 checkBonusHearts();
                 checkEveryImmortality();
-            } else if (dataType == ImmortalityData.DataTypeInt.TemporaryNegativeHearts)
+            } else if (dataType == DataTypeInt.TemporaryNegativeHearts)
                 checkTemporaryNegativeHearts();
-            else if (dataType == ImmortalityData.DataTypeInt.BonusArmor) {
+            else if (dataType == DataTypeInt.BonusArmor) {
                 checkBonusArmor();
-            } else if (dataType == ImmortalityData.DataTypeInt.BonusArmorToughness) {
+            } else if (dataType == DataTypeInt.BonusArmorToughness) {
                 checkBonusArmorToughness();
-            } else if (dataType == ImmortalityData.DataTypeInt.SoulEnergy) {
+            } else if (dataType == DataTypeInt.SoulEnergy) {
                 checkSoulEnergy();
             }
         }
 
         private void doPlayerLogicBool() {
-            if (dataType == ImmortalityData.DataTypeBool.AlphaImmortality)
+            if (dataType == DataTypeBool.AlphaImmortality)
                 checkEveryImmortality();
-            else if (dataType == ImmortalityData.DataTypeBool.BetaImmortality)
+            else if (dataType == DataTypeBool.BetaImmortality)
                 checkEveryImmortality();
-            else if (dataType == ImmortalityData.DataTypeBool.GammaImmortality)
+            else if (dataType == DataTypeBool.GammaImmortality)
                 checkEveryImmortality();
-            else if (dataType == ImmortalityData.DataTypeBool.DeltaImmortality)
+            else if (dataType == DataTypeBool.DeltaImmortality)
                 checkEveryImmortality();
-            else if (dataType == ImmortalityData.DataTypeBool.ImmortalHeart) {
+            else if (dataType == DataTypeBool.ImmortalHeart) {
                 checkImmortalHeart(); // Ensure Player should actually be able to earn one, if not refund it
                 checkEveryImmortality();
-            } else if (dataType == ImmortalityData.DataTypeBool.VoidHeart)
+            } else if (dataType == DataTypeBool.VoidHeart)
                 checkEveryImmortality();
-            else if (dataType == ImmortalityData.DataTypeBool.ExistingSoulVial) {
-            } else if (dataType == ImmortalityData.DataTypeBool.LiverExtractedEver)
+            else if (dataType == DataTypeBool.ExistingSoulVial) {
+            } else if (dataType == DataTypeBool.LiverExtractedEver)
                 checkEveryImmortality();
-            else if (dataType == ImmortalityData.DataTypeBool.LiverCurrentlyExtracted)
+            else if (dataType == DataTypeBool.LiverCurrentlyExtracted)
                 checkEveryImmortality();
 
         }
@@ -570,19 +572,19 @@ public final class ImmortalityStatus {
             {
                 //Checking if should instead be AlphaImmortality, can be also Gamma Immortal simultaneously
 
-                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.AlphaImmortality);
+                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.AlphaImmortality);
                 if (isAlphaImmortal)
                     return; //Not unsetting True Immortality, just because Target already is True Immortal and some false Immortality value is set
-                boolean voidHeart = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.VoidHeart);
+                boolean voidHeart = getBool(this.serverPlayerEntity, DataTypeBool.VoidHeart);
                 if (!voidHeart) return;
-                boolean liverExtractedEver = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.LiverExtractedEver);
+                boolean liverExtractedEver = getBool(this.serverPlayerEntity, DataTypeBool.LiverExtractedEver);
                 if (!liverExtractedEver) return;
-                int immortalDeaths = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.ImmortalDeaths);
+                int immortalDeaths = getInt(this.serverPlayerEntity, DataTypeInt.ImmortalDeaths);
                 if (immortalDeaths < ImmortalityStatus.REQ_DEATHS_FOR_ALPHA_IMMORTALITY) return;
-                boolean isBetaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.BetaImmortality);
+                boolean isBetaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.BetaImmortality);
                 if (!isBetaImmortal) return; //At least needs to be BetaImmortal
             }
-            toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.AlphaImmortality);
+            toggleGeneric(this.serverPlayerEntity, DataTypeBool.AlphaImmortality);
             //Is Final Form, cannot be removed except for all reset
         }
 
@@ -592,23 +594,23 @@ public final class ImmortalityStatus {
         private void checkBetaImmortal() {
             {
                 //Check if Immortal or should unset Immortality, can be both Beta Immortal and Gamma Immortal
-                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.AlphaImmortality);
-                boolean isBetaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.BetaImmortality);
+                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.AlphaImmortality);
+                boolean isBetaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.BetaImmortality);
                 if (isAlphaImmortal && isBetaImmortal) {
                     //Illegal state, should only be either or
-                    toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.BetaImmortality);
+                    toggleGeneric(this.serverPlayerEntity, DataTypeBool.BetaImmortality);
                     return;
                 }
                 if (isBetaImmortal)
                     return; // If not Alpha Immortal no need to check other states, as Gamma Immortality is allowed
-                boolean isGammaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.GammaImmortality);
+                boolean isGammaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.GammaImmortality);
                 if (!isGammaImmortal) return; //At least needs to be Gamma Immortal
-                int bonusHearts = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusHearts);
+                int bonusHearts = getInt(this.serverPlayerEntity, DataTypeInt.BonusHearts);
                 if (bonusHearts < ImmortalityStatus.REQ_BONUS_HEARTS_FOR_IMMORTALITY) return;
-                boolean immortalHeart = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.ImmortalHeart);
+                boolean immortalHeart = getBool(this.serverPlayerEntity, DataTypeBool.ImmortalHeart);
                 if (!immortalHeart) return;
             }
-            toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.BetaImmortality);
+            toggleGeneric(this.serverPlayerEntity, DataTypeBool.BetaImmortality);
         }
 
         /**
@@ -616,38 +618,38 @@ public final class ImmortalityStatus {
          * Also Checks if it should be kept as a Temporary State for higher types of Immortality
          */
         private void checkGammaImmortal() {
-            boolean isGammaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.GammaImmortality);
+            boolean isGammaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.GammaImmortality);
 
             if (isGammaImmortal) {
                 //Checking if Player should Lose Gamma Immortality
-                boolean isBetaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.BetaImmortality);
-                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.AlphaImmortality);
+                boolean isBetaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.BetaImmortality);
+                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.AlphaImmortality);
                 //Needs Higher Immortality
                 if (!(isBetaImmortal || isAlphaImmortal)) return; // Not removing when Player is only Semi Immortal
-                int killedByBaneOfLifeCurrentAmount = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.KilledByBaneOfLifeCurrentAmount);
+                int killedByBaneOfLifeCurrentAmount = getInt(this.serverPlayerEntity, DataTypeInt.KilledByBaneOfLifeCurrentAmount);
                 // Should keep it, as it's temporary
                 if (killedByBaneOfLifeCurrentAmount >= REQ_BANE_OF_LIFE_DEATHS_FOR_TEMP_GAMMA_IMMORTALITY) return;
                 //Will also clear, when just promoted to Beta Immortality
             } else {
                 //Check if should become Gamma Immortality // Rank Up from Delta Immortality
-                boolean isDeltaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.DeltaImmortality);
+                boolean isDeltaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.DeltaImmortality);
                 if (isDeltaImmortal) {
                     //Promotion Logic
-                    int bonusHearts = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusHearts);
+                    int bonusHearts = getInt(this.serverPlayerEntity, DataTypeInt.BonusHearts);
                     if (bonusHearts < ImmortalityStatus.REQ_BONUS_HEARTS_FOR_IMMORTALITY) return;
                     // That's about it
                 } else {
                     //Temporary State Logic
-                    int killedByBaneOfLifeCurrentAmount = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.KilledByBaneOfLifeCurrentAmount);
+                    int killedByBaneOfLifeCurrentAmount = getInt(this.serverPlayerEntity, DataTypeInt.KilledByBaneOfLifeCurrentAmount);
                     if (killedByBaneOfLifeCurrentAmount < REQ_BANE_OF_LIFE_DEATHS_FOR_TEMP_GAMMA_IMMORTALITY) return;
 
-                    boolean isBetaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.BetaImmortality);
-                    boolean isAlphaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.AlphaImmortality);
+                    boolean isBetaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.BetaImmortality);
+                    boolean isAlphaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.AlphaImmortality);
                     //Needs Higher Immortality
                     if (!(isBetaImmortal || isAlphaImmortal)) return; // Not removing when Player is only Semi Immortal
                 }
             }
-            toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.GammaImmortality);
+            toggleGeneric(this.serverPlayerEntity, DataTypeBool.GammaImmortality);
         }
 
         /**
@@ -655,24 +657,24 @@ public final class ImmortalityStatus {
          */
         private void checkDeltaImmortal() {
             {
-                boolean isDeltaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.DeltaImmortality);
+                boolean isDeltaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.DeltaImmortality);
                 if (!isDeltaImmortal) return;
 
                 //Check if Should still be Delta Immortal
-                boolean isGammaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.GammaImmortality);
-                boolean isBetaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.BetaImmortality);
-                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.AlphaImmortality);
+                boolean isGammaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.GammaImmortality);
+                boolean isBetaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.BetaImmortality);
+                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.AlphaImmortality);
                 // Will check if other has other Immortality
                 if (isGammaImmortal || isBetaImmortal || isAlphaImmortal) {
                     //Turn off Delta Immortality, conflicting with other Immortality
-                    toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.DeltaImmortality);
+                    toggleGeneric(this.serverPlayerEntity, DataTypeBool.DeltaImmortality);
                     return;
                 }
                 //Check if at least 1 Heart is left
                 int maxHealth = (int) this.serverPlayerEntity.getMaxHealth();
                 if (maxHealth >= 2) return;
             }
-            toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.DeltaImmortality);
+            toggleGeneric(this.serverPlayerEntity, DataTypeBool.DeltaImmortality);
         }
 
         /**
@@ -682,7 +684,7 @@ public final class ImmortalityStatus {
             //Checking if Player should earn one, otherwise refund it
             if (shouldEarnOrKeepImmortalHeart()) return; //He won't get it removed
             //Refunding and removing State
-            toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.ImmortalHeart);
+            toggleGeneric(this.serverPlayerEntity, DataTypeBool.ImmortalHeart);
             World world = this.serverPlayerEntity.world;
             double x = this.serverPlayerEntity.getX();
             double y = this.serverPlayerEntity.getY();
@@ -697,12 +699,12 @@ public final class ImmortalityStatus {
          * @return should earn or keep Immortal Heart
          */
         private boolean shouldEarnOrKeepImmortalHeart() {
-            boolean isAlphaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.AlphaImmortality);
+            boolean isAlphaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.AlphaImmortality);
             if (isAlphaImmortal) return true;
-            boolean isBetaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.BetaImmortality);
+            boolean isBetaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.BetaImmortality);
             if (isBetaImmortal) return true;
-            boolean isGammaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.GammaImmortality);
-            int bonusHearts = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusHearts);
+            boolean isGammaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.GammaImmortality);
+            int bonusHearts = getInt(this.serverPlayerEntity, DataTypeInt.BonusHearts);
             if (isGammaImmortal)
                 if (bonusHearts >= ImmortalityStatus.REQ_BONUS_HEARTS_FOR_IMMORTALITY)
                     return true;
@@ -714,10 +716,10 @@ public final class ImmortalityStatus {
          * if not killed within ImmortalityStatus.REQ_SECONDS_COOLDOWN_TO_CLEAR_GAMMA_IMMORTALITY_DEATHS for higher Type of Immortality than Gamma Immortality
          */
         private void checkBaneOfLife() {
-            int killedByBaneOfLifeCurrentAmount = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.KilledByBaneOfLifeCurrentAmount);
+            int killedByBaneOfLifeCurrentAmount = getInt(this.serverPlayerEntity, DataTypeInt.KilledByBaneOfLifeCurrentAmount);
             if (killedByBaneOfLifeCurrentAmount == 0) return; //Nothing to do
             int currentTimeSeconds = getCurrentTime(this.serverPlayerEntity) / 20;
-            int killedByBaneOfLifeTimeSeconds = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.KilledByBaneOfLifeTime) / 20;
+            int killedByBaneOfLifeTimeSeconds = getInt(this.serverPlayerEntity, DataTypeInt.KilledByBaneOfLifeTime) / 20;
             //Time left until clear in secs
             int diffTimeSeconds = (killedByBaneOfLifeTimeSeconds + ImmortalityStatus.REQ_SECONDS_COOLDOWN_TO_CLEAR_SEMI_IMMORTALITY_DEATHS)-currentTimeSeconds;
             // Give Bane Of Life effect, to indicate Temporary Status
@@ -727,13 +729,13 @@ public final class ImmortalityStatus {
             //Should be cleared
             if (diffTimeSeconds<0) {
                 //Clear Bane Of Life Deaths
-                ImmortalityStatus.addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.KilledByBaneOfLifeCurrentAmount, -killedByBaneOfLifeCurrentAmount);
+                ImmortalityStatus.addGeneric(this.serverPlayerEntity, DataTypeInt.KilledByBaneOfLifeCurrentAmount, -killedByBaneOfLifeCurrentAmount);
                 //If higher Immortality than Gamma Immortality, instantly regain all lost Hearts
-                boolean isBetaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.BetaImmortality);
-                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.AlphaImmortality);
+                boolean isBetaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.BetaImmortality);
+                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.AlphaImmortality);
                 if (!(isBetaImmortal || isAlphaImmortal)) return;
-                int temporaryNegativeHearts = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.TemporaryNegativeHearts);
-                ImmortalityStatus.addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.TemporaryNegativeHearts, -temporaryNegativeHearts);
+                int temporaryNegativeHearts = getInt(this.serverPlayerEntity, DataTypeInt.TemporaryNegativeHearts);
+                ImmortalityStatus.addGeneric(this.serverPlayerEntity, DataTypeInt.TemporaryNegativeHearts, -temporaryNegativeHearts);
             }
         }
 
@@ -746,9 +748,9 @@ public final class ImmortalityStatus {
             //Applying Negative Hearts
             {
                 EntityAttributeInstance healthModifier = this.serverPlayerEntity.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-                int negativeHearts = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.TemporaryNegativeHearts);
-                boolean isDeltaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.DeltaImmortality);
-                boolean isGammaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.GammaImmortality);
+                int negativeHearts = getInt(this.serverPlayerEntity, DataTypeInt.TemporaryNegativeHearts);
+                boolean isDeltaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.DeltaImmortality);
+                boolean isGammaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.GammaImmortality);
                 if (!(isDeltaImmortal || isGammaImmortal)) {
                     //When not False/Semi Immortal clear Negative Hearts
                     negativeHearts = 0;
@@ -758,31 +760,31 @@ public final class ImmortalityStatus {
                 healthModifier.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.NEGATIVE_HEALTH_KEY, (negativeHearts * ImmortalityStatus.negativeImmortalityHeartsHealthAddition), EntityAttributeModifier.Operation.ADDITION));
             }
             //Giving Negative Hearts on Death to Delta/Gamma Immortality
-            if (this.dataType instanceof ImmortalityData.DataTypeInt)
-                if (this.dataType == ImmortalityData.DataTypeInt.ImmortalDeaths) {
-                    boolean isDeltaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.DeltaImmortality);
-                    boolean isGammaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.GammaImmortality);
+            if (this.dataType instanceof DataTypeInt)
+                if (this.dataType == DataTypeInt.ImmortalDeaths) {
+                    boolean isDeltaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.DeltaImmortality);
+                    boolean isGammaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.GammaImmortality);
                     //Needs to be either or to get Negative Hearts, or for any underlying Logic as Negative Hearts are applied first anyway
                     if (!(isDeltaImmortal || isGammaImmortal)) return;
                     //This will result in this function being called again, and applying the first part, of giving negative Hearts
-                    incrementGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.TemporaryNegativeHearts);
+                    incrementGeneric(this.serverPlayerEntity, DataTypeInt.TemporaryNegativeHearts);
                 }
             {
                 //Needs to be Semi Immortal to allow possibility of regenerating his Negative Hearts
-                boolean isGammaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.GammaImmortality);
+                boolean isGammaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.GammaImmortality);
                 if (!isGammaImmortal) return;
                 int currentTimeSeconds = getCurrentTime(this.serverPlayerEntity) / 20;
-                int timeLostHeartSeconds = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.KilledByBaneOfLifeTime) / 20;
-                int heartRegenCooldown = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.GammaImmortalityHeartCooldownSeconds);
+                int timeLostHeartSeconds = getInt(this.serverPlayerEntity, DataTypeInt.KilledByBaneOfLifeTime) / 20;
+                int heartRegenCooldown = getInt(this.serverPlayerEntity, DataTypeInt.GammaImmortalityHeartCooldownSeconds);
                 int diffCooldown = (timeLostHeartSeconds + ImmortalityStatus.BASE_SEMI_IMMORTALITY_HEART_COOLDOWN_BASE_SECONDS) - currentTimeSeconds;
                 heartRegenCooldown -= diffCooldown;
                 if (heartRegenCooldown > 0) return;
                 //Set Last Regenerated Heart Time
-                new ImmortalityData.DataTypes(getComponent(this.serverPlayerEntity), ImmortalityData.DataTypeInt.KilledByBaneOfLifeTime, currentTimeSeconds * 20);
+                new ImmortalityData.DataTypes(getComponent(this.serverPlayerEntity), DataTypeInt.KilledByBaneOfLifeTime, currentTimeSeconds * 20);
                 //Give new Cooldown to Heart Regen
-                addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.GammaImmortalityHeartCooldownSeconds, ImmortalityStatus.BASE_SEMI_IMMORTALITY_HEART_COOLDOWN_BASE_SECONDS);
+                addGeneric(this.serverPlayerEntity, DataTypeInt.GammaImmortalityHeartCooldownSeconds, ImmortalityStatus.BASE_SEMI_IMMORTALITY_HEART_COOLDOWN_BASE_SECONDS);
                 //Regen a Heart
-                addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.TemporaryNegativeHearts, -1);
+                addGeneric(this.serverPlayerEntity, DataTypeInt.TemporaryNegativeHearts, -1);
                 //Give Feedback Message
                 this.serverPlayerEntity.sendMessage(Text.translatable("immortality.status.heart_restored"), true);
             }
@@ -795,16 +797,16 @@ public final class ImmortalityStatus {
         private void checkBonusHearts() {
             {
                 //Applying Bonus Hearts
-                int bonusHearts = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusHearts);
+                int bonusHearts = getInt(this.serverPlayerEntity, DataTypeInt.BonusHearts);
 
-                boolean isDeltaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.DeltaImmortality);
-                boolean isGammaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.GammaImmortality);
-                boolean isBetaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.BetaImmortality);
-                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.AlphaImmortality);
+                boolean isDeltaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.DeltaImmortality);
+                boolean isGammaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.GammaImmortality);
+                boolean isBetaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.BetaImmortality);
+                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.AlphaImmortality);
                 //Needs to be any Immortality, to sustain/have bonus hearts
                 if (!(isDeltaImmortal || isGammaImmortal || isBetaImmortal || isAlphaImmortal)) {
                     //If not any Immortality remove Bonus Hearts
-                    addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusHearts, -bonusHearts);
+                    addGeneric(this.serverPlayerEntity, DataTypeInt.BonusHearts, -bonusHearts);
                     bonusHearts = 0;
                 }
                 EntityAttributeInstance maxHealthInstance = this.serverPlayerEntity.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
@@ -835,7 +837,7 @@ public final class ImmortalityStatus {
          */
         private void checkLifeElixir() {
             //TODO: NEEDS TO HAPPEN IN INVOKE IMMORTALITY | TO RESET LIFE ELIXIR TIME OR IT WILL JUST WORK EVEN IF THEY DIED
-            int lifeElixirTime = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.LifeElixirTime);
+            int lifeElixirTime = getInt(this.serverPlayerEntity, DataTypeInt.LifeElixirTime);
             final int[] lifeElixirChances = {ImmortalityStatus.BASE_BONUS_HEART_CHANCE_PERCENT, ImmortalityStatus.IMMORTAL_BONUS_HEART_CHANCE_PERCENT, ImmortalityStatus.TRUE_IMMORTAL_BONUS_HEART_CHANCE_PERCENT};
             //lifeElixirChances[0] = normal
             //lifeElixirChances[1] = for Immortal
@@ -851,8 +853,8 @@ public final class ImmortalityStatus {
                 int secondsPassed = currentTimeSeconds - lifeElixirTimeSeconds;
                 if (secondsPassed < ImmortalityStatus.LIFE_ELIXIR_SECONDS_TO_FINISH) return;
 
-                boolean isBetaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.BetaImmortality);
-                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.AlphaImmortality);
+                boolean isBetaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.BetaImmortality);
+                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.AlphaImmortality);
                 int lifeElixirChance = lifeElixirChances[0];
                 if (isBetaImmortal) lifeElixirChance = lifeElixirChances[1];
                 else if (isAlphaImmortal) lifeElixirChance = lifeElixirChances[2];
@@ -861,14 +863,14 @@ public final class ImmortalityStatus {
                 boolean success = false;
                 if (lifeElixirChance > randomInt) success = true;
                 //Check if they even have an Immortality
-                boolean isDeltaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.DeltaImmortality);
-                boolean isGammaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.GammaImmortality);
+                boolean isDeltaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.DeltaImmortality);
+                boolean isGammaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.GammaImmortality);
                 if (!(isDeltaImmortal || isGammaImmortal || isBetaImmortal || isAlphaImmortal)) success = false;
                 //Reset LifeElixirTime
-                addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.LifeElixirTime, -lifeElixirTime);
+                addGeneric(this.serverPlayerEntity, DataTypeInt.LifeElixirTime, -lifeElixirTime);
                 if (success) {
                     //Add Bonus Heart
-                    incrementGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusHearts);
+                    incrementGeneric(this.serverPlayerEntity, DataTypeInt.BonusHearts);
                     //Positive Audio/Visual Feedback
                     {
                         //Particles
@@ -893,12 +895,12 @@ public final class ImmortalityStatus {
                 }
             }
             //TODO: Global reducing of lifeElixirDropCooldown, except when exactly 0, but without setting to 0 itself
-            int lifeElixirDropCooldown = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.LifeElixirDropCooldown);
+            int lifeElixirDropCooldown = getInt(this.serverPlayerEntity, DataTypeInt.LifeElixirDropCooldownSeconds);
             if (lifeElixirDropCooldown < 0) {
                 //Logic to Handle Life Elixir Drop on Final Killing a Gamma Immortal or higher
-                boolean isGammaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.GammaImmortality);
-                boolean isBetaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.BetaImmortality);
-                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.AlphaImmortality);
+                boolean isGammaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.GammaImmortality);
+                boolean isBetaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.BetaImmortality);
+                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.AlphaImmortality);
                 if (!(isGammaImmortal || isBetaImmortal | isAlphaImmortal)) return;
 
                 //Dropping item
@@ -906,7 +908,7 @@ public final class ImmortalityStatus {
                 world.spawnEntity(lifeElixirItemEntity);
 
                 //Giving implicit 0, to indicate to no longer reduce it
-                addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.LifeElixirDropCooldown, -lifeElixirDropCooldown);
+                addGeneric(this.serverPlayerEntity, DataTypeInt.LifeElixirDropCooldownSeconds, -lifeElixirDropCooldown);
             }
         }
 
@@ -916,15 +918,15 @@ public final class ImmortalityStatus {
          * When not then if problem wasn't cooldown, reset cooldown to deactivate function call
          */
         private void checkLiverExtraction() {
-            boolean isLiverCurrentlyExtracted = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.LiverCurrentlyExtracted);
-            int liverExtractionCooldown = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.LiverExtractionCooldown);
-            boolean isDeltaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.DeltaImmortality);
+            boolean isLiverCurrentlyExtracted = getBool(this.serverPlayerEntity, DataTypeBool.LiverCurrentlyExtracted);
+            int liverExtractionCooldown = getInt(this.serverPlayerEntity, DataTypeInt.LiverExtractionCooldownSeconds);
+            boolean isDeltaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.DeltaImmortality);
             //TODO: implicitly no longer reducing Cooldown if exactly 0, in global timer
             //Reset liverExtraction status after Cooldown
             if (liverExtractionCooldown < 0) {
-                addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.LiverExtractionCooldown, -liverExtractionCooldown);
+                addGeneric(this.serverPlayerEntity, DataTypeInt.LiverExtractionCooldownSeconds, -liverExtractionCooldown);
                 assert isLiverCurrentlyExtracted;
-                toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.LiverCurrentlyExtracted);
+                toggleGeneric(this.serverPlayerEntity, DataTypeBool.LiverCurrentlyExtracted);
                 this.serverPlayerEntity.sendMessage(Text.translatable("immortality.status.liver_regrown"), true);
             } else if (isLiverCurrentlyExtracted && liverExtractionCooldown == 0) {
                 //Just Extracted Liver, no Cooldown active yet
@@ -932,13 +934,13 @@ public final class ImmortalityStatus {
                 if (isDeltaImmortal) shouldExtract = false;
                 //If not extracting reset all
                 if (!shouldExtract) {
-                    toggleGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeBool.LiverCurrentlyExtracted);
+                    toggleGeneric(this.serverPlayerEntity, DataTypeBool.LiverCurrentlyExtracted);
                     //TODO: Notify, Liver not extractable
                     return;
                 }
                 //If extracting increment cooldown, and drop Liver
                 //Increment Cooldown
-                addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.LiverExtractionCooldown, ImmortalityStatus.COOLDOWN_SECONDS_FOR_LIVER_REGROWTH);
+                addGeneric(this.serverPlayerEntity, DataTypeInt.LiverExtractionCooldownSeconds, ImmortalityStatus.COOLDOWN_SECONDS_FOR_LIVER_REGROWTH);
                 //Drop Liver
                 World world = this.serverPlayerEntity.world;
                 int x = (int) this.serverPlayerEntity.getX();
@@ -958,19 +960,19 @@ public final class ImmortalityStatus {
             //Apply Bonus Armor accordingly / clear if no Immortality
             {
                 //Determining bonus Armor
-                boolean isDeltaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.DeltaImmortality);
-                boolean isGammaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.GammaImmortality);
-                boolean isBetaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.BetaImmortality);
-                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.AlphaImmortality);
-                int bonusArmor = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusArmor);
+                boolean isDeltaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.DeltaImmortality);
+                boolean isGammaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.GammaImmortality);
+                boolean isBetaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.BetaImmortality);
+                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.AlphaImmortality);
+                int bonusArmor = getInt(this.serverPlayerEntity, DataTypeInt.BonusArmor);
                 //Needs any type of Immortality to be allowed bonus Armor
                 if (!(isDeltaImmortal || isGammaImmortal || isBetaImmortal || isAlphaImmortal)) {
-                    addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusArmor, -bonusArmor);
+                    addGeneric(this.serverPlayerEntity, DataTypeInt.BonusArmor, -bonusArmor);
                     bonusArmor = 0;
                 }
                 //Scale Armor
                 {
-                    int immortalDeaths = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.ImmortalDeaths);
+                    int immortalDeaths = getInt(this.serverPlayerEntity, DataTypeInt.ImmortalDeaths);
                     int deathsForNextBoni = ImmortalityStatus.DEATHS_FOR_BONUS_ARMOR;
                     int boniToBeApplied = 0;
                     while (immortalDeaths >= deathsForNextBoni) {
@@ -1015,19 +1017,19 @@ public final class ImmortalityStatus {
             //Apply Bonus Armor Toughness accordingly / clear if no Immortality
             {
                 //Determining bonus Armor Toughness
-                boolean isDeltaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.DeltaImmortality);
-                boolean isGammaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.GammaImmortality);
-                boolean isBetaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.BetaImmortality);
-                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, ImmortalityData.DataTypeBool.AlphaImmortality);
-                int bonusArmorToughness = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusArmorToughness);
+                boolean isDeltaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.DeltaImmortality);
+                boolean isGammaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.GammaImmortality);
+                boolean isBetaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.BetaImmortality);
+                boolean isAlphaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.AlphaImmortality);
+                int bonusArmorToughness = getInt(this.serverPlayerEntity, DataTypeInt.BonusArmorToughness);
                 //Needs any type of Immortality to be allowed bonus Armor
                 if (!(isDeltaImmortal || isGammaImmortal || isBetaImmortal || isAlphaImmortal)) {
-                    addGeneric(this.serverPlayerEntity, ImmortalityData.DataTypeInt.BonusArmor, -bonusArmorToughness);
+                    addGeneric(this.serverPlayerEntity, DataTypeInt.BonusArmor, -bonusArmorToughness);
                     bonusArmorToughness = 0;
                 }
                 //Scale Armor Toughness
                 {
-                    int immortalDeaths = getInt(this.serverPlayerEntity, ImmortalityData.DataTypeInt.ImmortalDeaths);
+                    int immortalDeaths = getInt(this.serverPlayerEntity, DataTypeInt.ImmortalDeaths);
                     int deathsForNextBoni = ImmortalityStatus.DEATHS_FOR_BONUS_ARMOR_TOUGHNESS;
                     int boniToBeApplied = 0;
                     while (immortalDeaths >= deathsForNextBoni) {
@@ -1081,9 +1083,9 @@ public final class ImmortalityStatus {
                 doPlayerLogic();
                 return;
             } else if (livingEntity instanceof ImmortalWither immortalWither) {
-                if (!(dataType instanceof ImmortalityData.DataTypeInt)) return;
+                if (!(dataType instanceof DataTypeInt)) return;
                 EntityAttributeInstance maxHealthInstance = immortalWither.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-                if (dataType == ImmortalityData.DataTypeInt.ImmortalDeaths) {
+                if (dataType == DataTypeInt.ImmortalDeaths) {
                     //Applying Health based on Heads left
                     int health_diff = (int) -((valueInt / 3f) * immortalWither.getMaxHealth());
                     assert maxHealthInstance != null;
