@@ -12,8 +12,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.WitherSkullEntity;
 import net.minecraft.item.ItemStack;
@@ -30,7 +28,9 @@ import net.minecraft.world.TeleportTarget;
 
 import java.util.Objects;
 
-public final class ImmortalityInvokeImmortality {
+import static net.hempflingclub.immortality.util.ImmortalityStatus.getBool;
+
+public final class ImmortalityInvokeImmortality {//TODO: use Immortality Status
     public final static DamageSource soulBoundDamageSource = new DamageSource("immortality.soulBound").setBypassesArmor().setBypassesProtection().setUnblockable();
     private static boolean killedByImmortalWither = false;
     private static final float witherDamageMultiplier = 2.5f;
@@ -45,23 +45,24 @@ public final class ImmortalityInvokeImmortality {
                 //Non Player would die
                 return handleEntityDeath(livingEntity, dmgSource, damageAmount);
             }
-            return damageAmount;
         }
+        return damageAmount;
     }
 
     private static float handlePlayerDeath(ServerPlayerEntity playerEntity, DamageSource dmgSource, float damageAmount) {
-        if (ImmortalityStatus.hasTargetGiftedImmortal(playerEntity) && dmgSource.getSource() != null && dmgSource.getSource() != playerEntity) {
-            LivingEntity immortalEntity = ImmortalityStatus.getTargetGiftedImmortalLivingEntity(playerEntity);
-            handleSoulBoundTeleportAndAggression(immortalEntity, playerEntity, dmgSource);
-        }
         if (playerShouldNotDie(playerEntity, dmgSource, damageAmount)) {
             return playerImmortalityHandling(playerEntity, dmgSource, damageAmount);
-        } else if (dmgSource != null && dmgSource.getSource() instanceof WitherSkullEntity witherSkullEntity && witherSkullEntity.getOwner() instanceof ImmortalWither) {
-            //Give appropriate damage, and apply ImmortalWither Damage
-            return ((damageAmount) * ((playerEntity.getWorld().getDifficulty() == Difficulty.HARD || playerEntity.getWorld().getDifficulty() == Difficulty.NORMAL) ? witherDamageMultiplier : witherDamageMultiplierEasy));
         }
-        //Can Survive Damage or ain't immortal
-        return damageAmount;
+        //No faulty handling
+        else if (dmgSource == null) return damageAmount;
+            //If Not Killed By Immortal Wither just give damage
+        else if (!(dmgSource.getSource() instanceof WitherSkullEntity witherSkullEntity)) return damageAmount;
+            //Not doing logic when killed by buggy Immortal Wither Skulls
+        else if (!(witherSkullEntity.getOwner() instanceof ImmortalWither)) return damageAmount;
+            //Give appropriate damage, and apply ImmortalWither Damage
+        else {
+            return ImmortalWitherDamageWithDifficulty(playerEntity.getWorld(), damageAmount);
+        }
     }
 
     private static void teleportPlayerToSpawnPoint(ServerPlayerEntity playerEntity) {
@@ -77,44 +78,44 @@ public final class ImmortalityInvokeImmortality {
         playerEntity.fallDistance = 0;
     }
 
-    private static void handleSoulBoundTeleportAndAggression(LivingEntity soulBoundEntity, ServerPlayerEntity playerEntity, DamageSource dmgSource) {
-        if (soulBoundEntity instanceof WolfEntity wolfEntity) {
-            if (ImmortalityStatus.getSummonedTeleport(playerEntity) && wolfEntity.isTeammate(playerEntity)) {
-                if (wolfEntity.getWorld() != playerEntity.getWorld() || wolfEntity.distanceTo(playerEntity) > 10) {
-                    teleportSoulBoundToPlayer(wolfEntity, playerEntity);
-                }
-                wolfEntity.setAngryAt(Objects.requireNonNull(dmgSource.getSource()).getUuid());
-                wolfEntity.chooseRandomAngerTime();
-            }
-        } else if (soulBoundEntity instanceof HostileEntity hostileEntity && Objects.requireNonNull(dmgSource.getSource()).isPlayer()) {
-            if (ImmortalityStatus.getSummonedTeleport(playerEntity)) {
-                if (hostileEntity.getWorld() != playerEntity.getWorld() || hostileEntity.distanceTo(playerEntity) > 10) {
-                    teleportSoulBoundToPlayer(hostileEntity, playerEntity);
-                }
-                hostileEntity.setAttacking((PlayerEntity) dmgSource.getSource());
-                hostileEntity.setAttacking(true);
-            }
-        }
-
+    private static boolean hasAnyImmortality(ServerPlayerEntity playerEntity) {
+        boolean isDeltaImmortal = getBool(playerEntity, ImmortalityData.DataTypeBool.DeltaImmortality);
+        if (isDeltaImmortal) return true;
+        boolean isGammaImmortal = getBool(playerEntity, ImmortalityData.DataTypeBool.GammaImmortality);
+        if (isGammaImmortal) return true;
+        boolean isBetaImmortal = getBool(playerEntity, ImmortalityData.DataTypeBool.BetaImmortality);
+        if (isBetaImmortal) return true;
+        boolean isAlphaImmortal = getBool(playerEntity, ImmortalityData.DataTypeBool.AlphaImmortality);
+        if (isAlphaImmortal) return true;
+        //No Valid Immortality found
+        return false;
     }
 
-    private static void teleportSoulBoundToPlayer(LivingEntity soulBoundEntity, ServerPlayerEntity playerEntity) {
-        soulBoundEntity.fallDistance = 0;
-        FabricDimensions.teleport(soulBoundEntity, playerEntity.getWorld(), new TeleportTarget(playerEntity.getPos(), Vec3d.ZERO, soulBoundEntity.getYaw(), soulBoundEntity.getPitch()));
-        ((ServerWorld) soulBoundEntity.getWorld()).spawnParticles(ParticleTypes.SOUL, soulBoundEntity.getX(), soulBoundEntity.getY(), soulBoundEntity.getZ(), 64, 0, 5, 0, 1);
+    private static float ImmortalWitherDamageWithDifficulty(ServerWorld world, float damageAmount) {
+        //2.5 multiplier on Normal / Hard | 2.0 multiplier on Easy
+        // (Against Players, Animals get Default damage)
+        return ((damageAmount) * ((world.getDifficulty() == Difficulty.HARD || world.getDifficulty() == Difficulty.NORMAL) ? witherDamageMultiplier : witherDamageMultiplierEasy));
     }
 
     private static boolean playerShouldNotDie(ServerPlayerEntity playerEntity, DamageSource dmgSource, float damageAmount) {
-        boolean hasImmortality = (ImmortalityStatus.getImmortality(playerEntity) || ImmortalityStatus.getLiverImmortality(playerEntity) || ImmortalityStatus.isSemiImmortal(playerEntity) || ImmortalityStatus.isTrueImmortal(playerEntity));
+        boolean hasAnyImmortality = hasAnyImmortality(playerEntity);
         boolean wouldDie = (playerEntity.getHealth() - damageAmount) <= 0;
-        boolean wouldDieToImmortalWither = (dmgSource != null && dmgSource.getSource() instanceof WitherSkullEntity witherSkullEntity &&
-                witherSkullEntity.getOwner() instanceof ImmortalWither &&
-                (playerEntity.getHealth() - ((damageAmount) * ((playerEntity.getWorld().getDifficulty() == Difficulty.HARD || playerEntity.getWorld().getDifficulty() == Difficulty.NORMAL) ? witherDamageMultiplier : witherDamageMultiplierEasy))) <= 0);
-        boolean shouldNotDie = (hasImmortality && (wouldDie || wouldDieToImmortalWither));
+        boolean wouldDieToImmortalWither;
+        {
+            //Would Die To Immortal Wither
+            float immortalWitherDamageWithDifficulty = ImmortalWitherDamageWithDifficulty(playerEntity.getWorld(), damageAmount);
+            boolean wouldActuallyDieToImmortalWither = (playerEntity.getHealth() - immortalWitherDamageWithDifficulty) <= 0;
+            wouldDieToImmortalWither = (dmgSource != null && dmgSource.getSource() instanceof WitherSkullEntity witherSkullEntity &&
+                    witherSkullEntity.getOwner() instanceof ImmortalWither && wouldActuallyDieToImmortalWither);
+
+        }
+        boolean shouldNotDie = (hasAnyImmortality && (wouldDie || wouldDieToImmortalWither));
         return shouldNotDie;
     }
 
     private static float playerImmortalityHandling(ServerPlayerEntity playerEntity, DamageSource dmgSource, float damageAmount) {
+        //TODO: Sort this Bullshit out, even refactored it's still to convoluted
+
         // This is Server, Player is Immortal and would've Died
         if (playerEntity.getY() <= playerEntity.world.getBottomY() && dmgSource == DamageSource.OUT_OF_WORLD) {
             teleportPlayerToSpawnPoint(playerEntity);
