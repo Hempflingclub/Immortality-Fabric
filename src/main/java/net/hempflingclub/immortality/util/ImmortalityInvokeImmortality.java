@@ -25,10 +25,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.TeleportTarget;
+import net.minecraft.world.World;
 
 import java.util.Objects;
 
-import static net.hempflingclub.immortality.util.ImmortalityStatus.getBool;
+import static net.hempflingclub.immortality.util.ImmortalityStatus.*;
 
 public final class ImmortalityInvokeImmortality {//TODO: use Immortality Status
     public final static DamageSource soulBoundDamageSource = new DamageSource("immortality.soulBound").setBypassesArmor().setBypassesProtection().setUnblockable();
@@ -220,32 +221,30 @@ public final class ImmortalityInvokeImmortality {//TODO: use Immortality Status
     }
 
     private static void sendDeathMessage(ServerPlayerEntity immortalPlayer, DamageSource dmgSource) {
-        boolean isFalseImmortal = ImmortalityStatus.getLiverImmortality(immortalPlayer);
-        boolean isSemiImmortal = ImmortalityStatus.isSemiImmortal(immortalPlayer);
-        boolean isImmortal = ImmortalityStatus.getImmortality(immortalPlayer);
-        boolean isTrueImmortal = ImmortalityStatus.isTrueImmortal(immortalPlayer);
-        boolean isImmortalOrTrueImmortal = isImmortal || isTrueImmortal; // Not actually needed just for readability
-        boolean isPureSemiImmortal = isSemiImmortal && !isImmortal && !isTrueImmortal;
-        String translationKeyByPlayer;
-        String translationKeyNormal;
+        boolean deltaImmortality = getBool(immortalPlayer, ImmortalityData.DataTypeBool.DeltaImmortality);
+        boolean gammaImmortality = getBool(immortalPlayer, ImmortalityData.DataTypeBool.GammaImmortality);
+        boolean betaImmortality = getBool(immortalPlayer, ImmortalityData.DataTypeBool.BetaImmortality);
+        boolean alphaImmortality = getBool(immortalPlayer, ImmortalityData.DataTypeBool.AlphaImmortality);
+        boolean isPureGammaImmortal = gammaImmortality && !betaImmortality && !alphaImmortality;
+        String translationKeyByPlayer, translationKeyNormal;
 
-        ImmortalityStatus.resetKilledByBaneOfLifeTime(immortalPlayer);
-        ImmortalityStatus.resetKilledByBaneOfLifeCount(immortalPlayer);
+        //Reset Bane Of Life to negative so Immortality Status logic will do the reset logic
+        int KilledByBaneOfLifeTime = getInt(immortalPlayer, ImmortalityData.DataTypeInt.KilledByBaneOfLifeTime) + 1;
+        addGeneric(immortalPlayer, ImmortalityData.DataTypeInt.KilledByBaneOfLifeTime, -KilledByBaneOfLifeTime);
+        int KilledByBaneOfLifeCurrentAmount = getInt(immortalPlayer, ImmortalityData.DataTypeInt.KilledByBaneOfLifeCurrentAmount) + 1;
+        addGeneric(immortalPlayer, ImmortalityData.DataTypeInt.KilledByBaneOfLifeCurrentAmount, -KilledByBaneOfLifeCurrentAmount);
 
         translationKeyByPlayer =
-                isFalseImmortal ? "immortality.last.death.player" :
-                        isPureSemiImmortal ? "immortality.semiImmortal_slayed.death.player" :
-                                isTrueImmortal ? "immortality.trueImmortal_slayed.death.player" :
+                deltaImmortality ? "immortality.last.death.player" :
+                        isPureGammaImmortal ? "immortality.semiImmortal_slayed.death.player" :
+                                alphaImmortality ? "immortality.trueImmortal_slayed.death.player" :
                                         "immortality.immortal_slayed.death.player";// Must be normal Immortality
         translationKeyNormal =
-                isFalseImmortal ? "immortality.last.death" :
-                        isPureSemiImmortal ? "immortality.semiImmortal_slayed.death" :
-                                isTrueImmortal ? "immortality.trueImmortal_slayed.death" :
+                deltaImmortality ? "immortality.last.death" :
+                        isPureGammaImmortal ? "immortality.semiImmortal_slayed.death" :
+                                alphaImmortality ? "immortality.trueImmortal_slayed.death" :
                                         "immortality.immortal_slayed.death";// Must be normal Immortality
         sendMessageToAllPlayers(immortalPlayer, dmgSource, translationKeyByPlayer, translationKeyNormal);
-        if (isImmortalOrTrueImmortal) {
-            ImmortalityStatus.convertSemiImmortalityIntoOtherImmortality(immortalPlayer);
-        }
     }
 
     private static void sendMessageToAllPlayers(ServerPlayerEntity immortalPlayer, DamageSource dmgSource, String translationKeyByPlayer, String translationKeyNormal) {
@@ -272,65 +271,10 @@ public final class ImmortalityInvokeImmortality {//TODO: use Immortality Status
 
 
     private static float handleEntityDeath(LivingEntity livingEntity, DamageSource dmgSource, float damageAmount) {
-        if (ImmortalityStatus.hasTargetGiverImmortal(livingEntity)) {
-            return handleImmortalEntityDeath(livingEntity, dmgSource, damageAmount);
-        } else if (livingEntity instanceof ImmortalWither immortalWither) {
+        if (livingEntity instanceof ImmortalWither immortalWither)
             return handleImmortalWitherDeath(immortalWither, dmgSource, damageAmount);
-        }
         //Not Affected by any Immortality Attributes
         return damageAmount;
-    }
-
-    private static float handleImmortalEntityDeath(LivingEntity immortalEntity, DamageSource dmgSource, float damageAmount) {
-        //Is SoulBound to Player
-        if (ImmortalityStatus.getTargetGiverImmortalPlayerEntity(immortalEntity) == null) {
-            return damageAmount;
-        }
-        //Player is Online
-        PlayerEntity unspecifiedPlayerEntity = ImmortalityStatus.getTargetGiverImmortalPlayerEntity(immortalEntity);
-        if (unspecifiedPlayerEntity.getWorld().isClient()) {
-            return damageAmount;
-        }
-        ServerPlayerEntity giverImmortal = (ServerPlayerEntity) unspecifiedPlayerEntity;
-        if (!ImmortalityStatus.hasTargetGiftedImmortal(giverImmortal) && ImmortalityStatus.getTargetGiftedImmortalLivingEntity(giverImmortal) != immortalEntity) { //Prevent Abuse of Multiple SoulBounds
-            ImmortalityStatus.setTargetGiftedImmortal(giverImmortal, immortalEntity.getUuid());
-            giverImmortal.sendMessage(Text.translatable("immortality.status.soulBond_restored"), true);
-        }
-        if (ImmortalityStatus.getTargetGiftedImmortalLivingEntity(giverImmortal) != immortalEntity) {
-            return damageAmount;
-        }
-        if (!(ImmortalityStatus.getImmortality(giverImmortal) || ImmortalityStatus.isTrueImmortal(giverImmortal) || ImmortalityStatus.isSemiImmortal(giverImmortal) || ImmortalityStatus.getLiverImmortality(giverImmortal))) {
-            //Player is no longer Immortal
-            return damageAmount;
-        }
-        //Check if Killed by Bane Of Life
-        if (isKilledByBaneOfLife(immortalEntity, dmgSource)) {
-            PlayerEntity attackingPlayer = (PlayerEntity) dmgSource.getSource();
-            //Killed By Bane Of Life
-            assert attackingPlayer != null;
-            giverImmortal.sendMessage(Text.translatable("immortality.soulBound_killed_with_baneOfLife", Objects.requireNonNull(immortalEntity.getCustomName()).getString(), attackingPlayer.getName().getString()));
-            giverImmortal.setHealth(1);
-            giverImmortal.damage(soulBoundDamageSource, 1000);
-            return damageAmount;
-        }
-        if (immortalEntity.getY() <= immortalEntity.world.getBottomY() && dmgSource == DamageSource.OUT_OF_WORLD) {
-            //If in Void taking damage then Teleport to Spawnpoint/Bed of Player, When no Bed is found then yeet them to Overworld Spawn
-            teleportSoulBoundToPlayer(immortalEntity, giverImmortal);
-        } else if (dmgSource != DamageSource.OUT_OF_WORLD) {
-            if (immortalEntity.isOnFire()) {
-                immortalEntity.extinguish();
-            }
-            giverImmortal.setHealth(1);
-            giverImmortal.damage(soulBoundDamageSource, 1000);
-            immortalEntity.getWorld().playSoundFromEntity(null, immortalEntity, SoundEvents.BLOCK_AMETHYST_CLUSTER_FALL, SoundCategory.NEUTRAL, 5, 1);
-            ((ServerWorld) immortalEntity.getWorld()).spawnParticles(ParticleTypes.TOTEM_OF_UNDYING, immortalEntity.getX(), immortalEntity.getY(), immortalEntity.getZ(), 64, 0, 5, 0, 1);
-            immortalEntity.setAir(immortalEntity.getMaxAir());
-            immortalEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 20, 0, false, false));
-            immortalEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 100, 1, false, false));
-            immortalEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 15 * 20, 2, true, true));
-        }
-        immortalEntity.setHealth(immortalEntity.getMaxHealth());
-        return 0;
     }
 
     private static boolean isKilledByBaneOfLife(LivingEntity killedEntity, DamageSource dmgSource) {
@@ -349,30 +293,30 @@ public final class ImmortalityInvokeImmortality {//TODO: use Immortality Status
 
 
     private static float handleImmortalWitherDeath(ImmortalWither immortalWither, DamageSource dmgSource, float damageAmount) {
-        //If Bane Of Life, it will count as 2 Kills
-        if (dmgSource.getSource() != null && dmgSource.getSource() != immortalWither && dmgSource.getSource().isPlayer()) {
-            PlayerEntity attackingPlayer = (PlayerEntity) dmgSource.getSource();
-            if (attackingPlayer.getMainHandStack().hasEnchantments()) {
-                if (EnchantmentHelper.getLevel(ImmortalityEnchants.Bane_Of_Life, attackingPlayer.getMainHandStack()) > 0) {
-                    ImmortalityStatus.incrementImmortalWitherDeaths(immortalWither);
-                    //Will give Liver on every Death
-                    attackingPlayer.giveItemStack(new ItemStack(ImmortalityItems.LiverOfImmortality));
-                }
-            }
+        //If Bane Of Life, it will count as Kill
+        int immortalWitherDeaths = 0;
+        if (isKilledByBaneOfLife(immortalWither, dmgSource) && dmgSource.getSource() instanceof ServerPlayerEntity attackingPlayer) {
+            //Increases Immortal Deaths, and will set new Max Health from ImmortalityStatus
+            immortalWitherDeaths = incrementGeneric(immortalWither, ImmortalityData.DataTypeInt.ImmortalDeaths);
+            //Will give Liver on every Death
+            World world = attackingPlayer.world;
+            int x = (int) attackingPlayer.getX();
+            int y = (int) attackingPlayer.getY();
+            int z = (int) attackingPlayer.getZ();
+            world.spawnEntity(new ItemEntity(world, x, y, z, new ItemStack(ImmortalityItems.LiverOfImmortality)));
         }
-        ImmortalityStatus.incrementImmortalWitherDeaths(immortalWither);
-        if (ImmortalityStatus.getImmortalWitherDeaths(immortalWither) < 5) { // Kill it 5 Times, and it won't be able to recover
-            float lostLifePercent = (1.0F * ImmortalityStatus.getImmortalWitherDeaths(immortalWither)) / 5; // 0.2f -> 1.0f
-            immortalWither.setHealth(immortalWither.getMaxHealth() * (1 - lostLifePercent));
+        if (immortalWitherDeaths < 3) { // Kill it 3 Times, and it won't be able to recover
+            // Spawn Effects to give indication
             immortalWither.getWorld().playSoundFromEntity(null, immortalWither, SoundEvents.BLOCK_AMETHYST_CLUSTER_FALL, SoundCategory.HOSTILE, 5, 1);
             ((ServerWorld) immortalWither.getWorld()).spawnParticles(ParticleTypes.SOUL, immortalWither.getX(), immortalWither.getY(), immortalWither.getZ(), 64, 0, 5, 0, 1);
             immortalWither.setInvulTimer(220);
             return 0;
-        } else if (dmgSource != DamageSource.OUT_OF_WORLD) {
-            return damageAmount;
-        } else {
-            return 0;
         }
+        //Void Damage Immunity
+        if (dmgSource == DamageSource.OUT_OF_WORLD)
+            return 0;
+        //Give Normal Damage
+        return damageAmount;
     }
 
     private static boolean killedByImmortalWither(DamageSource damageSource) {
