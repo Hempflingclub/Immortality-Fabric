@@ -837,7 +837,6 @@ public final class ImmortalityStatus {
          * Life Elixir Dropping on Final Killing Semi Immortal or higher
          */
         private void checkLifeElixir() {
-            //TODO: NEEDS TO HAPPEN IN INVOKE IMMORTALITY | TO RESET LIFE ELIXIR TIME OR IT WILL JUST WORK EVEN IF THEY DIED
             int lifeElixirTime = getInt(this.serverPlayerEntity, DataTypeInt.LifeElixirTime);
             final int[] lifeElixirChances = {ImmortalityStatus.BASE_BONUS_HEART_CHANCE_PERCENT, ImmortalityStatus.IMMORTAL_BONUS_HEART_CHANCE_PERCENT, ImmortalityStatus.TRUE_IMMORTAL_BONUS_HEART_CHANCE_PERCENT};
             //lifeElixirChances[0] = normal
