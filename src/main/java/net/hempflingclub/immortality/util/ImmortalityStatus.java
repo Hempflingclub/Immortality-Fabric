@@ -564,6 +564,7 @@ public final class ImmortalityStatus {
             checkBetaImmortal();
             checkGammaImmortal();
             checkDeltaImmortal();
+            checkAchievements();
         }
 
         /**
@@ -676,6 +677,13 @@ public final class ImmortalityStatus {
                 if (maxHealth >= 2) return;
             }
             toggleGeneric(this.serverPlayerEntity, DataTypeBool.DeltaImmortality);
+        }
+
+        /**
+         * calls giveImmortalityAchievements to apply valid Achievements
+         */
+        private void checkAchievements(){
+            ImmortalityAdvancementGiver.giveImmortalityAchievements(this.serverPlayerEntity);
         }
 
         /**

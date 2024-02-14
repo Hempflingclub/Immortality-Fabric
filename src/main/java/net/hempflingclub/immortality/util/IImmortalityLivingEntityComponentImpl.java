@@ -3,7 +3,7 @@ package net.hempflingclub.immortality.util;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.minecraft.nbt.NbtCompound;
 
-public class IImmortalityLivingEntityComponentImpl implements IIImmortalityLivingEntityComponent, AutoSyncedComponent {
+public class IImmortalityLivingEntityComponentImpl implements IImmortalityLivingEntityComponent, AutoSyncedComponent {
     private NbtCompound nbtData;
 
     @Override

@@ -1,11 +1,14 @@
 package net.hempflingclub.immortality.util;
 
 import net.hempflingclub.immortality.Immortality;
+import net.hempflingclub.immortality.util.ImmortalityData.DataTypeBool;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
 import java.util.Objects;
+
+import static net.hempflingclub.immortality.util.ImmortalityStatus.getBool;
 
 public final class ImmortalityAdvancementGiver {
     public static final Identifier root = new Identifier(Immortality.MOD_ID, "immortality/root");
@@ -21,27 +24,27 @@ public final class ImmortalityAdvancementGiver {
     public static final Identifier immortalWitherSlayer = new Identifier(Immortality.MOD_ID, "immortality/immortal_wither_slayer");
 
     public static void giveImmortalityAchievements(PlayerEntity playerEntity) {
-        if (ImmortalityStatus.getImmortality(playerEntity) || ImmortalityStatus.isTrueImmortal(playerEntity) || ImmortalityStatus.getLiverImmortality(playerEntity) || ImmortalityStatus.isSemiImmortal(playerEntity) || ImmortalityStatus.getVoidHeart(playerEntity)) {
-            achievementGranter(playerEntity, root);
-            if (ImmortalityStatus.getVoidHeart(playerEntity)) {
-                achievementGranter(playerEntity, voidHeart);
-            }
-            if (ImmortalityStatus.getImmortality(playerEntity)) {
-                achievementGranter(playerEntity, immortality);
-                if (ImmortalityStatus.getVoidHeart(playerEntity)) {
-                    achievementGranter(playerEntity, doubleHearted);
-                }
-            }
-            if (ImmortalityStatus.isTrueImmortal(playerEntity)) {
-                achievementGranter(playerEntity, trueImmortality);
-            }
-            if (ImmortalityStatus.getLiverImmortality(playerEntity)) {
-                achievementGranter(playerEntity, falseImmortality);
-            }
-            if (ImmortalityStatus.isSemiImmortal(playerEntity)) {
-                achievementGranter(playerEntity, semi_immortality);
-            }
+        boolean isDeltaImmortal = getBool(playerEntity, DataTypeBool.DeltaImmortality);
+        boolean isGammaImmortal = getBool(playerEntity, DataTypeBool.GammaImmortality);
+        boolean isBetaImmortal = getBool(playerEntity, DataTypeBool.BetaImmortality);
+        boolean isAlphaImmortal = getBool(playerEntity, DataTypeBool.AlphaImmortality);
+        boolean isVoidHearted = getBool(playerEntity, DataTypeBool.VoidHeart);
+        //Needs any of those
+        if (!(isDeltaImmortal ||
+                isGammaImmortal ||
+                isBetaImmortal ||
+                isAlphaImmortal ||
+                isVoidHearted)) return;
+        achievementGranter(playerEntity, root);
+        if (isVoidHearted) achievementGranter(playerEntity, voidHeart);
+        if (isDeltaImmortal) achievementGranter(playerEntity, falseImmortality);
+        if (isGammaImmortal) achievementGranter(playerEntity, semi_immortality);
+        if (isBetaImmortal) {
+            achievementGranter(playerEntity, immortality);
+            if (isVoidHearted)
+                achievementGranter(playerEntity, doubleHearted);
         }
+        if (isAlphaImmortal) achievementGranter(playerEntity, trueImmortality);
     }
 
     public static void giveHolyDaggerAchievement(PlayerEntity playerEntity) {
