@@ -1,5 +1,6 @@
 package net.hempflingclub.immortality.item.itemtypes;
 
+import net.hempflingclub.immortality.util.ImmortalityData;
 import net.hempflingclub.immortality.util.ImmortalityStatus;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
@@ -13,7 +14,12 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
+import static net.hempflingclub.immortality.util.ImmortalityStatus.addGeneric;
+import static net.hempflingclub.immortality.util.ImmortalityStatus.incrementGeneric;
+
 public class SoulStone extends Item {
+    public static int MAX_CAPACITY = 0xFF;
+
     public SoulStone(Settings settings) {
         super(settings);
     }
@@ -21,12 +27,16 @@ public class SoulStone extends Item {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
         ItemStack itemStack = user.getStackInHand(hand);
-        ImmortalityStatus.addItemSoulEnergy(itemStack, 0.01); // Only for Testing currently
+        //Testing only, just test if increasing works
+        int soulEnergy = incrementGeneric(itemStack, ImmortalityData.DataTypeInt.SoulEnergy);
+        if (soulEnergy > MAX_CAPACITY) addGeneric(itemStack, ImmortalityData.DataTypeInt.SoulEnergy, -1);
         return TypedActionResult.success(itemStack);
     }
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext context) {
-        tooltip.add(Text.translatable("immortality.tooltip.item.soul_stone_1", (ImmortalityStatus.getItemSoulEnergy(itemStack))).formatted(Formatting.RED));
+        tooltip.add(Text.translatable("immortality.tooltip.item.soul_stone_1",
+                        (ImmortalityStatus.getInt(itemStack, ImmortalityData.DataTypeInt.SoulEnergy)))
+                .formatted(Formatting.RED));
     }
 }
