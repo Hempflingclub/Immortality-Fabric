@@ -1,6 +1,5 @@
 package net.hempflingclub.immortality.item.itemtypes;
 
-import com.mojang.authlib.yggdrasil.response.UserAttributesResponse;
 import net.hempflingclub.immortality.Immortality;
 import net.hempflingclub.immortality.item.ImmortalityItems;
 import net.hempflingclub.immortality.util.ImmortalityAdvancementGiver;
@@ -54,11 +53,10 @@ public class HeartOfImmortality extends Item {
         }
         return super.finishUsing(stack, world, player);
     }
+    @Override
+    public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext context) {
+        tooltip.add(Text.translatable("immortality.tooltip.item.heart_of_immortality_1").formatted(Formatting.LIGHT_PURPLE));
+        tooltip.add(Text.translatable("immortality.tooltip.item.heart_of_immortality_2").formatted(Formatting.DARK_PURPLE));
+    }
 }
 
-@Override
-public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext context) {
-    tooltip.add(Text.translatable("immortality.tooltip.item.heart_of_immortality_1").formatted(Formatting.LIGHT_PURPLE));
-    tooltip.add(Text.translatable("immortality.tooltip.item.heart_of_immortality_2").formatted(Formatting.DARK_PURPLE));
-}
-}

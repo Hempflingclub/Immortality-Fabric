@@ -58,7 +58,7 @@ public final class ImmortalityStatus {
         IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityPlayerComponent, dataTypeInt);
         int newValue = incrementGeneric(dataTypes);
-        specificSpecializedLogicApplier(serverPlayerEntity,dataTypeInt);
+        specificSpecializedLogicApplier(serverPlayerEntity, dataTypeInt);
         return newValue;
     }
 
@@ -66,7 +66,7 @@ public final class ImmortalityStatus {
         IImmortalityLivingEntityComponent iImmortalityLivingEntityComponent = getComponent(livingEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityLivingEntityComponent, dataTypeInt);
         int newValue = incrementGeneric(dataTypes);
-        specificSpecializedLogicApplier(livingEntity,dataTypeInt);
+        specificSpecializedLogicApplier(livingEntity, dataTypeInt);
         return newValue;
     }
 
@@ -74,7 +74,7 @@ public final class ImmortalityStatus {
         IImmortalityItemComponent iImmortalityItemComponent = getComponent(itemStack);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityItemComponent, dataTypeInt);
         int newValue = incrementGeneric(dataTypes);
-        specificSpecializedLogicApplier(itemStack,dataTypeInt);
+        specificSpecializedLogicApplier(itemStack, dataTypeInt);
         return newValue;
     }
 
@@ -93,7 +93,7 @@ public final class ImmortalityStatus {
         IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityPlayerComponent, dataTypeBool);
         boolean newValue = toggleGeneric(dataTypes);
-        specificSpecializedLogicApplier(serverPlayerEntity,dataTypeBool);
+        specificSpecializedLogicApplier(serverPlayerEntity, dataTypeBool);
         return newValue;
     }
 
@@ -101,7 +101,7 @@ public final class ImmortalityStatus {
         IImmortalityLivingEntityComponent iImmortalityLivingEntityComponent = getComponent(livingEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityLivingEntityComponent, dataTypeBool);
         boolean newValue = toggleGeneric(dataTypes);
-        specificSpecializedLogicApplier(livingEntity,dataTypeBool);
+        specificSpecializedLogicApplier(livingEntity, dataTypeBool);
         return newValue;
     }
 
@@ -109,7 +109,7 @@ public final class ImmortalityStatus {
         IImmortalityItemComponent iImmortalityItemComponent = getComponent(itemStack);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityItemComponent, dataTypeBool);
         boolean newValue = toggleGeneric(dataTypes);
-        specificSpecializedLogicApplier(itemStack,dataTypeBool);
+        specificSpecializedLogicApplier(itemStack, dataTypeBool);
         return newValue;
     }
 
@@ -177,7 +177,7 @@ public final class ImmortalityStatus {
         IImmortalityPlayerComponent iImmortalityPlayerComponent = getComponent(serverPlayerEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityPlayerComponent, dataTypeInt);
         int newValue = addGeneric(dataTypes, addition);
-        specificSpecializedLogicApplier(serverPlayerEntity,dataTypeInt);
+        specificSpecializedLogicApplier(serverPlayerEntity, dataTypeInt);
         return newValue;
     }
 
@@ -185,7 +185,7 @@ public final class ImmortalityStatus {
         IImmortalityLivingEntityComponent iImmortalityLivingEntityComponent = getComponent(livingEntity);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityLivingEntityComponent, dataTypeInt);
         int newValue = addGeneric(dataTypes, addition);
-        specificSpecializedLogicApplier(livingEntity,dataTypeInt);
+        specificSpecializedLogicApplier(livingEntity, dataTypeInt);
         return newValue;
     }
 
@@ -193,7 +193,7 @@ public final class ImmortalityStatus {
         IImmortalityItemComponent iImmortalityItemComponent = getComponent(itemStack);
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(iImmortalityItemComponent, dataTypeInt);
         int newValue = addGeneric(dataTypes, addition);
-        specificSpecializedLogicApplier(itemStack,dataTypeInt);
+        specificSpecializedLogicApplier(itemStack, dataTypeInt);
         return newValue;
     }
 
@@ -211,7 +211,7 @@ public final class ImmortalityStatus {
 
     public static void logicApplier(IImmortalityComponent something, ImmortalityData.DataType dataType) {
         ImmortalityData.DataTypes dataTypes = new ImmortalityData.DataTypes(something, dataType);
-        logicApplier(dataTypes,dataType);
+        logicApplier(dataTypes, dataType);
     }
 
     public static void logicApplier(ImmortalityData.DataTypes dataTypes, ImmortalityData.DataType dataType) {
@@ -219,13 +219,13 @@ public final class ImmortalityStatus {
         IImmortalityComponent immortalityComponent = dataTypes.getIImmortalityComponent();
         if (immortalityComponent instanceof IImmortalityPlayerComponent iImmortalityPlayerComponent) {
             ServerPlayerEntity serverPlayerEntity = findPlayer(iImmortalityPlayerComponent);
-            specificSpecializedLogicApplier(serverPlayerEntity,dataType);
+            specificSpecializedLogicApplier(serverPlayerEntity, dataType);
         } else if (immortalityComponent instanceof IImmortalityLivingEntityComponent iImmortalityLivingEntityComponent) {
             LivingEntity livingEntity = findEntity(iImmortalityLivingEntityComponent);
-            specificSpecializedLogicApplier(livingEntity,dataType);
+            specificSpecializedLogicApplier(livingEntity, dataType);
         } else if (immortalityComponent instanceof IImmortalityItemComponent iImmortalityItemComponent) {
             ItemStack itemStack = findItemStack(iImmortalityItemComponent); //TODO: Probably also search in BlockEntity of Soul Urn
-            specificSpecializedLogicApplier(itemStack,dataType);
+            specificSpecializedLogicApplier(itemStack, dataType);
         }
     }
 
@@ -277,17 +277,20 @@ public final class ImmortalityStatus {
         return target;
     }
 
-    public static void specificSpecializedLogicApplier(ServerPlayerEntity serverPlayerEntity, ImmortalityData.DataType dataType){
+    public static void specificSpecializedLogicApplier(ServerPlayerEntity serverPlayerEntity, ImmortalityData.DataType dataType) {
         serverPlayerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
         new SpecificLogicApplier(serverPlayerEntity, dataType);
     }
-    public static void specificSpecializedLogicApplier(LivingEntity livingEntity, ImmortalityData.DataType dataType){
+
+    public static void specificSpecializedLogicApplier(LivingEntity livingEntity, ImmortalityData.DataType dataType) {
         livingEntity.syncComponent(IImmortalityLivingEntityComponent.KEY);
         new SpecificLogicApplier(livingEntity, dataType);
     }
-    public static void specificSpecializedLogicApplier(ItemStack itemStack, ImmortalityData.DataType dataType){
+
+    public static void specificSpecializedLogicApplier(ItemStack itemStack, ImmortalityData.DataType dataType) {
         new SpecificLogicApplier(itemStack, dataType);
     }
+
     public static void specificAllLogicApplier(ServerPlayerEntity serverPlayerEntity) {
         serverPlayerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
         for (DataTypeInt dataTypeInt : DataTypeInt.values())
@@ -545,8 +548,10 @@ public final class ImmortalityStatus {
             else if (dataType == DataTypeBool.ExistingSoulVial) {
             } else if (dataType == DataTypeBool.LiverExtractedEver)
                 checkEveryImmortality();
-            else if (dataType == DataTypeBool.LiverCurrentlyExtracted)
+            else if (dataType == DataTypeBool.LiverCurrentlyExtracted) {
+                checkLiverExtraction();
                 checkEveryImmortality();
+            }
 
         }
 
@@ -682,7 +687,7 @@ public final class ImmortalityStatus {
         /**
          * calls giveImmortalityAchievements to apply valid Achievements
          */
-        private void checkAchievements(){
+        private void checkAchievements() {
             ImmortalityAdvancementGiver.giveImmortalityAchievements(this.serverPlayerEntity);
         }
 
@@ -730,13 +735,13 @@ public final class ImmortalityStatus {
             int currentTimeSeconds = getCurrentTime(this.serverPlayerEntity) / 20;
             int killedByBaneOfLifeTimeSeconds = getInt(this.serverPlayerEntity, DataTypeInt.KilledByBaneOfLifeTime) / 20;
             //Time left until clear in secs
-            int diffTimeSeconds = (killedByBaneOfLifeTimeSeconds + ImmortalityStatus.REQ_SECONDS_COOLDOWN_TO_CLEAR_SEMI_IMMORTALITY_DEATHS)-currentTimeSeconds;
+            int diffTimeSeconds = (killedByBaneOfLifeTimeSeconds + ImmortalityStatus.REQ_SECONDS_COOLDOWN_TO_CLEAR_SEMI_IMMORTALITY_DEATHS) - currentTimeSeconds;
             // Give Bane Of Life effect, to indicate Temporary Status
-            if(killedByBaneOfLifeCurrentAmount>=ImmortalityStatus.REQ_BANE_OF_LIFE_DEATHS_FOR_TEMP_GAMMA_IMMORTALITY)
+            if (killedByBaneOfLifeCurrentAmount >= ImmortalityStatus.REQ_BANE_OF_LIFE_DEATHS_FOR_TEMP_GAMMA_IMMORTALITY)
                 if (!this.serverPlayerEntity.hasStatusEffect(ModEffectRegistry.bane_of_life))
                     this.serverPlayerEntity.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.bane_of_life, 5 * 20, 0, true, true));
             //Should be cleared
-            if (diffTimeSeconds<0) {
+            if (diffTimeSeconds < 0) {
                 //Clear Bane Of Life Deaths
                 ImmortalityStatus.addGeneric(this.serverPlayerEntity, DataTypeInt.KilledByBaneOfLifeCurrentAmount, -killedByBaneOfLifeCurrentAmount);
                 //If higher Immortality than Gamma Immortality, instantly regain all lost Hearts
@@ -923,6 +928,7 @@ public final class ImmortalityStatus {
          * Checking if Liver should be extractable (not Delta Immortality) (Cooldown is cool)
          * If then drop Liver and set cooldown
          * When not then if problem wasn't cooldown, reset cooldown to deactivate function call
+         * Will also update Liver Extracted Ever
          */
         private void checkLiverExtraction() {
             boolean isLiverCurrentlyExtracted = getBool(this.serverPlayerEntity, DataTypeBool.LiverCurrentlyExtracted);
@@ -941,7 +947,7 @@ public final class ImmortalityStatus {
                 //If not extracting reset all
                 if (!shouldExtract) {
                     toggleGeneric(this.serverPlayerEntity, DataTypeBool.LiverCurrentlyExtracted);
-                    this.serverPlayerEntity.sendMessage(Text.literal("Liver not regrown"),true);
+                    this.serverPlayerEntity.sendMessage(Text.literal("Liver not regrown"), true);
                     return;
                 }
                 //If extracting increment cooldown, and drop Liver
@@ -954,6 +960,14 @@ public final class ImmortalityStatus {
                 int z = (int) this.serverPlayerEntity.getZ();
                 ItemEntity lifeElixirItemEntity = new ItemEntity(world, x, y, z, new ItemStack(ImmortalityItems.LifeElixir));
                 world.spawnEntity(lifeElixirItemEntity);
+
+                //Update Liver Extracted Ever
+                boolean liverExtractedEver = getBool(this.serverPlayerEntity, DataTypeBool.LiverExtractedEver);
+                if (!liverExtractedEver) toggleGeneric(this.serverPlayerEntity, DataTypeBool.LiverExtractedEver);
+
+                //Give World Feedback, that a Liver was extracted
+                for (PlayerEntity players : world.getPlayers())
+                    players.playSound(SoundEvents.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.PLAYERS, 1, 1);
             }
         }
 
