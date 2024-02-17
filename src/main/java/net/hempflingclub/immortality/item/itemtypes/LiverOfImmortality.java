@@ -2,8 +2,7 @@ package net.hempflingclub.immortality.item.itemtypes;
 
 import net.hempflingclub.immortality.item.ImmortalityItems;
 import net.hempflingclub.immortality.util.ImmortalityAdvancementGiver;
-import net.hempflingclub.immortality.util.ImmortalityData;
-import net.hempflingclub.immortality.util.ImmortalityStatus;
+import net.hempflingclub.immortality.util.ImmortalityData.DataTypeBool;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
@@ -12,6 +11,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
@@ -20,6 +20,9 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
+import static net.hempflingclub.immortality.util.ImmortalityStatus.getBool;
+import static net.hempflingclub.immortality.util.ImmortalityStatus.toggleGeneric;
+
 public class LiverOfImmortality extends Item {
     public LiverOfImmortality(Settings settings) {
         super(settings);
@@ -27,56 +30,30 @@ public class LiverOfImmortality extends Item {
 
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity player) {
-        PlayerEntity playerEntity = (PlayerEntity) player;
-        if (!world.isClient() && !ImmortalityStatus.getImmortality(playerEntity)) {
-            //Server
-            boolean status = ImmortalityStatus.getLiverImmortality(playerEntity);
-            ImmortalityStatus.setLiverImmortality(playerEntity, true);
-            if (status) {
-                if (playerEntity.isPlayer()) {
-                    ImmortalityStatus.removeNegativeHearts(playerEntity);
-                }
-            } else {
-                playerEntity.sendMessage(Text.translatable("immortality.achieve.liver_of_immortality"), true);
-                world.playSoundFromEntity(null, playerEntity, SoundEvents.ENTITY_WITHER_SPAWN, SoundCategory.PLAYERS, 1, 1);
-                playerEntity.setHealth(playerEntity.getMaxHealth());
-            }
-            playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 50, 0, false, false));
-            playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 50, 0, false, false));
-            ImmortalityAdvancementGiver.giveImmortalityAchievements(playerEntity);
-        } else if (ImmortalityStatus.canEatLiverOfImmortality(playerEntity) && ImmortalityData.getLiverExtracted(ImmortalityStatus.getComponent(playerEntity)) && !world.isClient()) {
-            //Remove Debuff
-            ImmortalityData.setLiverExtractionTime(ImmortalityStatus.getComponent(playerEntity), 0);
-            playerEntity.sendMessage(Text.translatable("immortality.status.liver_regrown"), true);
-
-        } else if (!world.isClient() && ImmortalityStatus.isTrueImmortal(playerEntity)) {
-            //User has Trilogy
-            playerEntity.getWorld().playSoundFromEntity(null, playerEntity, SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1, 1);
-            //Give Buff
-            playerEntity.sendMessage(Text.translatable("immortality.status.liver_absorbed"), true);
-            if (playerEntity.isPlayer()) {
-                ImmortalityStatus.addImmortalityHearts(playerEntity);
-                playerEntity.setHealth(playerEntity.getMaxHealth());
-            }
-        } else if (world.isClient()) {
+        if (player instanceof PlayerEntity playerEntity && playerEntity.world.isClient) {
+            boolean isDeltaImmortal = getBool(playerEntity, DataTypeBool.DeltaImmortality);
             //Client
-            if ((!ImmortalityStatus.getLiverImmortality(playerEntity) && !ImmortalityStatus.getImmortality(playerEntity)) && ImmortalityStatus.canEatLiverOfImmortality(playerEntity)) {
+            if (isDeltaImmortal)
                 MinecraftClient.getInstance().gameRenderer.showFloatingItem(new ItemStack(ImmortalityItems.LiverOfImmortality));
-            }
         }
-        if (ImmortalityStatus.canEatLiverOfImmortality(playerEntity)) {
-            return super.finishUsing(stack, world, playerEntity);
-        } else {
-            //Fake finish using to trick Server
-            if (!world.isClient()) {
-                if (ImmortalityStatus.getMissingLiversToEatLiverOfImmortality(playerEntity) <= 0) {
-                    playerEntity.sendMessage(Text.translatable("immortality.commands.needsHolyDaggerStimulation"), true);
-                } else {
-                    playerEntity.sendMessage(Text.translatable("immortality.commands.neededExtractionLivers", ImmortalityStatus.getMissingLiversToEatLiverOfImmortality(playerEntity)), true);
-                }
-            }
-            return new ItemStack(stack.getItem());
-        }
+        if (!(player instanceof ServerPlayerEntity serverPlayerEntity)) return stack;
+        //Server
+        boolean isDeltaImmortal = getBool(player, DataTypeBool.DeltaImmortality);
+        //Don't do shit if already Delta Immortal
+        if (isDeltaImmortal) return stack;
+        //Use Stack
+        super.finishUsing(stack, world, serverPlayerEntity);
+        //Give Delta Immortality (edge cases will be handled in ImmortalityStatus
+        toggleGeneric(serverPlayerEntity, DataTypeBool.DeltaImmortality);
+        //Give Feedback Effects
+        //Sounds + Heal
+        world.playSoundFromEntity(null, serverPlayerEntity, SoundEvents.ENTITY_WITHER_SPAWN, SoundCategory.PLAYERS, 1, 1);
+        serverPlayerEntity.setHealth(serverPlayerEntity.getMaxHealth());
+        //Effects + Achievements
+        serverPlayerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 50, 0, false, false));
+        serverPlayerEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.DARKNESS, 50, 0, false, false));
+        ImmortalityAdvancementGiver.giveImmortalityAchievements(serverPlayerEntity);
+        return stack;
     }
 
     @Override

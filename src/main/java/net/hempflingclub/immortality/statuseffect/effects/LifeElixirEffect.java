@@ -16,8 +16,10 @@ public class LifeElixirEffect extends ModStatusEffect {
 
     @Override
     public void onRemoved(LivingEntity entity, AttributeContainer attributes, int amplifier) {
-        // Specific Logic is now in ImmortalityStatus
-        if (entity instanceof ServerPlayerEntity serverPlayerEntity)
+        // Specific Logic is now in ImmortalityStatus, so just call update
+        if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
+            ImmortalityStatus.specificAllLogicApplier(serverPlayerEntity);
             ImmortalityAdvancementGiver.giveImmortalityAchievements(serverPlayerEntity);
+        }
     }
 }

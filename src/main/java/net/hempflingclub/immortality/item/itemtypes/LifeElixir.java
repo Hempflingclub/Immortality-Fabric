@@ -1,6 +1,7 @@
 package net.hempflingclub.immortality.item.itemtypes;
 
 import net.hempflingclub.immortality.statuseffect.ModEffectRegistry;
+import net.hempflingclub.immortality.util.ImmortalityData.DataTypeInt;
 import net.hempflingclub.immortality.util.ImmortalityStatus;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.client.item.TooltipContext;
@@ -18,7 +19,9 @@ import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 
 import java.util.List;
-import java.util.Objects;
+
+import static net.hempflingclub.immortality.util.ImmortalityStatus.addGeneric;
+import static net.hempflingclub.immortality.util.ImmortalityStatus.getInt;
 
 public class LifeElixir extends Item {
     private static final int MAX_USE_TIME = 96;
@@ -34,16 +37,22 @@ public class LifeElixir extends Item {
 
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
-        ServerPlayerEntity playerEntity = (ServerPlayerEntity) user;
-        super.finishUsing(stack, world, playerEntity);
-        Criteria.CONSUME_ITEM.trigger(playerEntity, stack);
-        playerEntity.incrementStat(Stats.USED.getOrCreateStat(this));
-        ImmortalityStatus.setLifeElixirTime(playerEntity, (int) Objects.requireNonNull(playerEntity.getServer()).getOverworld().getTime());
-        playerEntity.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.life_elixir, 300 * 20));
+        if (!(user instanceof ServerPlayerEntity serverPlayerEntity)) return stack;
+        //Check if Life Elixir is active
+        int lifeElixirCooldown = getInt(serverPlayerEntity, DataTypeInt.LifeElixirCooldown);
+        if (lifeElixirCooldown > 0) return stack;
+        //Consume Bottle and Update Stats
+        Items.POTION.finishUsing(stack, world, serverPlayerEntity);
+        Criteria.CONSUME_ITEM.trigger(serverPlayerEntity, stack);
+        serverPlayerEntity.incrementStat(Stats.USED.getOrCreateStat(this));
+        //Set Life Elixir Cooldown
+        addGeneric(serverPlayerEntity, DataTypeInt.LifeElixirCooldown, ImmortalityStatus.LIFE_ELIXIR_SECONDS_TO_FINISH);
+        //Give Approximate Effect Time
+        serverPlayerEntity.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.life_elixir, ImmortalityStatus.LIFE_ELIXIR_SECONDS_TO_FINISH * 20));
         if (stack.isEmpty()) {
             return new ItemStack(Items.GLASS_BOTTLE);
         }
-        return Items.POTION.finishUsing(stack, world, playerEntity);
+        return stack;
     }
 
     @Override

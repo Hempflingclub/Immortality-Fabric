@@ -3,6 +3,8 @@ package net.hempflingclub.immortality.entitys.ImmortalWither;
 import com.google.common.collect.ImmutableList;
 import net.hempflingclub.immortality.item.ImmortalityItems;
 import net.hempflingclub.immortality.util.ImmortalityAdvancementGiver;
+import net.hempflingclub.immortality.util.ImmortalityData;
+import net.hempflingclub.immortality.util.ImmortalityData.DataTypeInt;
 import net.hempflingclub.immortality.util.ImmortalityStatus;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.entity.feature.SkinOverlayOwner;
@@ -58,6 +60,8 @@ public class ImmortalWither extends HostileEntity implements SkinOverlayOwner, R
     private static final TrackedData<Integer> TRACKED_ENTITY_ID_2;
     private static final TrackedData<Integer> TRACKED_ENTITY_ID_3;
     private static final List<TrackedData<Integer>> TRACKED_ENTITY_IDS;
+    private static final int BASE_HEAL_AMOUNT = 5;
+    private int heal_amount = BASE_HEAL_AMOUNT;
 
     static {
         TRACKED_ENTITY_ID_1 = DataTracker.registerData(ImmortalWither.class, TrackedDataHandlerRegistry.INTEGER);
@@ -125,16 +129,10 @@ public class ImmortalWither extends HostileEntity implements SkinOverlayOwner, R
                 }
             }
             this.setInvulTimer(i);
-            if (this.age % 10 == 0) {
-                int immortalWitherDeaths = ImmortalityStatus.getImmortalWitherDeaths(this);
-                if (this.getHealth() < this.getMaxHealth() * (1 - ((1.0F * immortalWitherDeaths) / 5))) {
-                    this.heal(20.0F);
-                } else {
-                    //Cap Health to Phase Health Limit
-                    this.setHealth(this.getMaxHealth() * (1 - ((1.0F * immortalWitherDeaths) / 5)));
-                }
+            if (this.age % 10 == 0)
+                //Cap Health to Phase Health Limit but increase Healing while invulnerable
+                if (this.getHealth() < this.getMaxHealth()) heal_amount = 25;
 
-            }
         } else {
             super.mobTick();
             int j;
@@ -207,13 +205,12 @@ public class ImmortalWither extends HostileEntity implements SkinOverlayOwner, R
                 }
             }
             if (this.age % 20 == 0) {
-                int immortalWitherDeaths = ImmortalityStatus.getImmortalWitherDeaths(this);
-                if (this.getHealth() < this.getMaxHealth() * (1 - ((1.0F * immortalWitherDeaths) / 5))) {
-                    this.heal(5.0F);
-                } else {
-                    //Cap Health to Phase Health Limit
-                    this.setHealth(this.getMaxHealth() * (1 - ((1.0F * immortalWitherDeaths) / 5)));
-                }
+                //Heal for Appropriate Amount
+                //Cap Health
+                if (this.getHealth() < this.getMaxHealth()) this.heal(heal_amount);
+                else if (this.getHealth() > this.getMaxHealth()) this.setHealth(this.getMaxHealth());
+                //Reset heal_amount to Base
+                heal_amount = BASE_HEAL_AMOUNT;
             }
             this.bossBar.setPercent(this.getHealth() / this.getMaxHealth());
         }

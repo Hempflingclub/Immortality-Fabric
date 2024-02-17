@@ -142,8 +142,8 @@ public final class ImmortalityInvokeImmortality {//TODO: use Immortality Status
         ImmortalityStatus.incrementGeneric(playerEntity, ImmortalityData.DataTypeInt.ImmortalDeaths);
         sendDeathMessage(playerEntity, dmgSource);
         //Reset Life Elixir Time
-        int LifeElixirTime = getInt(playerEntity, ImmortalityData.DataTypeInt.LifeElixirTime);
-        addGeneric(playerEntity, ImmortalityData.DataTypeInt.LifeElixirTime, -LifeElixirTime);
+        int LifeElixirTime = getInt(playerEntity, ImmortalityData.DataTypeInt.LifeElixirCooldown);
+        addGeneric(playerEntity, ImmortalityData.DataTypeInt.LifeElixirCooldown, -LifeElixirTime);
         //TODO: Ensure Bane of Life | Immortal Wither Kills work as expected
 
         // when not Delta or Gamma Immortal stop their Death for sure
