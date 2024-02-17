@@ -4,6 +4,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.dimension.v1.FabricDimensions;
 import net.hempflingclub.immortality.Immortality;
 import net.hempflingclub.immortality.util.ImmortalityData;
+import net.hempflingclub.immortality.util.ImmortalityData.DataTypeBool;
+import net.hempflingclub.immortality.util.ImmortalityData.DataTypeInt;
 import net.hempflingclub.immortality.util.ImmortalityStatus;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.WolfEntity;
@@ -11,12 +13,16 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.TeleportTarget;
 
 import java.util.Objects;
+
+import static net.hempflingclub.immortality.util.ImmortalityStatus.getBool;
+import static net.hempflingclub.immortality.util.ImmortalityStatus.getInt;
 
 public final class ImmortalityCommands {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
@@ -35,121 +41,46 @@ public final class ImmortalityCommands {
                 }))
                 .then(CommandManager.literal("stats").executes((context -> {
                     if (context.getSource().isExecutedByPlayer()) {
-                        PlayerEntity playerEntity = context.getSource().getPlayer();
+                        ServerPlayerEntity serverPlayerEntity = context.getSource().getPlayer();
                         context.getSource().getServer().execute(() -> {
-                            assert playerEntity != null;
-                            if (ImmortalityStatus.hasTargetGiftedImmortal(playerEntity)) {
-                                if (ImmortalityStatus.getTargetGiftedImmortalLivingEntity(playerEntity) != null) {
-                                    LivingEntity soulBondEntity = ImmortalityStatus.getTargetGiftedImmortalLivingEntity(playerEntity);
-                                    assert soulBondEntity != null;
-                                    context.getSource().sendFeedback(Text.translatable("immortality.status.soulBond", Objects.requireNonNull(soulBondEntity.getCustomName()).getString(), Double.toString(Math.floor(soulBondEntity.getX())), Double.toString(Math.floor(soulBondEntity.getY())), Double.toString(Math.floor(soulBondEntity.getZ())), soulBondEntity.getWorld().getDimensionKey().getValue().toString()), false);
+                            //Only executable by a player (serverside)
+                            if (!(serverPlayerEntity instanceof ServerPlayerEntity)) return;
+                            //Declarations
+                            int bonusHearts = getInt(serverPlayerEntity, DataTypeInt.BonusHearts);
+                            int negativeHearts = getInt(serverPlayerEntity, DataTypeInt.TemporaryNegativeHearts);
 
-                                } else {
-                                    context.getSource().sendFeedback(Text.translatable("immortality.status.soulBond_dead"), false);
+                            int bonusArmor = getInt(serverPlayerEntity, DataTypeInt.BonusArmor);
+                            int bonusArmorToughness = getInt(serverPlayerEntity, DataTypeInt.BonusArmorToughness);
 
-                                }
-                            }
-                            if (ImmortalityStatus.getLifeElixirAppliedHealth(playerEntity) != 0) {
-                                context.getSource().sendFeedback(Text.translatable("immortality.commands.lifeElixirHearts", ImmortalityStatus.getLifeElixirAppliedHealth(playerEntity)), false);
-                            }
-                            if (ImmortalityStatus.getBonusHearts(playerEntity) != 0) {
-                                context.getSource().sendFeedback(Text.translatable("immortality.commands.bonusHearts", ImmortalityStatus.getBonusHearts(playerEntity)), false);
-                            }
-                            if (ImmortalityStatus.getNegativeHearts(playerEntity) != 0) {
-                                if (ImmortalityStatus.isSemiImmortal(playerEntity)) {
-                                    context.getSource().sendFeedback(Text.translatable("immortality.commands.negativeHearts_Semi", ImmortalityStatus.getNegativeHearts(playerEntity)), false);
-                                } else {
-                                    context.getSource().sendFeedback(Text.translatable("immortality.commands.negativeHearts", ImmortalityStatus.getNegativeHearts(playerEntity)), false);
-                                }
-                            }
-                            if (ImmortalityStatus.getRegeneratingHearts(playerEntity) != 0) {
-                                context.getSource().sendFeedback(Text.translatable("immortality.commands.regeneratingHearts", ImmortalityStatus.getRegeneratingHearts(playerEntity)), false);
-                            }
-                            if (ImmortalityStatus.getAppliedBonusArmor(playerEntity) != 0) {
-                                context.getSource().sendFeedback(Text.translatable("immortality.commands.bonusArmor", ImmortalityStatus.getAppliedBonusArmor(playerEntity)), false);
-                            }
-                            if (ImmortalityStatus.getAppliedBonusArmorT(playerEntity) != 0) {
-                                context.getSource().sendFeedback(Text.translatable("immortality.commands.bonusArmorT", ImmortalityStatus.getAppliedBonusArmorT(playerEntity)), false);
-                            }
-                            if (ImmortalityStatus.getVoidHeart(playerEntity)) {
-                                context.getSource().sendFeedback(Text.translatable("immortality.commands.void_heart"), false);
-                            }
-                            if (ImmortalityStatus.isSemiImmortal(playerEntity)) {
-                                context.getSource().sendFeedback(Text.translatable("immortality.commands.semi_immortality"), false);
-                            }
-                            if (ImmortalityStatus.getLiverImmortality(playerEntity)) {
-                                context.getSource().sendFeedback(Text.translatable("immortality.commands.false_immortality"), false);
-                                context.getSource().sendFeedback(Text.translatable("immortality.commands.needed_successful_lifeElixir", ((20 - ImmortalityStatus.getBonusHearts(playerEntity)) / ImmortalityStatus.lifeElixirHealth)), false);
-                            } else if (ImmortalityStatus.getImmortality(playerEntity) && ImmortalityStatus.getVoidHeart(playerEntity)) {
-                                if (ImmortalityStatus.isTrueImmortal(playerEntity)) {
-                                    context.getSource().sendFeedback(Text.translatable("immortality.commands.trinity"), false);
-                                } else if (!ImmortalityStatus.hasTrueImmortalDeaths(playerEntity)) {
-                                    context.getSource().sendFeedback(Text.translatable("immortality.commands.immortality"), false);
-                                    context.getSource().sendFeedback(Text.translatable("immortality.commands.trinity_unfulfilled", ImmortalityStatus.getMissingDeathsToTrueImmortality(playerEntity)), false);
-                                } else if (!ImmortalityStatus.canEatLiverOfImmortality(playerEntity)) {
-                                    context.getSource().sendFeedback(Text.translatable("immortality.commands.immortality"), false);
-                                    if (ImmortalityStatus.getMissingLiversToEatLiverOfImmortality(playerEntity) > 0) {
-                                        context.getSource().sendFeedback(Text.translatable("immortality.commands.trinity_unfulfilled_extraction", ImmortalityStatus.getMissingLiversToEatLiverOfImmortality(playerEntity)), false);
-                                    } else {
-                                        context.getSource().sendFeedback(Text.translatable("immortality.commands.trinity_unfulfilled_holy_dagger"), false);
-                                    }
-                                }
-                            } else if (ImmortalityStatus.getImmortality(playerEntity)) {
-                                context.getSource().sendFeedback(Text.translatable("immortality.commands.immortality"), false);
-                                if (ImmortalityStatus.canEatLiverOfImmortality(playerEntity)) {
-                                    context.getSource().sendFeedback(Text.translatable("immortality.commands.canEatLiver"), false);
-                                } else {
-                                    context.getSource().sendFeedback(Text.translatable("immortality.commands.neededExtractionLivers", ImmortalityStatus.getMissingLiversToEatLiverOfImmortality(playerEntity)), false);
-                                }
-                            } else {
-                                context.getSource().sendFeedback(Text.translatable("immortality.commands.not_immortal"), false);
-                            }
-                            if (ImmortalityData.getImmortalDeaths(ImmortalityStatus.getComponent(playerEntity)) > 0) {
-                                context.getSource().sendFeedback(Text.translatable("immortality.commands.prevented_deaths", ImmortalityData.getImmortalDeaths(ImmortalityStatus.getComponent(playerEntity))), false);
-                            }
+                            int immortalDeaths = getInt(serverPlayerEntity, DataTypeInt.ImmortalDeaths);
+
+                            boolean isDeltaImmortal = getBool(serverPlayerEntity, DataTypeBool.DeltaImmortality);
+                            boolean isGammaImmortal = getBool(serverPlayerEntity, DataTypeBool.GammaImmortality);
+                            boolean isBetaImmortal = getBool(serverPlayerEntity, DataTypeBool.BetaImmortality);
+                            boolean isAlphaImmortal = getBool(serverPlayerEntity, DataTypeBool.AlphaImmortality);
+
+                            boolean hasVoidHeart = getBool(serverPlayerEntity, DataTypeBool.VoidHeart);
+
+                            if (bonusHearts != 0) context.getSource().sendFeedback(Text.translatable("immortality.commands.lifeElixirHearts", bonusHearts), false);
+                            if (negativeHearts != 0) context.getSource().sendFeedback(Text.translatable(isGammaImmortal ? "immortality.commands.negativeHearts_Semi" : "immortality.commands.negativeHearts", negativeHearts), false);
+                            if (bonusArmor != 0) context.getSource().sendFeedback(Text.translatable("immortality.commands.bonusArmor", bonusArmor), false);
+                            if (bonusArmorToughness != 0) context.getSource().sendFeedback(Text.translatable("immortality.commands.bonusArmorT", bonusArmorToughness), false);
+                            if (hasVoidHeart) context.getSource().sendFeedback(Text.translatable("immortality.commands.void_heart"), false);
+                            if (isGammaImmortal) context.getSource().sendFeedback(Text.translatable("immortality.commands.semi_immortality"), false);
+                            //Going through exclusive Immortality Types
+                            if (isDeltaImmortal) context.getSource().sendFeedback(Text.translatable("immortality.commands.false_immortality"), false);
+                                //context.getSource().sendFeedback(Text.translatable("immortality.commands.needed_successful_lifeElixir", ((20 - ImmortalityStatus.getBonusHearts(playerEntity)) / ImmortalityStatus.lifeElixirHealth)), false);
+                            else if (isBetaImmortal) context.getSource().sendFeedback(Text.translatable("immortality.commands.immortality"), false);
+                            else if (isAlphaImmortal) context.getSource().sendFeedback(Text.translatable("immortality.commands.trinity"), false);
+                            else context.getSource().sendFeedback(Text.translatable("immortality.commands.not_immortal"), false);
+                            //Immortal Deaths
+                            if (immortalDeaths > 0) context.getSource().sendFeedback(Text.translatable("immortality.commands.prevented_deaths", immortalDeaths), false);
                         });
                     } else {
                         context.getSource().sendFeedback(Text.translatable("immortality.commands.playerOnly"), false);
                     }
                     return 1;
                 })))
-                .then(CommandManager.literal("summon").executes((context -> {
-                            if (context.getSource().isExecutedByPlayer()) {
-                                PlayerEntity playerEntity = context.getSource().getPlayer();
-                                context.getSource().getServer().execute(() -> {
-                                    if (ImmortalityStatus.hasTargetGiftedImmortal(playerEntity)) {
-                                        assert playerEntity != null;
-                                        playerEntity.sendMessage(Text.translatable("immortality.commands.summoned"), true);
-                                        LivingEntity summonedEntity = ImmortalityStatus.getTargetGiftedImmortalLivingEntity(playerEntity);
-                                        assert summonedEntity != null;
-                                        FabricDimensions.teleport(summonedEntity, (ServerWorld) Objects.requireNonNull(playerEntity).getWorld(), new TeleportTarget(playerEntity.getPos(), Vec3d.ZERO, summonedEntity.getHeadYaw(), summonedEntity.getPitch()));
-                                        ((ServerWorld) summonedEntity.getWorld()).spawnParticles(ParticleTypes.SOUL, summonedEntity.getX(), summonedEntity.getY(), summonedEntity.getZ(), 64, 0, 5, 0, 1);
-                                    } else {
-                                        context.getSource().sendFeedback(Text.translatable("immortality.commands.no_soulbound"), false);
-                                    }
-                                });
-                            } else {
-                                context.getSource().sendFeedback(Text.translatable("immortality.commands.playerOnly"), false);
-                            }
-                            return 1;
-                        })).then(CommandManager.literal("toggle").executes((context -> {
-                            if (context.getSource().isExecutedByPlayer()) {
-                                PlayerEntity playerEntity = context.getSource().getPlayer();
-                                context.getSource().getServer().execute(() -> {
-                                    if (ImmortalityStatus.hasTargetGiftedImmortal(playerEntity) && ImmortalityStatus.getTargetGiftedImmortalLivingEntity(playerEntity) instanceof WolfEntity) {
-                                        assert playerEntity != null;
-                                        ImmortalityStatus.toggleSummonedTeleport(playerEntity);
-                                        playerEntity.sendMessage(Text.translatable((ImmortalityStatus.getSummonedTeleport(playerEntity) ? "immortality.status.enabled_combat_wolf" : "immortality.status_disabled_combat_wolf")));
-                                    } else {
-                                        context.getSource().sendFeedback(Text.translatable((ImmortalityStatus.getTargetGiftedImmortalLivingEntity(playerEntity) != null && !(ImmortalityStatus.getTargetGiftedImmortalLivingEntity(playerEntity) instanceof WolfEntity) ? "immortality.commands.no_soulbound_wolf" : "immortality.commands.no_soulbound")), false);
-                                    }
-                                });
-                            } else {
-                                context.getSource().sendFeedback(Text.translatable("immortality.commands.playerOnly"), false);
-                            }
-                            return 1;
-                        })))
-                )
         );
     }
 }
