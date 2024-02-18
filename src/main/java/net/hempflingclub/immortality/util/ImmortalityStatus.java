@@ -696,6 +696,8 @@ public final class ImmortalityStatus {
          */
         private void checkImmortalHeart() {
             //Checking if Player should earn one, otherwise refund it
+            boolean hasImmortalHeart = getBool(this.serverPlayerEntity, DataTypeBool.ImmortalHeart);
+            if (!hasImmortalHeart) return;
             if (shouldEarnOrKeepImmortalHeart()) return; //He won't get it removed
             //Refunding and removing State
             toggleGeneric(this.serverPlayerEntity, DataTypeBool.ImmortalHeart);
@@ -818,7 +820,7 @@ public final class ImmortalityStatus {
                 boolean isBetaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.BetaImmortality);
                 boolean isAlphaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.AlphaImmortality);
                 //Needs to be any Immortality, to sustain/have bonus hearts
-                if (!(isDeltaImmortal || isGammaImmortal || isBetaImmortal || isAlphaImmortal)) {
+                if (!(isDeltaImmortal || isGammaImmortal || isBetaImmortal || isAlphaImmortal) && bonusHearts > 0) {
                     //If not any Immortality remove Bonus Hearts
                     addGeneric(this.serverPlayerEntity, DataTypeInt.BonusHearts, -bonusHearts);
                     bonusHearts = 0;
@@ -981,7 +983,7 @@ public final class ImmortalityStatus {
                 boolean isAlphaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.AlphaImmortality);
                 int bonusArmor = getInt(this.serverPlayerEntity, DataTypeInt.BonusArmor);
                 //Needs any type of Immortality to be allowed bonus Armor
-                if (!(isDeltaImmortal || isGammaImmortal || isBetaImmortal || isAlphaImmortal)) {
+                if (!(isDeltaImmortal || isGammaImmortal || isBetaImmortal || isAlphaImmortal) && bonusArmor > 0) {
                     addGeneric(this.serverPlayerEntity, DataTypeInt.BonusArmor, -bonusArmor);
                     bonusArmor = 0;
                 }
@@ -1038,7 +1040,7 @@ public final class ImmortalityStatus {
                 boolean isAlphaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.AlphaImmortality);
                 int bonusArmorToughness = getInt(this.serverPlayerEntity, DataTypeInt.BonusArmorToughness);
                 //Needs any type of Immortality to be allowed bonus Armor
-                if (!(isDeltaImmortal || isGammaImmortal || isBetaImmortal || isAlphaImmortal)) {
+                if (!(isDeltaImmortal || isGammaImmortal || isBetaImmortal || isAlphaImmortal) && bonusArmorToughness > 0) {
                     addGeneric(this.serverPlayerEntity, DataTypeInt.BonusArmor, -bonusArmorToughness);
                     bonusArmorToughness = 0;
                 }

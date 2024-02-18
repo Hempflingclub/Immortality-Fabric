@@ -13,11 +13,11 @@ import java.util.ArrayList;
 
 public class PlayerTickHandler implements ServerTickEvents.StartTick {
     public static MinecraftServer minecraftServer;
-    long counter = 0;//TODO use ImmortalityStatus refactor to use logic here
+    long counter = 0;
 
     @Override
     public void onStartTick(MinecraftServer server) {
-        if (counter++ % 20 == 0) {
+        if (++counter % 20 == 0) {
             //int currentTime = ImmortalityStatus.getCurrentTime(server);
             minecraftServer = server;
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
