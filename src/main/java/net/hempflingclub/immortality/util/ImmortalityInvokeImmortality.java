@@ -113,7 +113,6 @@ public final class ImmortalityInvokeImmortality {//TODO: use Immortality Status
     }
 
     private static float playerImmortalityHandling(ServerPlayerEntity playerEntity, DamageSource dmgSource, float damageAmount) {
-        //TODO: Sort this Bullshit out, even refactored it's still to convoluted
 
         // Stop Endlessly falling into void
         if (playerEntity.getY() <= playerEntity.world.getBottomY() && dmgSource == DamageSource.OUT_OF_WORLD)
@@ -138,20 +137,35 @@ public final class ImmortalityInvokeImmortality {//TODO: use Immortality Status
             //Increase Death Counter in Statistics
             playerEntity.incrementStat(Stats.DEATHS);
         }
+        // when not Delta or Gamma Immortal stop their Death for sure
+        boolean isDeltaImmortality = getBool(playerEntity, ImmortalityData.DataTypeBool.DeltaImmortality);
+        boolean isGammaImmortality = getBool(playerEntity, ImmortalityData.DataTypeBool.GammaImmortality);
+        boolean stopDeath = !(isDeltaImmortality || isGammaImmortality);
+
         //Increase Immortals Death Counter
         ImmortalityStatus.incrementGeneric(playerEntity, ImmortalityData.DataTypeInt.ImmortalDeaths);
         sendDeathMessage(playerEntity, dmgSource);
+        //Giving Negative Hearts at Death Time, so no recursive loops happen because of Immortality Status time based checks
+        int maxHealth = (int) playerEntity.getMaxHealth();
+        {
+            boolean isDeltaImmortal = getBool(playerEntity, ImmortalityData.DataTypeBool.DeltaImmortality);
+            boolean isGammaImmortal = getBool(playerEntity, ImmortalityData.DataTypeBool.GammaImmortality);
+            //Needs to be either or to get Negative Hearts, or for any underlying Logic as Negative Hearts are applied first anyway
+            if (isDeltaImmortal || isGammaImmortal) {
+                //This will result in this Negative function being called, and applying the first part, of giving negative Hearts
+                incrementGeneric(playerEntity, ImmortalityData.DataTypeInt.TemporaryNegativeHearts);
+                maxHealth += negativeImmortalityHeartsHealthAddition; //Calculate New Temporary Heart State so determination of should die still works
+            }
+        }
+
         //Reset Life Elixir Time
         int LifeElixirTime = getInt(playerEntity, ImmortalityData.DataTypeInt.LifeElixirCooldown);
         addGeneric(playerEntity, ImmortalityData.DataTypeInt.LifeElixirCooldown, -LifeElixirTime);
         //TODO: Ensure Bane of Life | Immortal Wither Kills work as expected
 
-        // when not Delta or Gamma Immortal stop their Death for sure
-        boolean isDeltaImmortality = getBool(playerEntity, ImmortalityData.DataTypeBool.DeltaImmortality);
-        boolean isGammaImmortality = getBool(playerEntity, ImmortalityData.DataTypeBool.GammaImmortality);
-        if (!(isDeltaImmortality || isGammaImmortality)) return stopDeath(playerEntity);
+        if (stopDeath) return stopDeath(playerEntity);
         //Check if Death is a final Death, if not stop Death
-        if (playerEntity.getMaxHealth() >= 2) return stopDeath(playerEntity);
+        if (maxHealth >= 2) return stopDeath(playerEntity);
         //Ensure Death, reducing likely de-syncs
         playerEntity.setHealth(1);
         return damageAmount + 1;
@@ -195,7 +209,8 @@ public final class ImmortalityInvokeImmortality {//TODO: use Immortality Status
     }
 
     private static void sendMessage(ServerPlayerEntity immortalPlayer, DamageSource dmgSource, PlayerEntity playerToSendTo, String translationKey) {
-        playerToSendTo.sendMessage(Text.translatable(translationKey, immortalPlayer.getName().getString(), Objects.requireNonNull(dmgSource.getSource()).getName().getString()));
+        if (dmgSource.getSource() == null) return;
+        playerToSendTo.sendMessage(Text.translatable(translationKey, immortalPlayer.getName().getString(), dmgSource.getSource().getName().getString()));
     }
 
     private static float stopDeath(ServerPlayerEntity immortalPlayer) {
