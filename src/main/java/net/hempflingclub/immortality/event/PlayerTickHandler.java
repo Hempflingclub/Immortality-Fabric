@@ -29,6 +29,7 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                         dataTypesCooldown.add(DataTypeInt.GammaImmortalityHeartCooldownSeconds);
                         dataTypesCooldown.add(DataTypeInt.LiverExtractionCooldownSeconds);
                         dataTypesCooldown.add(DataTypeInt.LifeElixirDropCooldownSeconds);
+                        dataTypesCooldown.add(DataTypeInt.LifeElixirCooldownSeconds);
                         for (DataTypeInt dataTypeCooldown : dataTypesCooldown) {
                             int secondsToReduce = 5;
                             int currentCooldownSeconds = ImmortalityStatus.getInt(player, dataTypeCooldown);
@@ -61,10 +62,14 @@ public class PlayerTickHandler implements ServerTickEvents.StartTick {
                     //Apply Void Heart + boost per Immortality Stage
                     if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.VoidHeart)) {
                         int foodRegen = 1;
-                        if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.DeltaImmortality)) foodRegen += 1;
-                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.GammaImmortality)) foodRegen += 2;
-                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.BetaImmortality)) foodRegen += 3;
-                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.AlphaImmortality)) foodRegen += 4;
+                        if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.DeltaImmortality))
+                            foodRegen += 1;
+                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.GammaImmortality))
+                            foodRegen += 2;
+                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.BetaImmortality))
+                            foodRegen += 3;
+                        else if (ImmortalityStatus.getBool(player, ImmortalityData.DataTypeBool.AlphaImmortality))
+                            foodRegen += 4;
                         player.getHungerManager().add(foodRegen, foodRegen);
                     }
                 }

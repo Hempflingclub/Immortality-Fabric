@@ -39,14 +39,14 @@ public class LifeElixir extends Item {
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
         if (!(user instanceof ServerPlayerEntity serverPlayerEntity)) return stack;
         //Check if Life Elixir is active
-        int lifeElixirCooldown = getInt(serverPlayerEntity, DataTypeInt.LifeElixirCooldown);
+        int lifeElixirCooldown = getInt(serverPlayerEntity, DataTypeInt.LifeElixirCooldownSeconds);
         if (lifeElixirCooldown > 0) return stack;
         //Consume Bottle and Update Stats
         Items.POTION.finishUsing(stack, world, serverPlayerEntity);
         Criteria.CONSUME_ITEM.trigger(serverPlayerEntity, stack);
         serverPlayerEntity.incrementStat(Stats.USED.getOrCreateStat(this));
         //Set Life Elixir Cooldown
-        addGeneric(serverPlayerEntity, DataTypeInt.LifeElixirCooldown, ImmortalityStatus.LIFE_ELIXIR_SECONDS_TO_FINISH);
+        addGeneric(serverPlayerEntity, DataTypeInt.LifeElixirCooldownSeconds, ImmortalityStatus.LIFE_ELIXIR_SECONDS_TO_FINISH);
         //Give Approximate Effect Time
         serverPlayerEntity.addStatusEffect(new StatusEffectInstance(ModEffectRegistry.life_elixir, ImmortalityStatus.LIFE_ELIXIR_SECONDS_TO_FINISH * 20));
         if (stack.isEmpty()) {

@@ -159,8 +159,8 @@ public final class ImmortalityInvokeImmortality {//TODO: use Immortality Status
         }
 
         //Reset Life Elixir Time
-        int LifeElixirTime = getInt(playerEntity, ImmortalityData.DataTypeInt.LifeElixirCooldown);
-        addGeneric(playerEntity, ImmortalityData.DataTypeInt.LifeElixirCooldown, -LifeElixirTime);
+        int LifeElixirTime = getInt(playerEntity, ImmortalityData.DataTypeInt.LifeElixirCooldownSeconds);
+        addGeneric(playerEntity, ImmortalityData.DataTypeInt.LifeElixirCooldownSeconds, -LifeElixirTime);
         //TODO: Ensure Bane of Life | Immortal Wither Kills work as expected
 
         if (stopDeath) return stopDeath(playerEntity);

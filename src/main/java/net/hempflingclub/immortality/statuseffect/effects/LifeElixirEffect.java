@@ -3,7 +3,6 @@ package net.hempflingclub.immortality.statuseffect.effects;
 import net.hempflingclub.immortality.statuseffect.ModStatusEffect;
 import net.hempflingclub.immortality.util.ImmortalityAdvancementGiver;
 import net.hempflingclub.immortality.util.ImmortalityStatus;
-import net.minecraft.client.report.ReporterEnvironment;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.AttributeContainer;
 import net.minecraft.entity.effect.StatusEffectCategory;

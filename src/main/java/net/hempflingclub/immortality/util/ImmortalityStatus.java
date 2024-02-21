@@ -44,7 +44,7 @@ public final class ImmortalityStatus {
     public static final int BASE_BONUS_HEART_CHANCE_PERCENT = 50;
     public static final int IMMORTAL_BONUS_HEART_CHANCE_PERCENT = 75;
     public static final int TRUE_IMMORTAL_BONUS_HEART_CHANCE_PERCENT = 100;
-    public static final int LIFE_ELIXIR_SECONDS_TO_FINISH = 150;
+    public static final int LIFE_ELIXIR_SECONDS_TO_FINISH = 10; //TODO: RETURN TO ORIGNAL VALUE from Debug
     public static final String BONUS_HEALTH_KEY = "bonus-health";
     public static final String NEGATIVE_HEALTH_KEY = "negative-health";
     public static final String BONUS_ARMOR_KEY = "bonus-armor";
@@ -544,7 +544,7 @@ public final class ImmortalityStatus {
                 checkLiverExtraction();
             } else if (dataType == DataTypeInt.LiverExtractionCooldownSeconds) {
                 checkLiverExtraction();
-            } else if (dataType == DataTypeInt.LifeElixirCooldown) {
+            } else if (dataType == DataTypeInt.LifeElixirCooldownSeconds) {
                 checkLifeElixir();
             } else if (dataType == DataTypeInt.LifeElixirDropCooldownSeconds) {
                 checkLifeElixir();
@@ -725,9 +725,9 @@ public final class ImmortalityStatus {
             boolean isAlphaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.AlphaImmortality);
             boolean anyImmortality =
                     isDeltaImmortal ||
-                    isGammaImmortal ||
-                    isBetaImmortal ||
-                    isAlphaImmortal;
+                            isGammaImmortal ||
+                            isBetaImmortal ||
+                            isAlphaImmortal;
             if (anyImmortality) return;
             //Clear
             {
@@ -900,7 +900,7 @@ public final class ImmortalityStatus {
          * Life Elixir Dropping on Final Killing Semi Immortal or higher
          */
         private void checkLifeElixir() {
-            int lifeElixirCooldown = getInt(this.serverPlayerEntity, DataTypeInt.LifeElixirCooldown);
+            int lifeElixirCooldown = getInt(this.serverPlayerEntity, DataTypeInt.LifeElixirCooldownSeconds);
             final int[] lifeElixirChances = {ImmortalityStatus.BASE_BONUS_HEART_CHANCE_PERCENT, ImmortalityStatus.IMMORTAL_BONUS_HEART_CHANCE_PERCENT, ImmortalityStatus.TRUE_IMMORTAL_BONUS_HEART_CHANCE_PERCENT};
             //lifeElixirChances[0] = normal
             //lifeElixirChances[1] = for Immortal
@@ -925,7 +925,7 @@ public final class ImmortalityStatus {
                 boolean isGammaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.GammaImmortality);
                 if (!(isDeltaImmortal || isGammaImmortal || isBetaImmortal || isAlphaImmortal)) success = false;
                 //Reset LifeElixirCooldown
-                addGeneric(this.serverPlayerEntity, DataTypeInt.LifeElixirCooldown, -lifeElixirCooldown);
+                addGeneric(this.serverPlayerEntity, DataTypeInt.LifeElixirCooldownSeconds, -lifeElixirCooldown);
                 if (success) {
                     //Add Bonus Heart
                     incrementGeneric(this.serverPlayerEntity, DataTypeInt.BonusHearts);
