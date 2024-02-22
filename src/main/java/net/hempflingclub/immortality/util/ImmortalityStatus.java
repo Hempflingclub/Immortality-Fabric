@@ -828,9 +828,27 @@ public final class ImmortalityStatus {
                     negativeHearts = 0;
                 }
                 assert healthModifier != null;
-                healthModifier.clearModifiers();
-                if (negativeHearts != 0) System.out.println("Added {" + negativeHearts + "} negative Hearts");
-                healthModifier.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.NEGATIVE_HEALTH_KEY, (negativeHearts * ImmortalityStatus.negativeImmortalityHeartsHealthAddition), EntityAttributeModifier.Operation.ADDITION));
+                {
+                    //Removing old Modifier if no longer valid
+                    Set<EntityAttributeModifier> entityAttributeModifiers = healthModifier.getModifiers(EntityAttributeModifier.Operation.ADDITION);
+                    EntityAttributeModifier oldNegativeHealth = null;
+                    for (EntityAttributeModifier entityAttributeModifier : entityAttributeModifiers) {
+                        if (!entityAttributeModifier.getName().equals(ImmortalityStatus.NEGATIVE_HEALTH_KEY))
+                            continue;
+                        oldNegativeHealth = entityAttributeModifier;
+                        break;
+                    }
+                    //Could possibly not yet have one, so null check
+                    if (oldNegativeHealth == null) { //Not yet has applied Negative Health
+                        healthModifier.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.NEGATIVE_HEALTH_KEY, (negativeHearts * ImmortalityStatus.negativeImmortalityHeartsHealthAddition), EntityAttributeModifier.Operation.ADDITION));
+                        return;
+                    }
+                    if (oldNegativeHealth.getValue() == negativeHearts * ImmortalityStatus.immortalityHeartsHealthAddition)
+                        return;
+                    //Remove if no longer valid (value changed)
+                    healthModifier.removeModifier(oldNegativeHealth);
+                    healthModifier.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.NEGATIVE_HEALTH_KEY, (negativeHearts * ImmortalityStatus.negativeImmortalityHeartsHealthAddition), EntityAttributeModifier.Operation.ADDITION));
+                }
             }
             //Regen Logic
             {
@@ -876,7 +894,7 @@ public final class ImmortalityStatus {
                 EntityAttributeInstance maxHealthInstance = this.serverPlayerEntity.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
                 assert maxHealthInstance != null;
                 {
-                    //Removing old Modifier
+                    //Removing old Modifier if no longer valid
                     Set<EntityAttributeModifier> entityAttributeModifiers = maxHealthInstance.getModifiers(EntityAttributeModifier.Operation.ADDITION);
                     EntityAttributeModifier oldHealthBonus = null;
                     for (EntityAttributeModifier entityAttributeModifier : entityAttributeModifiers) {
@@ -886,9 +904,16 @@ public final class ImmortalityStatus {
                         break;
                     }
                     //Could possibly not yet have one, so null check
-                    if (oldHealthBonus != null) maxHealthInstance.removeModifier(oldHealthBonus);
+                    if (oldHealthBonus == null) { //Not yet has applied Bonus Health
+                        maxHealthInstance.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.BONUS_HEALTH_KEY, (bonusHearts * ImmortalityStatus.immortalityHeartsHealthAddition), EntityAttributeModifier.Operation.ADDITION));
+                        return;
+                    }
+                    if (oldHealthBonus.getValue() == bonusHearts * ImmortalityStatus.immortalityHeartsHealthAddition)
+                        return;
+                    //Remove if no longer valid (value changed)
+                    maxHealthInstance.removeModifier(oldHealthBonus);
+                    maxHealthInstance.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.BONUS_HEALTH_KEY, (bonusHearts * ImmortalityStatus.immortalityHeartsHealthAddition), EntityAttributeModifier.Operation.ADDITION));
                 }
-                maxHealthInstance.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.BONUS_HEALTH_KEY, (bonusHearts * ImmortalityStatus.immortalityHeartsHealthAddition), EntityAttributeModifier.Operation.ADDITION));
             }
         }
 
