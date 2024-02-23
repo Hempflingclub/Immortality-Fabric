@@ -11,6 +11,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.*;
+import net.minecraft.entity.attribute.EntityAttributeModifier.Operation;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
@@ -372,6 +373,32 @@ public final class ImmortalityStatus {
         dataTypesToClear.removeAll(dataTypesToKeep);
         resetDataTypesGeneric(serverPlayerEntity, dataTypesToClear);
         serverPlayerEntity.syncComponent(IImmortalityPlayerComponent.KEY);
+    }
+
+    private static void GenericAttributeRefresh(ServerPlayerEntity serverPlayerEntity, EntityAttribute entityAttribute, Operation operation, String attributeKey, int newValue) {
+        EntityAttributeInstance attributeInstance = serverPlayerEntity.getAttributeInstance(entityAttribute);
+        assert attributeInstance != null;
+        {
+            //Removing old Modifier if no longer valid
+            Set<EntityAttributeModifier> entityAttributeModifiers = attributeInstance.getModifiers(operation);
+            EntityAttributeModifier oldModifier = null;
+            for (EntityAttributeModifier entityAttributeModifier : entityAttributeModifiers) {
+                if (!entityAttributeModifier.getName().equals(attributeKey))
+                    continue;
+                oldModifier = entityAttributeModifier;
+                break;
+            }
+            //Could possibly not yet have one, so null check
+            if (oldModifier == null) { //Not yet has applied Bonus Health
+                attributeInstance.addPersistentModifier(new EntityAttributeModifier(attributeKey, newValue, operation));
+                return;
+            }
+            if ((int) oldModifier.getValue() == newValue)
+                return;
+            //Remove if no longer valid (value changed)
+            attributeInstance.removeModifier(oldModifier);
+            attributeInstance.addPersistentModifier(new EntityAttributeModifier(attributeKey, newValue, operation));
+        }
     }
 
     public static IImmortalityPlayerComponent getComponent(PlayerEntity playerEntity) {
@@ -819,7 +846,6 @@ public final class ImmortalityStatus {
         private void checkTemporaryNegativeHearts() {
             //Applying Negative Hearts
             {
-                EntityAttributeInstance healthModifier = this.serverPlayerEntity.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
                 int negativeHearts = getInt(this.serverPlayerEntity, DataTypeInt.TemporaryNegativeHearts);
                 boolean isDeltaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.DeltaImmortality);
                 boolean isGammaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.GammaImmortality);
@@ -827,42 +853,34 @@ public final class ImmortalityStatus {
                     //When not False/Semi Immortal clear Negative Hearts
                     negativeHearts = 0;
                 }
-                assert healthModifier != null;
-                {
-                    //Removing old Modifier if no longer valid
-                    Set<EntityAttributeModifier> entityAttributeModifiers = healthModifier.getModifiers(EntityAttributeModifier.Operation.ADDITION);
-                    EntityAttributeModifier oldNegativeHealth = null;
-                    for (EntityAttributeModifier entityAttributeModifier : entityAttributeModifiers) {
-                        if (!entityAttributeModifier.getName().equals(ImmortalityStatus.NEGATIVE_HEALTH_KEY))
-                            continue;
-                        oldNegativeHealth = entityAttributeModifier;
-                        break;
-                    }
-                    //Could possibly not yet have one, so null check
-                    if (oldNegativeHealth == null) { //Not yet has applied Negative Health
-                        healthModifier.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.NEGATIVE_HEALTH_KEY, (negativeHearts * ImmortalityStatus.negativeImmortalityHeartsHealthAddition), EntityAttributeModifier.Operation.ADDITION));
-                        return;
-                    }
-                    if (oldNegativeHealth.getValue() == negativeHearts * ImmortalityStatus.immortalityHeartsHealthAddition)
-                        return;
-                    //Remove if no longer valid (value changed)
-                    healthModifier.removeModifier(oldNegativeHealth);
-                    healthModifier.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.NEGATIVE_HEALTH_KEY, (negativeHearts * ImmortalityStatus.negativeImmortalityHeartsHealthAddition), EntityAttributeModifier.Operation.ADDITION));
+                //Preventing Negative Hearts (regen after final Death)
+                if (this.serverPlayerEntity.getMaxHealth() < 2) {
+                    resetDataTypesGeneric(this.serverPlayerEntity, DataTypeInt.TemporaryNegativeHearts);
+                    negativeHearts = 0;
                 }
+
+                //Update Negative Health Attribute
+                GenericAttributeRefresh(
+                        this.serverPlayerEntity,
+                        EntityAttributes.GENERIC_MAX_HEALTH,
+                        Operation.ADDITION,
+                        ImmortalityStatus.NEGATIVE_HEALTH_KEY,
+                        negativeHearts * ImmortalityStatus.negativeImmortalityHeartsHealthAddition
+                );
             }
             //Regen Logic
             {
                 //Needs to be Semi Immortal to allow possibility of regenerating his Negative Hearts
                 boolean isGammaImmortal = getBool(this.serverPlayerEntity, DataTypeBool.GammaImmortality);
                 if (!isGammaImmortal) return;
-                int currentTimeSeconds = getCurrentTime(this.serverPlayerEntity) / 20;
-                int timeLostHeartSeconds = getInt(this.serverPlayerEntity, DataTypeInt.KilledByBaneOfLifeTime) / 20;
                 int heartRegenCooldown = getInt(this.serverPlayerEntity, DataTypeInt.GammaImmortalityHeartCooldownSeconds);
-                int diffCooldown = (timeLostHeartSeconds + ImmortalityStatus.BASE_SEMI_IMMORTALITY_HEART_COOLDOWN_BASE_SECONDS) - currentTimeSeconds;
-                heartRegenCooldown -= diffCooldown;
-                if (heartRegenCooldown > 0) return;
-                //Set Last Regenerated Heart Time
-                new ImmortalityData.DataTypes(getComponent(this.serverPlayerEntity), DataTypeInt.KilledByBaneOfLifeTime, currentTimeSeconds * 20);
+                int negativeHearts = getInt(this.serverPlayerEntity, DataTypeInt.TemporaryNegativeHearts);
+                if (negativeHearts == 0) return;
+                if (heartRegenCooldown >= 0) return;
+                System.out.println("Regen");
+                //Set Last Regenerated Heart Time TODO: 🤔🤔🤔
+                //new ImmortalityData.DataTypes(getComponent(this.serverPlayerEntity), DataTypeInt.KilledByBaneOfLifeTime, currentTimeSeconds * 20);
+
                 //Give new Cooldown to Heart Regen
                 addGeneric(this.serverPlayerEntity, DataTypeInt.GammaImmortalityHeartCooldownSeconds, ImmortalityStatus.BASE_SEMI_IMMORTALITY_HEART_COOLDOWN_BASE_SECONDS);
                 //Regen a Heart
@@ -891,29 +909,14 @@ public final class ImmortalityStatus {
                     addGeneric(this.serverPlayerEntity, DataTypeInt.BonusHearts, -bonusHearts);
                     bonusHearts = 0;
                 }
-                EntityAttributeInstance maxHealthInstance = this.serverPlayerEntity.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
-                assert maxHealthInstance != null;
-                {
-                    //Removing old Modifier if no longer valid
-                    Set<EntityAttributeModifier> entityAttributeModifiers = maxHealthInstance.getModifiers(EntityAttributeModifier.Operation.ADDITION);
-                    EntityAttributeModifier oldHealthBonus = null;
-                    for (EntityAttributeModifier entityAttributeModifier : entityAttributeModifiers) {
-                        if (!entityAttributeModifier.getName().equals(ImmortalityStatus.BONUS_HEALTH_KEY))
-                            continue;
-                        oldHealthBonus = entityAttributeModifier;
-                        break;
-                    }
-                    //Could possibly not yet have one, so null check
-                    if (oldHealthBonus == null) { //Not yet has applied Bonus Health
-                        maxHealthInstance.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.BONUS_HEALTH_KEY, (bonusHearts * ImmortalityStatus.immortalityHeartsHealthAddition), EntityAttributeModifier.Operation.ADDITION));
-                        return;
-                    }
-                    if (oldHealthBonus.getValue() == bonusHearts * ImmortalityStatus.immortalityHeartsHealthAddition)
-                        return;
-                    //Remove if no longer valid (value changed)
-                    maxHealthInstance.removeModifier(oldHealthBonus);
-                    maxHealthInstance.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.BONUS_HEALTH_KEY, (bonusHearts * ImmortalityStatus.immortalityHeartsHealthAddition), EntityAttributeModifier.Operation.ADDITION));
-                }
+                //Update Bonus Health Attribute
+                GenericAttributeRefresh(
+                        this.serverPlayerEntity,
+                        EntityAttributes.GENERIC_MAX_HEALTH,
+                        Operation.ADDITION,
+                        ImmortalityStatus.BONUS_HEALTH_KEY,
+                        bonusHearts * ImmortalityStatus.immortalityHeartsHealthAddition
+                );
             }
         }
 
@@ -1083,7 +1086,7 @@ public final class ImmortalityStatus {
                 assert armorInstance != null;
                 {
                     //Removing old Modifier
-                    Set<EntityAttributeModifier> entityAttributeModifiers = armorInstance.getModifiers(EntityAttributeModifier.Operation.ADDITION);
+                    Set<EntityAttributeModifier> entityAttributeModifiers = armorInstance.getModifiers(Operation.ADDITION);
                     EntityAttributeModifier oldArmorBonus = null;
                     for (EntityAttributeModifier entityAttributeModifier : entityAttributeModifiers) {
                         if (!entityAttributeModifier.getName().equals(ImmortalityStatus.BONUS_ARMOR_KEY))
@@ -1094,7 +1097,7 @@ public final class ImmortalityStatus {
                     //Could possibly not yet have one, so null check
                     if (oldArmorBonus != null) armorInstance.removeModifier(oldArmorBonus);
                 }
-                armorInstance.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.BONUS_HEALTH_KEY, appliedBonusArmor, EntityAttributeModifier.Operation.ADDITION));
+                armorInstance.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.BONUS_HEALTH_KEY, appliedBonusArmor, Operation.ADDITION));
             }
         }
 
@@ -1140,7 +1143,7 @@ public final class ImmortalityStatus {
                 assert armorToughnessInstance != null;
                 {
                     //Removing old Modifier
-                    Set<EntityAttributeModifier> entityAttributeModifiers = armorToughnessInstance.getModifiers(EntityAttributeModifier.Operation.ADDITION);
+                    Set<EntityAttributeModifier> entityAttributeModifiers = armorToughnessInstance.getModifiers(Operation.ADDITION);
                     EntityAttributeModifier oldArmorToughnessBonus = null;
                     for (EntityAttributeModifier entityAttributeModifier : entityAttributeModifiers) {
                         if (!entityAttributeModifier.getName().equals(ImmortalityStatus.BONUS_ARMOR_TOUGHNESS_KEY))
@@ -1151,7 +1154,7 @@ public final class ImmortalityStatus {
                     //Could possibly not yet have one, so null check
                     if (oldArmorToughnessBonus != null) armorToughnessInstance.removeModifier(oldArmorToughnessBonus);
                 }
-                armorToughnessInstance.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.BONUS_HEALTH_KEY, appliedBonusArmorToughness, EntityAttributeModifier.Operation.ADDITION));
+                armorToughnessInstance.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.BONUS_HEALTH_KEY, appliedBonusArmorToughness, Operation.ADDITION));
             }
         }
 
@@ -1181,7 +1184,7 @@ public final class ImmortalityStatus {
                     assert maxHealthInstance != null;
                     {
                         //Removing old Modifier
-                        Set<EntityAttributeModifier> entityAttributeModifiers = maxHealthInstance.getModifiers(EntityAttributeModifier.Operation.ADDITION);
+                        Set<EntityAttributeModifier> entityAttributeModifiers = maxHealthInstance.getModifiers(Operation.ADDITION);
                         EntityAttributeModifier oldHealthDeficit = null;
                         for (EntityAttributeModifier entityAttributeModifier : entityAttributeModifiers) {
                             if (!entityAttributeModifier.getName().equals(ImmortalityStatus.NEGATIVE_HEALTH_KEY))
@@ -1191,7 +1194,7 @@ public final class ImmortalityStatus {
                         }
                         if (oldHealthDeficit != null) maxHealthInstance.removeModifier(oldHealthDeficit);
                     }
-                    maxHealthInstance.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.NEGATIVE_HEALTH_KEY, health_diff, EntityAttributeModifier.Operation.ADDITION));
+                    maxHealthInstance.addPersistentModifier(new EntityAttributeModifier(ImmortalityStatus.NEGATIVE_HEALTH_KEY, health_diff, Operation.ADDITION));
                 }
             }
         }
