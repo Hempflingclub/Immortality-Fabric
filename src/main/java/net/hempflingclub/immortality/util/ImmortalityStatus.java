@@ -875,16 +875,26 @@ public final class ImmortalityStatus {
                 if (!isGammaImmortal) return;
                 int heartRegenCooldown = getInt(this.serverPlayerEntity, DataTypeInt.GammaImmortalityHeartCooldownSeconds);
                 int negativeHearts = getInt(this.serverPlayerEntity, DataTypeInt.TemporaryNegativeHearts);
+                if (negativeHearts == 0 && heartRegenCooldown < 0) {
+                    //Finished Regen, reset Cooldown
+                    resetDataTypesGeneric(this.serverPlayerEntity, DataTypeInt.GammaImmortalityHeartCooldownSeconds);
+                }
                 if (negativeHearts == 0) return;
-                if (heartRegenCooldown >= 0) return;
-                System.out.println("Regen");
+                if (heartRegenCooldown == 0) {
+                    //Not Regen yet, but new Negative Heart
+                    //Give new Cooldown to Heart Regen
+                    addGeneric(this.serverPlayerEntity, DataTypeInt.GammaImmortalityHeartCooldownSeconds, ImmortalityStatus.BASE_SEMI_IMMORTALITY_HEART_COOLDOWN_BASE_SECONDS);
+                    return;
+                }
+
+                if (heartRegenCooldown > 0) return;
                 //Set Last Regenerated Heart Time TODO: 🤔🤔🤔
                 //new ImmortalityData.DataTypes(getComponent(this.serverPlayerEntity), DataTypeInt.KilledByBaneOfLifeTime, currentTimeSeconds * 20);
 
                 //Give new Cooldown to Heart Regen
                 addGeneric(this.serverPlayerEntity, DataTypeInt.GammaImmortalityHeartCooldownSeconds, ImmortalityStatus.BASE_SEMI_IMMORTALITY_HEART_COOLDOWN_BASE_SECONDS);
                 //Regen a Heart
-                addGeneric(this.serverPlayerEntity, DataTypeInt.TemporaryNegativeHearts, -1);
+                int a = addGeneric(this.serverPlayerEntity, DataTypeInt.TemporaryNegativeHearts, -1);
                 //Give Feedback Message
                 this.serverPlayerEntity.sendMessage(Text.translatable("immortality.status.heart_restored"), true);
             }

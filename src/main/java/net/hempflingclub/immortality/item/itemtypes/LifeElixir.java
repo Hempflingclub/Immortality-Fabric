@@ -24,7 +24,7 @@ import static net.hempflingclub.immortality.util.ImmortalityStatus.addGeneric;
 import static net.hempflingclub.immortality.util.ImmortalityStatus.getInt;
 
 public class LifeElixir extends Item {
-    private static final int MAX_USE_TIME = 96;
+    private static final int MAX_USE_TIME = 0x0F;
 
     public LifeElixir(Settings settings) {
         super(settings);
