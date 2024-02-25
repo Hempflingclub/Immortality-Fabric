@@ -333,6 +333,10 @@ public final class ImmortalityStatus {
     }
 
     public static void specificAllLogicApplier(LivingEntity livingEntity) {
+        if (livingEntity instanceof ServerPlayerEntity serverPlayer) {
+            specificAllLogicApplier(serverPlayer);
+            return;
+        }
         livingEntity.syncComponent(IImmortalityLivingEntityComponent.KEY);
         for (DataTypeInt dataTypeInt : DataTypeInt.values())
             new SpecificLogicApplier(livingEntity, dataTypeInt);
@@ -393,8 +397,10 @@ public final class ImmortalityStatus {
                 attributeInstance.addPersistentModifier(new EntityAttributeModifier(attributeKey, newValue, operation));
                 return;
             }
-            if ((int) oldModifier.getValue() == newValue)
+            if ((int) oldModifier.getValue() == newValue) {
+                System.out.println("Player already has attribute - " + attributeKey + " - " + newValue);
                 return;
+            }
             //Remove if no longer valid (value changed)
             attributeInstance.removeModifier(oldModifier);
             attributeInstance.addPersistentModifier(new EntityAttributeModifier(attributeKey, newValue, operation));
