@@ -397,9 +397,12 @@ public final class ImmortalityStatus {
                 attributeInstance.addPersistentModifier(new EntityAttributeModifier(attributeKey, newValue, operation));
                 return;
             }
-            if ((int) oldModifier.getValue() == newValue) {
-                System.out.println("Player already has attribute - " + attributeKey + " - " + newValue);
-                return;
+            int curValue = (int) oldModifier.getValue();
+            if (curValue == newValue) return;
+            if (entityAttribute.equals(EntityAttributes.GENERIC_MAX_HEALTH)) {
+                //Heal / Damage Difference
+                int diff = newValue - curValue;
+                serverPlayerEntity.heal(diff);
             }
             //Remove if no longer valid (value changed)
             attributeInstance.removeModifier(oldModifier);
@@ -743,6 +746,11 @@ public final class ImmortalityStatus {
                     return;
                 }
                 //Check if at least 1 Heart is left
+                //Debug because of Dimensional De-Sync
+                {
+                    checkBonusHearts();
+                    checkTemporaryNegativeHearts();
+                }
                 int maxHealth = (int) this.serverPlayerEntity.getMaxHealth();
                 if (maxHealth >= 2) return;
             }
@@ -790,7 +798,7 @@ public final class ImmortalityStatus {
             if (shouldEarnOrKeepImmortalHeart()) return; //He won't get it removed
             //Refunding and removing State
             toggleGeneric(this.serverPlayerEntity, DataTypeBool.ImmortalHeart);
-            World world = this.serverPlayerEntity.world;
+            ServerWorld world = this.serverPlayerEntity.getWorld();
             double x = this.serverPlayerEntity.getX();
             double y = this.serverPlayerEntity.getY();
             double z = this.serverPlayerEntity.getZ();
@@ -949,7 +957,7 @@ public final class ImmortalityStatus {
             //lifeElixirChances[0] = normal
             //lifeElixirChances[1] = for Immortal
             //lifeElixirChances[2] = for True Immortal
-            World world = this.serverPlayerEntity.world;
+            ServerWorld world = this.serverPlayerEntity.getWorld();
             int x = (int) this.serverPlayerEntity.getX();
             int y = (int) this.serverPlayerEntity.getY();
             int z = (int) this.serverPlayerEntity.getZ();
@@ -1043,7 +1051,7 @@ public final class ImmortalityStatus {
                 //Increment Cooldown
                 addGeneric(this.serverPlayerEntity, DataTypeInt.LiverExtractionCooldownSeconds, ImmortalityStatus.COOLDOWN_SECONDS_FOR_LIVER_REGROWTH);
                 //Drop Liver
-                World world = this.serverPlayerEntity.world;
+                ServerWorld world = this.serverPlayerEntity.getWorld();
                 int x = (int) this.serverPlayerEntity.getX();
                 int y = (int) this.serverPlayerEntity.getY();
                 int z = (int) this.serverPlayerEntity.getZ();
