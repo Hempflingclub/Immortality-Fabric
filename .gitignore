@@ -4,4 +4,16 @@
 /gradle/
 /run/
 /.idea/
+.idea
+**/*.log
 *.log
+*.iml
+build
+run
+runs
+**/run
+**/runs
+**/build
+**/.gradle
+TODO*
+roadmap*
