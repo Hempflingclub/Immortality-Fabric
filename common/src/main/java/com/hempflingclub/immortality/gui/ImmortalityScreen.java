@@ -1,40 +1,35 @@
 package com.hempflingclub.immortality.gui;
 
-import com.hempflingclub.immortality.Constants;
-import net.minecraft.client.Minecraft;
+import com.hempflingclub.immortality.gui.Screens.MainImmortalityScreen;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.toasts.SystemToast;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.world.item.Items;
+import net.minecraft.client.gui.screens.Screen;
 
-public class ImmortalityScreen extends BaseScreen implements ScreenI {
+public class ImmortalityScreen extends BaseScreen {
+    private BaseScreen currentScreen;
+
     public ImmortalityScreen() {
         super();
+        this.currentScreen = new MainImmortalityScreen(); // Will also call its init
     }
 
     @Override
-    protected void init() {
-        super.init();
-        Button buttonWidget = Button.builder(Component.literal("Hello World"), (btn) -> {
-                    // When the button is clicked, we can display a toast to the screen.
-                    minecraft.getToastManager().addToast(
-                            new SystemToast(SystemToast.SystemToastId.NARRATOR_TOGGLE,
-                                    Component.literal("Test Button"),
-                                    Component.literal("Hello " + minecraft.level.random.nextIntBetweenInclusive(1, 10)))
-                    );
-                }).bounds(xStart + 10, (int) (yStart + (10 * ratio)*2), 60, (int) (60 * ratio))
-                .build();
-        this.addRenderableWidget(buttonWidget);
+    public void init() {
+        this.currentScreen.init(minecraft, this);
+    }
+
+    @Override
+    public void tick() {
+        this.currentScreen.tick(minecraft, this);
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+        this.currentScreen.renderBackground(minecraft, this, guiGraphics, mouseX, mouseY, delta);
     }
 
     @Override
     public void renderForeground(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-        String text = "Immortality Menu";
-        int textWidth = font.width(text);
-        guiGraphics.drawString(font, text, xStart + (xSize - textWidth) / 2, yStart + 8, FONT_COLOR);
+        this.currentScreen.renderForeground(minecraft, this, guiGraphics, mouseX, mouseY, delta);
     }
+
 }

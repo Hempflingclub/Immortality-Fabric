@@ -1,5 +1,6 @@
 package com.hempflingclub.immortality.gui;
 
+import com.hempflingclub.immortality.CommonClass;
 import com.hempflingclub.immortality.Constants;
 import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.opengl.VertexArrayCache;
@@ -11,6 +12,9 @@ import com.mojang.blaze3d.vertex.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.model.geom.ModelPart;
@@ -23,7 +27,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 
-public abstract class BaseScreen extends Screen {
+public abstract class BaseScreen extends Screen implements ScreenI {
     public static final Component TITLE = Component.literal("Immortality Menu");
 
     public static final int BACKGROUND_COLOR = 0xFF474747; //Actually 474747 (but needs to be left padded for some reason)
@@ -46,23 +50,33 @@ public abstract class BaseScreen extends Screen {
 
     @Override
     public void tick() {
+        this.tick(minecraft, this);
+    }
+
+    @Override
+    public void tick(Minecraft minecraft, BaseScreen callback) {
         super.tick();
     }
 
     @Override
     protected void init() {
+        this.init(minecraft, this);
+    }
+
+    @Override
+    public void init(Minecraft minecraft, BaseScreen callback) {
         clearWidgets();
         super.init();
 
         double offsetPercent = 0.25;
 
-        xSize = (int) (Minecraft.getInstance().getWindow().getGuiScaledWidth() * (1 - offsetPercent * 2));
-        ySize = (int) (Minecraft.getInstance().getWindow().getGuiScaledHeight() * (1 - offsetPercent * 2));
+        xSize = (int) (minecraft.getWindow().getGuiScaledWidth() * (1 - offsetPercent * 2));
+        ySize = (int) (minecraft.getWindow().getGuiScaledHeight() * (1 - offsetPercent * 2));
 
-        xStart = (int) (Minecraft.getInstance().getWindow().getGuiScaledWidth() * offsetPercent);
-        yStart = (int) (Minecraft.getInstance().getWindow().getGuiScaledHeight() * offsetPercent);
+        xStart = (int) (minecraft.getWindow().getGuiScaledWidth() * offsetPercent);
+        yStart = (int) (minecraft.getWindow().getGuiScaledHeight() * offsetPercent);
 
-        ratio = Minecraft.getInstance().getWindow().getGuiScaledHeight() / (double) Minecraft.getInstance().getWindow().getGuiScaledWidth();
+        ratio = minecraft.getWindow().getGuiScaledHeight() / (double) minecraft.getWindow().getGuiScaledWidth();
     }
 
     protected boolean isIngame() {
@@ -81,6 +95,10 @@ public abstract class BaseScreen extends Screen {
 
     @Override
     public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+        this.renderBackground(minecraft, this, guiGraphics, mouseX, mouseY, delta);
+    }
+
+    public void renderBackground(Minecraft minecraft, BaseScreen callback, GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
         guiGraphics.fill(xStart, yStart, xStart + xSize, yStart + ySize, WHITE_COLOR);
@@ -89,6 +107,15 @@ public abstract class BaseScreen extends Screen {
 
 
     public void renderForeground(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+        this.renderForeground(minecraft, this, guiGraphics, mouseX, mouseY, delta);
+    }
+
+    public void renderForeground(Minecraft minecraft, BaseScreen callback, GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+    }
+
+    @Override
+    public <T extends GuiEventListener & Renderable & NarratableEntry> T addRenderableWidget(T widget) {
+        return super.addRenderableWidget(widget);
     }
 
 }

@@ -1,13 +1,9 @@
 package com.hempflingclub.immortality.mixin;
 
-import com.hempflingclub.immortality.Constants;
 import com.hempflingclub.immortality.gui.ImmortalityScreen;
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffectUtil;
 import net.minecraft.world.effect.MobEffects;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,7 +25,6 @@ public class OnKeyPressMixin {
         if (key == 'Y') if (minecraft.level != null && minecraft.screen == null) {
             assert minecraft.player != null;
             minecraft.player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 200));
-            Constants.LOG.warn("Monitor Supports Refreshrate: " + GLX._getRefreshRate(minecraft.getWindow()));
             minecraft.setScreen(new ImmortalityScreen());
         }
     }
